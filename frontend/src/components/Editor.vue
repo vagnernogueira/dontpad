@@ -56,6 +56,7 @@ import { EditorState } from '@codemirror/state'
 import { EditorView, basicSetup } from 'codemirror'
 import { markdown } from '@codemirror/lang-markdown'
 import { yCollab } from 'y-codemirror.next'
+import { markdownPreviewPlugin } from '../cm-preview-plugin'
 
 // Random color/name for cursor
 const userColors = [
@@ -107,6 +108,7 @@ const initEditor = () => {
       basicSetup,
       markdown(),
       yCollab(ytext, provider.awareness),
+      markdownPreviewPlugin,
       EditorView.theme({
         "&": { height: "100%" },
         ".cm-scroller": { overflow: "auto" }
