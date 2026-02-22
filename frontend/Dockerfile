@@ -2,10 +2,16 @@ FROM docker.io/node:20-alpine AS builder
 
 WORKDIR /usr/src/app
 
+ARG VITE_HOME_DOCS_PASSWORD
+ARG VITE_HOME_DOCS_SHORTCUT=Alt+R
+ENV VITE_HOME_DOCS_PASSWORD=$VITE_HOME_DOCS_PASSWORD
+ENV VITE_HOME_DOCS_SHORTCUT=$VITE_HOME_DOCS_SHORTCUT
+
 COPY package*.json ./
 RUN npm install --legacy-peer-deps
 
 COPY . .
+RUN test -n "$VITE_HOME_DOCS_PASSWORD" || (echo "Missing VITE_HOME_DOCS_PASSWORD for frontend build" && exit 1)
 RUN npm run build
 
 FROM docker.io/nginx:alpine

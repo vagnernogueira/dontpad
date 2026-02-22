@@ -18,6 +18,9 @@ services:
   frontend:
     build:
       context: ./frontend
+      args:
+        VITE_HOME_DOCS_PASSWORD: ${VITE_HOME_DOCS_PASSWORD}
+        VITE_HOME_DOCS_SHORTCUT: ${VITE_HOME_DOCS_SHORTCUT:-Alt+R}
     container_name: dontpad_frontend
     ports:
       - "127.0.0.1:8080:80"

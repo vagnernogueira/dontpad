@@ -27,6 +27,8 @@ dist-ssr
 # Vite / Vue
 .env.local
 .env.*.local
+.env
+!env.example
 
 # TypeScript
 *.tsbuildinfo

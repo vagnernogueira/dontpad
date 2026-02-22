@@ -25,7 +25,7 @@
       </form>
     </div>
 
-    <div class="mt-4 w-full bg-white p-6 rounded-xl shadow-lg">
+    <div v-if="showDocumentsBox" class="mt-4 w-full bg-white p-6 rounded-xl shadow-lg">
 
       <p v-if="isLoadingDocuments" class="text-left text-sm text-gray-500">Carregando documentos...</p>
       <p v-else-if="documentsError" class="text-left text-sm text-red-600">{{ documentsError }}</p>
@@ -42,18 +42,102 @@
         </li>
       </ul>
     </div>
+
+    <div
+      v-if="showAuthDialog"
+      class="absolute inset-0 z-50 flex items-center justify-center bg-black/30 px-4"
+      @click.self="closeAuthDialog"
+    >
+      <form
+        @submit.prevent="unlockDocuments"
+        class="w-full max-w-xs rounded-lg bg-white p-4 shadow-xl"
+      >
+        <input
+          ref="passwordInputRef"
+          v-model="passwordInput"
+          type="password"
+          class="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-800"
+          autocomplete="off"
+        />
+        <p v-if="authError" class="mt-2 text-left text-xs text-red-600">{{ authError }}</p>
+        <div class="mt-3 flex justify-end gap-2 text-sm">
+          <button type="button" @click="closeAuthDialog" class="rounded px-3 py-1.5 text-gray-600 hover:bg-gray-100">Cancelar</button>
+          <button type="submit" class="rounded bg-gray-800 px-3 py-1.5 text-white hover:bg-gray-900">Entrar</button>
+        </div>
+      </form>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
+
+type ShortcutConfig = {
+  altKey: boolean
+  ctrlKey: boolean
+  shiftKey: boolean
+  key: string
+}
+
+const SHORTCUT_PARTS_SEPARATOR = '+'
+const VALID_MODIFIERS = new Set(['alt', 'ctrl', 'control', 'shift'])
+const VALID_KEYS = new Set([
+  'enter', 'escape', 'tab', 'space', 'backspace', 'delete',
+  'arrowup', 'arrowdown', 'arrowleft', 'arrowright',
+  'home', 'end', 'pageup', 'pagedown'
+])
+
+const isValidShortcutKey = (key: string) => {
+  if (VALID_KEYS.has(key)) return true
+  if (/^[a-z0-9]$/.test(key)) return true
+  if (/^f([1-9]|1[0-2])$/.test(key)) return true
+  return false
+}
+
+const parseShortcut = (shortcutRaw: string | undefined): ShortcutConfig | null => {
+  if (!shortcutRaw?.trim()) return null
+
+  const value = shortcutRaw
+    .split(SHORTCUT_PARTS_SEPARATOR)
+    .map(part => part.trim().toLowerCase())
+    .filter(Boolean)
+
+  if (value.length === 0) return null
+
+  const key = value[value.length - 1]
+
+  if (!key || VALID_MODIFIERS.has(key) || !isValidShortcutKey(key)) {
+    return null
+  }
+
+  const modifiers = value.slice(0, -1)
+  if (modifiers.some(modifier => !VALID_MODIFIERS.has(modifier))) {
+    return null
+  }
+
+  return {
+    altKey: modifiers.includes('alt'),
+    ctrlKey: modifiers.includes('ctrl') || modifiers.includes('control'),
+    shiftKey: modifiers.includes('shift'),
+    key
+  }
+}
+
+const DOCUMENTS_SHORTCUT = parseShortcut(import.meta.env.VITE_HOME_DOCS_SHORTCUT)
+const DOCUMENTS_ACCESS_PASSWORD = (import.meta.env.VITE_HOME_DOCS_PASSWORD ?? '').trim()
 
 const router = useRouter()
 const docName = ref('')
 const documents = ref<string[]>([])
 const isLoadingDocuments = ref(false)
 const documentsError = ref('')
+const hasDocumentsAccess = ref(false)
+const showDocumentsBox = ref(false)
+const showAuthDialog = ref(false)
+const passwordInput = ref('')
+const authError = ref('')
+const passwordInputRef = ref<HTMLInputElement | null>(null)
 
 const baseUrl = computed(() => {
   if (typeof window !== 'undefined') {
@@ -76,6 +160,58 @@ const apiBaseUrl = computed(() => {
 
 const toDocumentPath = (document: string) => {
   return `/${document.split('/').map(part => encodeURIComponent(part)).join('/')}`
+}
+
+const openAuthDialog = async () => {
+  passwordInput.value = ''
+  authError.value = DOCUMENTS_ACCESS_PASSWORD ? '' : 'Configure VITE_HOME_DOCS_PASSWORD no .env do frontend.'
+  showAuthDialog.value = true
+  await nextTick()
+  passwordInputRef.value?.focus()
+}
+
+const closeAuthDialog = () => {
+  showAuthDialog.value = false
+  passwordInput.value = ''
+  authError.value = ''
+}
+
+const unlockDocuments = async () => {
+  if (!DOCUMENTS_ACCESS_PASSWORD) {
+    authError.value = 'Configure VITE_HOME_DOCS_PASSWORD no .env do frontend.'
+    return
+  }
+
+  if (passwordInput.value !== DOCUMENTS_ACCESS_PASSWORD) {
+    authError.value = 'Senha inválida.'
+    return
+  }
+
+  hasDocumentsAccess.value = true
+  showDocumentsBox.value = true
+  closeAuthDialog()
+  await fetchDocuments()
+}
+
+const handleKeydown = (event: KeyboardEvent) => {
+  if (!DOCUMENTS_SHORTCUT) return
+
+  const key = event.key.toLowerCase()
+
+  if (
+    event.altKey === DOCUMENTS_SHORTCUT.altKey &&
+    event.ctrlKey === DOCUMENTS_SHORTCUT.ctrlKey &&
+    event.shiftKey === DOCUMENTS_SHORTCUT.shiftKey &&
+    key === DOCUMENTS_SHORTCUT.key
+  ) {
+    event.preventDefault()
+    if (hasDocumentsAccess.value) {
+      showDocumentsBox.value = !showDocumentsBox.value
+      return
+    }
+
+    openAuthDialog()
+  }
 }
 
 const fetchDocuments = async () => {
@@ -101,6 +237,10 @@ const fetchDocuments = async () => {
 }
 
 onMounted(() => {
-  fetchDocuments()
+  window.addEventListener('keydown', handleKeydown)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('keydown', handleKeydown)
 })
 </script>

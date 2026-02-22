@@ -35,12 +35,14 @@ Este projeto foi construído focado em ser o mais leve possível para rodar na s
 Para rodar este projeto em sua máquina durante o desenvolvimento:
 
 1. Clone o repositório.
-2. Acesse a pasta do backend: `cd backend`
-3. Instale as dependências: `npm install`
-4. Inicie o servidor: `npm run dev`
-5. Em outro terminal, acesse a pasta do frontend: `cd frontend`
-6. Instale as dependências: `npm install`
-7. Inicie o frontend: `npm run dev`
+2. Na raiz do projeto, crie o arquivo de ambiente: `cp .env.example .env`
+3. Defina uma senha forte em `VITE_HOME_DOCS_PASSWORD`.
+4. Acesse a pasta do backend: `cd backend`
+5. Instale as dependências: `npm install`
+6. Inicie o servidor: `npm run dev`
+7. Em outro terminal, acesse a pasta do frontend: `cd frontend`
+8. Instale as dependências: `npm install`
+9. Inicie o frontend: `npm run dev`
 
 ## Deploy On-Premises (Produção)
 
@@ -51,6 +53,16 @@ Para isso, providenciamos suporte nativo via **Podman**. Você não precisa inst
 ### Requisitos
 - Podman instalado no seu SO.
 - `podman-compose` ou acesso via `Makefile`.
+
+### Variáveis de ambiente (build da imagem frontend)
+Crie um arquivo `.env` na raiz do projeto (mesmo nível do `docker-compose.yml`) com:
+
+```bash
+VITE_HOME_DOCS_PASSWORD=defina-uma-senha-forte
+VITE_HOME_DOCS_SHORTCUT=Alt+R
+```
+
+> Essas variáveis são injetadas no build da imagem frontend. Sem `VITE_HOME_DOCS_PASSWORD`, o build falha por segurança.
 
 ### Como iniciar o serviço
 
