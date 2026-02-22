@@ -46,8 +46,8 @@
         Tabela
       </button>
       <div class="w-px h-5 bg-gray-300 mx-1 self-center"></div>
-      <button @click="applyFormat('[', '](url)')" class="px-2 py-1 hover:bg-gray-100 rounded focus:outline-none" title="Link">Link</button>
-      <button @click="applyFormat('![alt]', '(url)')" class="px-2 py-1 hover:bg-gray-100 rounded focus:outline-none" title="Imagem">Img</button>
+      <button @click="openLinkDialog" class="px-2 py-1 hover:bg-gray-100 rounded focus:outline-none" title="Link">Link</button>
+      <button @click="openImageDialog" class="px-2 py-1 hover:bg-gray-100 rounded focus:outline-none" title="Imagem">Img</button>
       
       <div class="flex-1"></div> <!-- Spacer -->
       <div class="w-px h-5 bg-gray-300 mx-1 self-center"></div>
@@ -67,11 +67,50 @@
 
     <!-- Editor Area -->
     <main class="flex-1 overflow-hidden relative" ref="editorContainer"></main>
+
+    <!-- Dialogs -->
+    <div v-if="showLinkDialog || showImageDialog" class="absolute inset-0 bg-black bg-opacity-30 z-50 flex items-center justify-center">
+      
+      <!-- Link Dialog -->
+      <div v-if="showLinkDialog" class="bg-white rounded-lg shadow-xl p-5 w-80 max-w-full m-4">
+        <h3 class="font-bold text-gray-800 mb-4 text-lg">Inserir Link</h3>
+        <div class="mb-3">
+          <label class="block text-sm text-gray-600 mb-1">Texto do Link</label>
+          <input ref="linkTextInput" v-model="linkData.text" type="text" class="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" placeholder="Ex: Google" @keyup.enter="insertLink">
+        </div>
+        <div class="mb-4">
+          <label class="block text-sm text-gray-600 mb-1">URL / Link</label>
+          <input v-model="linkData.url" type="text" class="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" placeholder="https://" @keyup.enter="insertLink">
+        </div>
+        <div class="flex justify-end gap-2 text-sm">
+          <button @click="closeDialogs" class="px-3 py-1.5 text-gray-600 hover:bg-gray-100 rounded focus:outline-none">Cancelar</button>
+          <button @click="insertLink" class="px-3 py-1.5 bg-emerald-600 text-white hover:bg-emerald-700 rounded shadow-sm focus:outline-none" :disabled="!linkData.url">Inserir</button>
+        </div>
+      </div>
+
+      <!-- Image Dialog -->
+      <div v-if="showImageDialog" class="bg-white rounded-lg shadow-xl p-5 w-80 max-w-full m-4">
+        <h3 class="font-bold text-gray-800 mb-4 text-lg">Inserir Imagem</h3>
+        <div class="mb-3">
+          <label class="block text-sm text-gray-600 mb-1">Texto Alternativo (Alt)</label>
+          <input ref="imageAltInput" v-model="imageData.alt" type="text" class="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" placeholder="Descrição da imagem" @keyup.enter="insertImage">
+        </div>
+        <div class="mb-4">
+          <label class="block text-sm text-gray-600 mb-1">URL da Imagem</label>
+          <input v-model="imageData.url" type="text" class="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" placeholder="https://..." @keyup.enter="insertImage">
+        </div>
+        <div class="flex justify-end gap-2 text-sm">
+          <button @click="closeDialogs" class="px-3 py-1.5 text-gray-600 hover:bg-gray-100 rounded focus:outline-none">Cancelar</button>
+          <button @click="insertImage" class="px-3 py-1.5 bg-emerald-600 text-white hover:bg-emerald-700 rounded shadow-sm focus:outline-none" :disabled="!imageData.url">Inserir</button>
+        </div>
+      </div>
+
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
+import { ref, reactive, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 
 // Yjs
@@ -103,6 +142,14 @@ const documentId = ref(route.params.documentId as string || 'default')
 const editorContainer = ref<HTMLElement | null>(null)
 const pdfContainer = ref<HTMLElement | null>(null) // Ref for PDF rendering
 const status = ref('disconnected')
+
+// Dialog states
+const showLinkDialog = ref(false)
+const showImageDialog = ref(false)
+const linkData = reactive({ text: '', url: 'https://' })
+const imageData = reactive({ alt: '', url: 'https://' })
+const linkTextInput = ref<HTMLInputElement | null>(null)
+const imageAltInput = ref<HTMLInputElement | null>(null)
 
 let ydoc: Y.Doc
 let provider: WebsocketProvider
@@ -203,6 +250,59 @@ const applyFormat = (prefix: string, suffix: string = '') => {
   
   // Return focus back to CodeMirror
   view.focus()
+}
+
+// Dialog functions
+const openLinkDialog = async () => {
+  if (!view) return
+  
+  // Try to grab selected text for the link text
+  const { state } = view
+  const selection = state.selection.main
+  const selectedText = state.sliceDoc(selection.from, selection.to)
+  
+  linkData.text = selectedText || ''
+  linkData.url = 'https://'
+  showLinkDialog.value = true
+  
+  await nextTick()
+  if (linkTextInput.value) linkTextInput.value.select()
+}
+
+const insertLink = () => {
+  if (!linkData.url) return
+  const text = linkData.text || 'link'
+  applyFormat(`[${text}](${linkData.url})`, '')
+  closeDialogs()
+}
+
+const openImageDialog = async () => {
+  if (!view) return
+  
+  // Try to grab selected text for alt 
+  const { state } = view
+  const selection = state.selection.main
+  const selectedText = state.sliceDoc(selection.from, selection.to)
+
+  imageData.alt = selectedText || ''
+  imageData.url = 'https://'
+  showImageDialog.value = true
+  
+  await nextTick()
+  if (imageAltInput.value) imageAltInput.value.select()
+}
+
+const insertImage = () => {
+  if (!imageData.url) return
+  const alt = imageData.alt || 'imagem'
+  applyFormat(`![${alt}](${imageData.url})`, '')
+  closeDialogs()
+}
+
+const closeDialogs = () => {
+  showLinkDialog.value = false
+  showImageDialog.value = false
+  if (view) view.focus()
 }
 
 // Download methods
