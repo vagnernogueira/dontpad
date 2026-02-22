@@ -13,170 +13,106 @@ body,
   /* Light gray background imitating app wrap */
 }
 
-/* TipTap Editor Wrappers */
-.tiptap-wrapper {
-  background-color: #f7f9fa;
-  height: 100%;
-  overflow-y: auto;
-  padding-bottom: 50px;
+/* Base CodeMirror Tweaks */
+.cm-editor {
+  height: 100% !important;
+  font-size: 16px;
+  line-height: 1.6;
 }
 
 /* Force a classic clean reading font for the content */
-.ProseMirror {
+.cm-content {
   font-family: 'Inter', 'Roboto', 'Helvetica Neue', Arial, sans-serif !important;
-  font-size: 16px;
-  line-height: 1.6;
-  padding: 40px 40px !important;
+  padding: 20px 20px !important;
   max-width: 900px;
-  margin: 20px auto 0 auto;
+  margin: 0 auto;
   /* Center paper effect */
   background-color: white;
   /* Paper effect */
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
   /* Subtle paper shadow */
-  min-height: calc(100% - 20px);
-  outline: none !important;
+  min-height: 100%;
 }
 
-.ProseMirror p.is-editor-empty:first-child::before {
-  color: #adb5bd;
-  content: attr(data-placeholder);
-  float: left;
-  height: 0;
-  pointer-events: none;
+.cm-scroller {
+  overflow: auto !important;
+  background-color: #f7f9fa;
+  /* Scroller matches external bg */
+}
+
+/* Active line highlight (subtle) */
+.cm-activeLine {
+  background-color: #f8f9fa !important;
 }
 
 /* Fix text selection visibility */
-.ProseMirror ::selection {
+.cm-selectionLayer .cm-selectionBackground,
+.cm-selectionBackground {
   background-color: #cce2ff !important;
 }
 
-/* Markdown equivalents */
-.ProseMirror blockquote {
+.cm-content ::selection {
+  background-color: #cce2ff !important;
+}
+
+/* Ensure markdown formatting rules are globally applied if theme overrides them */
+.cmt-em {
+  font-style: italic !important;
+}
+
+.cmt-strong {
+  font-weight: bold !important;
+}
+
+.cmt-strikethrough {
+  text-decoration: line-through !important;
+}
+
+.cmt-quote {
   font-style: italic !important;
   color: #6a737d !important;
   border-left: 3px solid #dfe2e5 !important;
   padding-left: 10px !important;
-  margin-left: 0;
-}
-
-.ProseMirror ul {
-  list-style-type: disc;
-  padding-left: 20px;
-}
-
-.ProseMirror ol {
-  list-style-type: decimal;
-  padding-left: 20px;
-}
-
-.ProseMirror h1 {
-  font-size: 2em;
-  font-weight: bold;
-  margin-top: 0.67em;
-  margin-bottom: 0.67em;
-}
-
-.ProseMirror h2 {
-  font-size: 1.5em;
-  font-weight: bold;
-  margin-top: 0.83em;
-  margin-bottom: 0.83em;
-}
-
-.ProseMirror h3 {
-  font-size: 1.17em;
-  font-weight: bold;
-  margin-top: 1em;
-  margin-bottom: 1em;
 }
 
 /* Code blocks and inline code should stand out with monospace */
-.ProseMirror code {
+.cmt-inlineCode,
+.cmt-comment {
   font-family: "Courier Prime", "SFMono-Regular", Consolas, "Liberation Mono", "Courier New", monospace !important;
   background-color: #f6f8fa !important;
-  color: #eb5757 !important;
-  /* Slight red tint for inline code common in markdown */
-  padding: 0.2em 0.4em !important;
+  padding: 0.1em 0.3em !important;
   border-radius: 3px !important;
-  font-size: 0.85em !important;
-}
-
-.ProseMirror pre {
-  background: #f6f8fa !important;
-  color: #24292e !important;
-  font-family: "Courier Prime", "SFMono-Regular", Consolas, "Liberation Mono", "Courier New", monospace !important;
-  padding: 1rem !important;
-  border-radius: 0.5rem !important;
-  overflow-x: auto !important;
-}
-
-.ProseMirror pre code {
-  color: inherit !important;
-  padding: 0 !important;
-  background: none !important;
   font-size: 0.9em !important;
 }
 
-.ProseMirror img {
-  max-width: 100%;
-  height: auto;
+/* Focused outline removal */
+.cm-editor.cm-focused {
+  outline: none !important;
 }
 
-/* TipTap Task Lists */
-ul[data-type="taskList"] {
-  list-style: none !important;
-  padding: 0 !important;
-}
-
-ul[data-type="taskList"] li {
-  display: flex !important;
-  align-items: flex-start !important;
-  margin-bottom: 0.2rem !important;
-}
-
-ul[data-type="taskList"] li>label {
-  flex: 0 0 auto !important;
-  margin-right: 0.5rem !important;
-  user-select: none !important;
-  margin-top: 0.2rem !important;
-  /* align with text */
-}
-
-ul[data-type="taskList"] li>label input[type="checkbox"] {
-  cursor: pointer !important;
-  width: 1rem !important;
-  height: 1rem !important;
-  margin: 0 !important;
-}
-
-ul[data-type="taskList"] li>div {
-  flex: 1 1 auto !important;
-}
-
-/* Yjs Cursors (TipTap Collaboration Cursor Extension) */
-.collaboration-cursor__caret {
+/* Yjs Cursors */
+.yjs-cursor {
   position: relative;
   border-left: 2px solid black;
   border-right: 2px solid transparent;
   margin-left: -2px;
   margin-right: -2px;
-  word-break: normal;
-  pointer-events: none;
+  min-height: 1.2em;
 }
 
-.collaboration-cursor__label {
+.yjs-cursor>div {
   position: absolute;
   top: -1.05em;
   left: -2px;
   font-size: 11px;
-  font-style: normal;
-  font-weight: bold;
-  line-height: normal;
+  background-color: inherit;
+  font-family: sans-serif;
   padding: 2px 4px;
-  border-radius: 4px;
-  border-bottom-left-radius: 0;
   color: white;
   white-space: nowrap;
-  user-select: none;
+  font-weight: bold;
+  border-radius: 4px;
+  border-bottom-left-radius: 0;
+  pointer-events: none;
+  z-index: 10;
 }
