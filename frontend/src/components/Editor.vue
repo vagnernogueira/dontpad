@@ -126,6 +126,7 @@ import { WebsocketProvider } from 'y-websocket'
 import { EditorState } from '@codemirror/state'
 import { EditorView, basicSetup } from 'codemirror'
 import { markdown } from '@codemirror/lang-markdown'
+import { defaultHighlightStyle, syntaxHighlighting } from '@codemirror/language'
 import { yCollab } from 'y-codemirror.next'
 import { markdownPreviewPlugin } from '../cm-preview-plugin'
 
@@ -194,6 +195,7 @@ const initEditor = () => {
     extensions: [
       basicSetup,
       markdown(),
+      syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
       yCollab(ytext, provider.awareness, { undoManager }),
       markdownPreviewPlugin,
       EditorView.theme({
