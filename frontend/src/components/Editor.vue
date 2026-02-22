@@ -1,62 +1,67 @@
 <template>
   <div class="flex flex-col h-full w-full">
     <!-- Header -->
-    <header class="bg-emerald-600 text-white px-4 py-1.5 flex items-center justify-between shadow-sm z-20">
-      <div class="flex items-center gap-3">
-        <router-link to="/" class="font-bold text-lg hover:text-emerald-100 transition-colors">
-          &#8592; Início
+    <header class="bg-gray-900 text-gray-100 px-5 py-2.5 flex items-center justify-between shadow-md z-20">
+      <div class="flex items-center gap-4">
+        <router-link to="/" class="font-bold text-lg hover:text-white transition-colors flex items-center gap-1">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+          Início
         </router-link>
-        <div class="font-mono bg-emerald-700 px-2 py-0.5 rounded text-sm shrink-0">
+        <div class="font-mono bg-gray-800 text-gray-300 px-3 py-1 rounded-md text-sm shrink-0 border border-gray-700">
           /{{ documentId }}
         </div>
       </div>
-      <div class="flex items-center gap-2 text-xs opacity-90 truncate max-w-[150px]">
-        <span :class="['w-2 h-2 rounded-full', status === 'connected' ? 'bg-green-400' : 'bg-red-400']"></span>
+      <div class="flex items-center gap-2 text-sm text-gray-300 truncate max-w-[200px]">
+        <span :class="['w-2.5 h-2.5 rounded-full shadow-sm', status === 'connected' ? 'bg-emerald-400' : 'bg-red-400']"></span>
         {{ status === 'connected' ? 'Sincronizado' : 'Offline' }}
       </div>
     </header>
 
     <!-- Toolbar -->
-    <div class="bg-white border-b border-gray-200 px-3 py-1 flex items-center flex-wrap gap-1 shadow-[0_2px_4px_rgba(0,0,0,0.02)] text-gray-700 z-10 text-sm overflow-x-auto whitespace-nowrap">
-      <button @click="undo" class="px-2 py-1 hover:bg-gray-100 rounded focus:outline-none" title="Desfazer">
+    <div class="bg-[#f8f9fa] border-b border-gray-200 px-4 py-2 flex items-center flex-wrap gap-1.5 shadow-sm text-gray-600 z-10 text-sm overflow-x-auto whitespace-nowrap">
+      <button @click="undo" class="p-1.5 hover:bg-gray-200 hover:text-gray-900 rounded transition-colors focus:outline-none" title="Desfazer">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg>
       </button>
-      <button @click="redo" class="px-2 py-1 hover:bg-gray-100 rounded focus:outline-none" title="Refazer">
+      <button @click="redo" class="p-1.5 hover:bg-gray-200 hover:text-gray-900 rounded transition-colors focus:outline-none" title="Refazer">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 7v6h-6"/><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7"/></svg>
       </button>
-      <div class="w-px h-5 bg-gray-300 mx-1 self-center"></div>
-      <button @click="applyFormat('**', '**')" class="px-2 py-1 hover:bg-gray-100 rounded font-bold focus:outline-none" title="Negrito">B</button>
-      <button @click="applyFormat('*', '*')" class="px-2 py-1 hover:bg-gray-100 rounded italic focus:outline-none" title="Itálico">I</button>
-      <button @click="applyFormat('~~', '~~')" class="px-2 py-1 hover:bg-gray-100 rounded line-through focus:outline-none" title="Tachado">S</button>
-      <div class="w-px h-5 bg-gray-300 mx-1 self-center"></div>
-      <button @click="applyFormat('# ')" class="px-2 py-1 hover:bg-gray-100 rounded font-bold focus:outline-none" title="Título 1">H1</button>
-      <button @click="applyFormat('## ')" class="px-2 py-1 hover:bg-gray-100 rounded font-bold focus:outline-none" title="Título 2">H2</button>
-      <button @click="applyFormat('### ')" class="px-2 py-1 hover:bg-gray-100 rounded font-bold focus:outline-none" title="Título 3">H3</button>
-      <div class="w-px h-5 bg-gray-300 mx-1 self-center"></div>
-      <button @click="applyFormat('- ')" class="px-2 py-1 hover:bg-gray-100 rounded focus:outline-none" title="Lista Bullet">&#8226; Lista</button>
-      <button @click="applyFormat('1. ')" class="px-2 py-1 hover:bg-gray-100 rounded focus:outline-none" title="Lista Numérica">1. Lista</button>
-      <button @click="applyFormat('- [ ] ')" class="px-2 py-1 hover:bg-gray-100 rounded focus:outline-none" title="Checklist">&#9745; Checklist</button>
-      <div class="w-px h-5 bg-gray-300 mx-1 self-center"></div>
-      <button @click="applyFormat('> ')" class="px-2 py-1 hover:bg-gray-100 rounded font-serif italic focus:outline-none" title="Citação">“ ”</button>
-      <button @click="applyFormat('`', '`')" class="px-2 py-1 hover:bg-gray-100 rounded font-mono text-xs focus:outline-none" title="Código Inline">` `</button>
-      <button @click="applyFormat('```\n', '\n```')" class="px-2 py-1 hover:bg-gray-100 rounded font-mono text-xs focus:outline-none" title="Bloco de Código">{ }</button>
-      <div class="w-px h-5 bg-gray-300 mx-1 self-center"></div>
-      <button @click="applyFormat('\n|  |  |\n|--|--|\n|  |  |\n')" class="px-2 py-1 hover:bg-gray-100 rounded focus:outline-none flex items-center" title="Tabela">
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="3" y1="15" x2="21" y2="15"></line><line x1="9" y1="3" x2="9" y2="21"></line><line x1="15" y1="3" x2="15" y2="21"></line></svg>
+      <div class="w-px h-5 bg-gray-300 mx-1.5 self-center"></div>
+      <button @click="applyFormat('**', '**')" class="px-2.5 py-1.5 hover:bg-gray-200 hover:text-gray-900 rounded font-bold transition-colors focus:outline-none" title="Negrito">B</button>
+      <button @click="applyFormat('*', '*')" class="px-2.5 py-1.5 hover:bg-gray-200 hover:text-gray-900 rounded italic transition-colors focus:outline-none" title="Itálico">I</button>
+      <button @click="applyFormat('~~', '~~')" class="px-2.5 py-1.5 hover:bg-gray-200 hover:text-gray-900 rounded line-through transition-colors focus:outline-none" title="Tachado">S</button>
+      <div class="w-px h-5 bg-gray-300 mx-1.5 self-center"></div>
+      <button @click="applyFormat('# ')" class="px-2.5 py-1.5 hover:bg-gray-200 hover:text-gray-900 rounded font-bold transition-colors focus:outline-none" title="Título 1">H1</button>
+      <button @click="applyFormat('## ')" class="px-2.5 py-1.5 hover:bg-gray-200 hover:text-gray-900 rounded font-bold transition-colors focus:outline-none" title="Título 2">H2</button>
+      <button @click="applyFormat('### ')" class="px-2.5 py-1.5 hover:bg-gray-200 hover:text-gray-900 rounded font-bold transition-colors focus:outline-none" title="Título 3">H3</button>
+      <div class="w-px h-5 bg-gray-300 mx-1.5 self-center"></div>
+      <button @click="applyFormat('- ')" class="px-2.5 py-1.5 hover:bg-gray-200 hover:text-gray-900 rounded transition-colors focus:outline-none" title="Lista Bullet">&#8226; Lista</button>
+      <button @click="applyFormat('1. ')" class="px-2.5 py-1.5 hover:bg-gray-200 hover:text-gray-900 rounded transition-colors focus:outline-none" title="Lista Numérica">1. Lista</button>
+      <button @click="applyFormat('- [ ] ')" class="px-2.5 py-1.5 hover:bg-gray-200 hover:text-gray-900 rounded transition-colors focus:outline-none" title="Checklist">&#9745; Checklist</button>
+      <div class="w-px h-5 bg-gray-300 mx-1.5 self-center"></div>
+      <button @click="applyFormat('> ')" class="px-2.5 py-1.5 hover:bg-gray-200 hover:text-gray-900 rounded font-serif italic transition-colors focus:outline-none" title="Citação">“ ”</button>
+      <button @click="applyFormat('`', '`')" class="px-2.5 py-1.5 hover:bg-gray-200 hover:text-gray-900 rounded font-mono text-xs transition-colors focus:outline-none" title="Código Inline">` `</button>
+      <button @click="applyFormat('```\n', '\n```')" class="px-2.5 py-1.5 hover:bg-gray-200 hover:text-gray-900 rounded font-mono text-xs transition-colors focus:outline-none" title="Bloco de Código">{ }</button>
+      <div class="w-px h-5 bg-gray-300 mx-1.5 self-center"></div>
+      <button @click="applyFormat('\n|  |  |\n|--|--|\n|  |  |\n')" class="px-2.5 py-1.5 hover:bg-gray-200 hover:text-gray-900 rounded transition-colors focus:outline-none flex items-center gap-1" title="Tabela">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="3" y1="15" x2="21" y2="15"></line><line x1="9" y1="3" x2="9" y2="21"></line><line x1="15" y1="3" x2="15" y2="21"></line></svg>
         Tabela
       </button>
-      <div class="w-px h-5 bg-gray-300 mx-1 self-center"></div>
-      <button @click="openLinkDialog" class="px-2 py-1 hover:bg-gray-100 rounded focus:outline-none" title="Link">Link</button>
-      <button @click="openImageDialog" class="px-2 py-1 hover:bg-gray-100 rounded focus:outline-none" title="Imagem">Img</button>
+      <div class="w-px h-5 bg-gray-300 mx-1.5 self-center"></div>
+      <button @click="openLinkDialog" class="px-2.5 py-1.5 hover:bg-gray-200 hover:text-gray-900 rounded transition-colors focus:outline-none" title="Link">Link</button>
+      <button @click="openImageDialog" class="px-2.5 py-1.5 hover:bg-gray-200 hover:text-gray-900 rounded transition-colors focus:outline-none" title="Imagem">Img</button>
       
       <div class="flex-1"></div> <!-- Spacer -->
-      <div class="w-px h-5 bg-gray-300 mx-1 self-center"></div>
-      <button @click="downloadMarkdown" class="px-3 py-1 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded font-semibold focus:outline-none flex items-center gap-1" title="Baixar como .md">
-        &#8595; .MD
-      </button>
-      <button @click="downloadPDF" class="px-3 py-1 bg-red-50 text-red-700 hover:bg-red-100 rounded font-semibold focus:outline-none flex items-center gap-1" title="Baixar como .pdf">
-        &#8595; .PDF
-      </button>
+      
+      <div class="flex gap-2">
+        <button @click="downloadMarkdown" class="px-3 py-1.5 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 hover:text-gray-900 rounded-md font-medium text-xs transition-colors focus:outline-none flex items-center gap-1.5 shadow-sm" title="Baixar como .md">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+          .MD
+        </button>
+        <button @click="downloadPDF" class="px-3 py-1.5 bg-gray-800 border border-gray-800 text-white hover:bg-gray-900 rounded-md font-medium text-xs transition-colors focus:outline-none flex items-center gap-1.5 shadow-sm" title="Baixar como .pdf">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+          .PDF
+        </button>
+      </div>
     </div>
 
     <!-- Hidden element for PDF rendering -->

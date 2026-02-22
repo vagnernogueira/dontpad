@@ -2,20 +2,52 @@
 @tailwind components;
 @tailwind utilities;
 
-html, body, #app {
+html,
+body,
+#app {
   height: 100%;
   margin: 0;
   padding: 0;
+  font-family: 'Inter', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  background-color: #f7f9fa;
+  /* Light gray background imitating app wrap */
 }
 
+/* Base CodeMirror Tweaks */
 .cm-editor {
   height: 100% !important;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   font-size: 16px;
+  line-height: 1.6;
+}
+
+/* Force a classic clean monospace for the content */
+.cm-content {
+  font-family: "Courier Prime", "SFMono-Regular", Consolas, "Liberation Mono", "Courier New", monospace !important;
+  padding: 40px 60px !important;
+  max-width: 900px;
+  margin: 0 auto;
+  /* Center paper effect */
+  background-color: white;
+  /* Paper effect */
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  /* Subtle paper shadow */
+  min-height: 100%;
 }
 
 .cm-scroller {
   overflow: auto !important;
+  background-color: #f7f9fa;
+  /* Scroller matches external bg */
+}
+
+/* Remove default active line background to clean it up */
+.cm-activeLine {
+  background-color: transparent !important;
+}
+
+/* Focused outline removal */
+.cm-editor.cm-focused {
+  outline: none !important;
 }
 
 /* Yjs Cursors */
@@ -28,7 +60,7 @@ html, body, #app {
   min-height: 1.2em;
 }
 
-.yjs-cursor > div {
+.yjs-cursor>div {
   position: absolute;
   top: -1.05em;
   left: -2px;
