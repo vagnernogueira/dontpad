@@ -95,25 +95,27 @@ body,
 .ProseMirror code {
   font-family: "Courier Prime", "SFMono-Regular", Consolas, "Liberation Mono", "Courier New", monospace !important;
   background-color: #f6f8fa !important;
-  padding: 0.1em 0.3em !important;
+  color: #eb5757 !important;
+  /* Slight red tint for inline code common in markdown */
+  padding: 0.2em 0.4em !important;
   border-radius: 3px !important;
-  font-size: 0.9em !important;
+  font-size: 0.85em !important;
 }
 
 .ProseMirror pre {
-  background: #f6f8fa;
-  color: #24292e;
-  font-family: "Courier Prime", "SFMono-Regular", Consolas, "Liberation Mono", "Courier New", monospace;
-  padding: 1rem;
-  border-radius: 0.5rem;
-  overflow-x: auto;
+  background: #f6f8fa !important;
+  color: #24292e !important;
+  font-family: "Courier Prime", "SFMono-Regular", Consolas, "Liberation Mono", "Courier New", monospace !important;
+  padding: 1rem !important;
+  border-radius: 0.5rem !important;
+  overflow-x: auto !important;
 }
 
 .ProseMirror pre code {
-  color: inherit;
+  color: inherit !important;
   padding: 0 !important;
   background: none !important;
-  font-size: 0.85rem !important;
+  font-size: 0.9em !important;
 }
 
 .ProseMirror img {
@@ -121,28 +123,35 @@ body,
   height: auto;
 }
 
+/* TipTap Task Lists */
 ul[data-type="taskList"] {
-  list-style: none;
-  padding: 0;
+  list-style: none !important;
+  padding: 0 !important;
 }
 
 ul[data-type="taskList"] li {
-  display: flex;
-  align-items: center;
+  display: flex !important;
+  align-items: flex-start !important;
+  margin-bottom: 0.2rem !important;
 }
 
 ul[data-type="taskList"] li>label {
-  flex: 0 0 auto;
-  margin-right: 0.5rem;
-  user-select: none;
+  flex: 0 0 auto !important;
+  margin-right: 0.5rem !important;
+  user-select: none !important;
+  margin-top: 0.2rem !important;
+  /* align with text */
+}
+
+ul[data-type="taskList"] li>label input[type="checkbox"] {
+  cursor: pointer !important;
+  width: 1rem !important;
+  height: 1rem !important;
+  margin: 0 !important;
 }
 
 ul[data-type="taskList"] li>div {
-  flex: 1 1 auto;
-}
-
-ul[data-type="taskList"] input[type="checkbox"] {
-  cursor: pointer;
+  flex: 1 1 auto !important;
 }
 
 /* Yjs Cursors (TipTap Collaboration Cursor Extension) */
