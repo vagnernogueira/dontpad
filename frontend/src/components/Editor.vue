@@ -1,20 +1,42 @@
 <template>
   <div class="flex flex-col h-full w-full">
     <!-- Header -->
-    <header class="bg-emerald-600 text-white px-4 py-3 flex items-center justify-between shadow-md z-10">
-      <div class="flex items-center gap-4">
-        <router-link to="/" class="font-bold text-xl hover:text-emerald-100 transition-colors">
+    <header class="bg-emerald-600 text-white px-4 py-1.5 flex items-center justify-between shadow-sm z-20">
+      <div class="flex items-center gap-3">
+        <router-link to="/" class="font-bold text-lg hover:text-emerald-100 transition-colors">
           &#8592; Início
         </router-link>
-        <div class="font-mono bg-emerald-700 px-3 py-1 rounded text-sm md:text-base">
+        <div class="font-mono bg-emerald-700 px-2 py-0.5 rounded text-sm shrink-0">
           /{{ documentId }}
         </div>
       </div>
-      <div class="flex items-center gap-2 text-sm max-w-[200px] overflow-hidden text-ellipsis whitespace-nowrap">
+      <div class="flex items-center gap-2 text-xs opacity-90 truncate max-w-[150px]">
         <span :class="['w-2 h-2 rounded-full', status === 'connected' ? 'bg-green-400' : 'bg-red-400']"></span>
-        {{ status === 'connected' ? 'Sincronizado' : 'Desconectado' }}
+        {{ status === 'connected' ? 'Sincronizado' : 'Offline' }}
       </div>
     </header>
+
+    <!-- Toolbar -->
+    <div class="bg-white border-b border-gray-200 px-3 py-1 flex items-center flex-wrap gap-1 shadow-[0_2px_4px_rgba(0,0,0,0.02)] text-gray-700 z-10 text-sm overflow-x-auto whitespace-nowrap">
+      <button @click="applyFormat('**', '**')" class="px-2 py-1 hover:bg-gray-100 rounded font-bold focus:outline-none" title="Negrito">B</button>
+      <button @click="applyFormat('*', '*')" class="px-2 py-1 hover:bg-gray-100 rounded italic focus:outline-none" title="Itálico">I</button>
+      <button @click="applyFormat('~~', '~~')" class="px-2 py-1 hover:bg-gray-100 rounded line-through focus:outline-none" title="Tachado">S</button>
+      <div class="w-px h-5 bg-gray-300 mx-1 self-center"></div>
+      <button @click="applyFormat('# ')" class="px-2 py-1 hover:bg-gray-100 rounded font-bold focus:outline-none" title="Título 1">H1</button>
+      <button @click="applyFormat('## ')" class="px-2 py-1 hover:bg-gray-100 rounded font-bold focus:outline-none" title="Título 2">H2</button>
+      <button @click="applyFormat('### ')" class="px-2 py-1 hover:bg-gray-100 rounded font-bold focus:outline-none" title="Título 3">H3</button>
+      <div class="w-px h-5 bg-gray-300 mx-1 self-center"></div>
+      <button @click="applyFormat('- ')" class="px-2 py-1 hover:bg-gray-100 rounded focus:outline-none" title="Lista Bullet">&#8226; Lista</button>
+      <button @click="applyFormat('1. ')" class="px-2 py-1 hover:bg-gray-100 rounded focus:outline-none" title="Lista Numérica">1. Lista</button>
+      <div class="w-px h-5 bg-gray-300 mx-1 self-center"></div>
+      <button @click="applyFormat('> ')" class="px-2 py-1 hover:bg-gray-100 rounded font-serif italic focus:outline-none" title="Citação">“ ”</button>
+      <button @click="applyFormat('`', '`')" class="px-2 py-1 hover:bg-gray-100 rounded font-mono text-xs focus:outline-none" title="Código Inline">` `</button>
+      <button @click="applyFormat('```\n', '\n```')" class="px-2 py-1 hover:bg-gray-100 rounded font-mono text-xs focus:outline-none" title="Bloco de Código">{ }</button>
+      <div class="w-px h-5 bg-gray-300 mx-1 self-center"></div>
+      <button @click="applyFormat('[', '](url)')" class="px-2 py-1 hover:bg-gray-100 rounded focus:outline-none" title="Link">Link</button>
+      <button @click="applyFormat('![alt]', '(url)')" class="px-2 py-1 hover:bg-gray-100 rounded focus:outline-none" title="Imagem">Img</button>
+    </div>
+
 
     <!-- Editor Area -->
     <main class="flex-1 overflow-hidden relative" ref="editorContainer"></main>
@@ -97,6 +119,44 @@ const initEditor = () => {
     parent: editorContainer.value
   })
 }
+
+// Markdown formatting helper
+const applyFormat = (prefix: string, suffix: string = '') => {
+  if (!view) return
+  
+  const { state } = view
+  const selection = state.selection.main
+  const selectedText = state.sliceDoc(selection.from, selection.to)
+  
+  // Checking if it's a line-level format like headers or lists
+  const isLineFormat = !suffix && prefix.endsWith(' ')
+
+  if (isLineFormat) {
+    // Apply prefix to the start of the current line
+    const line = state.doc.lineAt(selection.from)
+    view.dispatch({
+      changes: { from: line.from, insert: prefix },
+      selection: { anchor: selection.from + prefix.length, head: selection.to + prefix.length }
+    })
+  } else {
+    // Wrap the selected text (or insert at cursor if no selection)
+    view.dispatch({
+      changes: {
+        from: selection.from,
+        to: selection.to,
+        insert: `${prefix}${selectedText}${suffix}`
+      },
+      selection: {
+        anchor: selection.from + prefix.length,
+        head: selection.to + prefix.length
+      }
+    })
+  }
+  
+  // Return focus back to CodeMirror
+  view.focus()
+}
+
 
 const cleanup = () => {
   if (provider) provider.destroy()
