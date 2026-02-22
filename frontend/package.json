@@ -13,6 +13,8 @@
         "@codemirror/state": "^6.4.1",
         "@codemirror/view": "^6.26.0",
         "codemirror": "^6.0.1",
+        "html2pdf.js": "^0.14.0",
+        "marked": "^17.0.3",
         "vue": "^3.4.21",
         "vue-router": "^4.3.0",
         "y-codemirror.next": "^0.3.2",

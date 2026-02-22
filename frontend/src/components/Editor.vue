@@ -35,6 +35,20 @@
       <div class="w-px h-5 bg-gray-300 mx-1 self-center"></div>
       <button @click="applyFormat('[', '](url)')" class="px-2 py-1 hover:bg-gray-100 rounded focus:outline-none" title="Link">Link</button>
       <button @click="applyFormat('![alt]', '(url)')" class="px-2 py-1 hover:bg-gray-100 rounded focus:outline-none" title="Imagem">Img</button>
+      
+      <div class="flex-1"></div> <!-- Spacer -->
+      <div class="w-px h-5 bg-gray-300 mx-1 self-center"></div>
+      <button @click="downloadMarkdown" class="px-3 py-1 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded font-semibold focus:outline-none flex items-center gap-1" title="Baixar como .md">
+        &#8595; .MD
+      </button>
+      <button @click="downloadPDF" class="px-3 py-1 bg-red-50 text-red-700 hover:bg-red-100 rounded font-semibold focus:outline-none flex items-center gap-1" title="Baixar como .pdf">
+        &#8595; .PDF
+      </button>
+    </div>
+
+    <!-- Hidden element for PDF rendering -->
+    <div v-show="false">
+      <div ref="pdfContainer" class="pdf-export-container p-8 text-black bg-white"></div>
     </div>
 
 
@@ -58,6 +72,10 @@ import { markdown } from '@codemirror/lang-markdown'
 import { yCollab } from 'y-codemirror.next'
 import { markdownPreviewPlugin } from '../cm-preview-plugin'
 
+// PDF & Markdown Exports
+import { marked } from 'marked'
+import html2pdf from 'html2pdf.js'
+
 // Random color/name for cursor
 const userColors = [
   '#30bced', '#6eeb83', '#ffbc42', '#ecd444', '#ee6352',
@@ -69,6 +87,7 @@ const randomName = `Anon ${Math.floor(Math.random() * 1000)}`
 const route = useRoute()
 const documentId = ref(route.params.documentId as string || 'default')
 const editorContainer = ref<HTMLElement | null>(null)
+const pdfContainer = ref<HTMLElement | null>(null) // Ref for PDF rendering
 const status = ref('disconnected')
 
 let ydoc: Y.Doc
@@ -159,6 +178,55 @@ const applyFormat = (prefix: string, suffix: string = '') => {
   view.focus()
 }
 
+// Download methods
+const downloadMarkdown = () => {
+  if (!view) return
+  const text = view.state.doc.toString()
+  const blob = new Blob([text], { type: 'text/markdown;charset=utf-8' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `${documentId.value}.md`
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(url)
+}
+
+const downloadPDF = async () => {
+  if (!view || !pdfContainer.value) return
+  const text = view.state.doc.toString()
+  
+  // Parse Markdown to HTML
+  const htmlContent = await marked.parse(text, { breaks: true, gfm: true })
+  
+  // Insert styled HTML into the hidden container
+  pdfContainer.value.innerHTML = `
+    <div style="font-family: sans-serif; line-height: 1.6; color: #333;">
+      ${htmlContent}
+    </div>
+  `
+  
+  // Make sure image tags have max-width to avoid breaking PDF layout
+  const images = pdfContainer.value.querySelectorAll('img')
+  images.forEach(img => {
+    img.style.maxWidth = '100%'
+    img.style.height = 'auto'
+  })
+
+  // html2pdf options (using any to bypass missing type defs)
+  const opt = {
+    margin:       15,
+    filename:     `${documentId.value}.pdf`,
+    image:        { type: 'jpeg', quality: 0.98 },
+    html2canvas:  { scale: 2, useCORS: true },
+    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+  }
+
+  // Trigger generation
+  // @ts-ignore
+  html2pdf().set(opt).from(pdfContainer.value).save()
+}
 
 const cleanup = () => {
   if (provider) provider.destroy()
