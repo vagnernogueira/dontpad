@@ -2,13 +2,20 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --font-ui: 'Fira Code', 'JetBrains Mono', monospace;
+  --font-code: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
 html,
 body,
 #app {
   height: 100%;
   margin: 0;
   padding: 0;
-  font-family: 'Inter', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  font-family: var(--font-ui);
+  font-variant-ligatures: common-ligatures contextual discretionary-ligatures;
+  font-feature-settings: "liga" 1, "calt" 1;
   background-color: #f7f9fa;
   /* Light gray background imitating app wrap */
 }
@@ -22,7 +29,9 @@ body,
 
 /* Force a classic clean reading font for the content */
 .cm-content {
-  font-family: 'Inter', 'Roboto', 'Helvetica Neue', Arial, sans-serif !important;
+  font-family: var(--font-ui) !important;
+  font-variant-ligatures: common-ligatures contextual discretionary-ligatures;
+  font-feature-settings: "liga" 1, "calt" 1;
   padding: 20px 20px !important;
   width: 100%;
   /* Center paper effect */
@@ -103,7 +112,9 @@ body,
 /* Code blocks and inline code should stand out with monospace */
 .cmt-inlineCode,
 .cmt-comment {
-  font-family: "Courier Prime", "SFMono-Regular", Consolas, "Liberation Mono", "Courier New", monospace !important;
+  font-family: var(--font-code) !important;
+  font-variant-ligatures: common-ligatures contextual discretionary-ligatures;
+  font-feature-settings: "liga" 1, "calt" 1;
   background-color: #f6f8fa !important;
   padding: 0.1em 0.3em !important;
   border-radius: 3px !important;

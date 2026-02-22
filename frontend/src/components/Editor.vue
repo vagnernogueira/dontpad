@@ -171,7 +171,7 @@ const markdownHighlightStyle = HighlightStyle.define([
   { tag: tags.strikethrough, textDecoration: 'line-through' },
   {
     tag: tags.monospace,
-    fontFamily: '"Courier Prime", "SFMono-Regular", Consolas, "Liberation Mono", "Courier New", monospace',
+    fontFamily: '"JetBrains Mono", "Fira Code", monospace',
     backgroundColor: '#f6f8fa'
   },
   { tag: tags.quote, fontStyle: 'italic', color: '#6a737d' }
