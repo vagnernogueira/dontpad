@@ -1,4 +1,4 @@
-import { ViewPlugin, Decoration, WidgetType, EditorView, MatchDecorator, DecorationSet, ViewUpdate } from "@codemirror/view"
+import { ViewPlugin, Decoration, WidgetType, EditorView, DecorationSet, ViewUpdate } from "@codemirror/view"
 
 // --- Image Widget ---
 class ImageWidget extends WidgetType {
@@ -66,44 +66,57 @@ class LinkWidget extends WidgetType {
     }
 }
 
-// Regex to match Markdown Images: ![alt](url)
-const imageDecorator = new MatchDecorator({
-    regexp: /!\[.*?\]\(([^)]+)\)/g,
-    decoration: (match: RegExpExecArray) => {
-        return Decoration.widget({
-            widget: new ImageWidget(match[1]),
-            side: 1 // Draw the widget after the matched text inline
-        })
-    }
-})
+import { RangeSetBuilder } from "@codemirror/state"
 
-// Regex to match Markdown Links: [text](url) - Negative lookbehind to ignore images
-// We use a simpler regex and just check if the match string starts with '!'
-const linkDecorator = new MatchDecorator({
-    regexp: /!?\[.*?\]\(([^)]+)\)/g,
-    decoration: (match: RegExpExecArray) => {
-        // If it starts with '!', it's an image. We skip it here, imageDecorator will handle it.
-        if (match[0].startsWith('!')) {
-            return null
+// --- View Plugins ---
+
+function buildImageDecorations(view: EditorView) {
+    const builder = new RangeSetBuilder<Decoration>()
+    for (let { from, to } of view.visibleRanges) {
+        const text = view.state.doc.sliceString(from, to)
+        const regex = /!\[.*?\]\(([^)]+)\)/g
+        let match
+        while ((match = regex.exec(text))) {
+            const pos = from + match.index + match[0].length
+            builder.add(pos, pos, Decoration.widget({
+                widget: new ImageWidget(match[1]),
+                side: 1
+            }))
         }
-        return Decoration.widget({
-            widget: new LinkWidget(match[1]),
-            side: 1 // Draw right next to it inline
-        })
     }
-})
+    return builder.finish()
+}
 
-// --- View Plugin ---
+function buildLinkDecorations(view: EditorView) {
+    const builder = new RangeSetBuilder<Decoration>()
+    for (let { from, to } of view.visibleRanges) {
+        const text = view.state.doc.sliceString(from, to)
+        const regex = /!?\[.*?\]\(([^)]+)\)/g
+        let match
+        while ((match = regex.exec(text))) {
+            // Skip if it's an image
+            if (match[0].startsWith('!')) continue
+
+            const pos = from + match.index + match[0].length
+            builder.add(pos, pos, Decoration.widget({
+                widget: new LinkWidget(match[1]),
+                side: 1
+            }))
+        }
+    }
+    return builder.finish()
+}
+
 export const markdownPreviewPlugin = [
     ViewPlugin.fromClass(
         class {
             decorations: DecorationSet
             constructor(view: EditorView) {
-                this.decorations = imageDecorator.createDeco(view)
+                this.decorations = buildImageDecorations(view)
             }
             update(update: ViewUpdate) {
                 if (update.docChanged || update.viewportChanged) {
-                    this.decorations = imageDecorator.updateDeco(update, this.decorations)
+                    this.decorations = buildImageDecorations(update.view)
                 }
             }
         },
@@ -115,11 +128,11 @@ export const markdownPreviewPlugin = [
         class {
             decorations: DecorationSet
             constructor(view: EditorView) {
-                this.decorations = linkDecorator.createDeco(view)
+                this.decorations = buildLinkDecorations(view)
             }
             update(update: ViewUpdate) {
                 if (update.docChanged || update.viewportChanged) {
-                    this.decorations = linkDecorator.updateDeco(update, this.decorations)
+                    this.decorations = buildLinkDecorations(update.view)
                 }
             }
         },
