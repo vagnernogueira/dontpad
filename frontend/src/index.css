@@ -13,71 +13,86 @@ body,
   /* Light gray background imitating app wrap */
 }
 
-/* Base CodeMirror Tweaks */
-.cm-editor {
-  height: 100% !important;
-  font-size: 16px;
-  line-height: 1.6;
+/* TipTap Editor Wrappers */
+.tiptap-wrapper {
+  background-color: #f7f9fa;
+  height: 100%;
+  overflow-y: auto;
+  padding-bottom: 50px;
 }
 
 /* Force a classic clean reading font for the content */
-.cm-content {
+.ProseMirror {
   font-family: 'Inter', 'Roboto', 'Helvetica Neue', Arial, sans-serif !important;
-  padding: 20px 20px !important;
+  font-size: 16px;
+  line-height: 1.6;
+  padding: 40px 40px !important;
   max-width: 900px;
-  margin: 0 auto;
+  margin: 20px auto 0 auto;
   /* Center paper effect */
   background-color: white;
   /* Paper effect */
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
   /* Subtle paper shadow */
-  min-height: 100%;
+  min-height: calc(100% - 20px);
+  outline: none !important;
 }
 
-.cm-scroller {
-  overflow: auto !important;
-  background-color: #f7f9fa;
-  /* Scroller matches external bg */
-}
-
-/* Active line highlight (subtle) */
-.cm-activeLine {
-  background-color: #f8f9fa !important;
+.ProseMirror p.is-editor-empty:first-child::before {
+  color: #adb5bd;
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
 }
 
 /* Fix text selection visibility */
-.cm-selectionLayer .cm-selectionBackground,
-.cm-selectionBackground {
+.ProseMirror ::selection {
   background-color: #cce2ff !important;
 }
 
-.cm-content ::selection {
-  background-color: #cce2ff !important;
-}
-
-/* Ensure markdown formatting rules are globally applied if theme overrides them */
-.cmt-em {
-  font-style: italic !important;
-}
-
-.cmt-strong {
-  font-weight: bold !important;
-}
-
-.cmt-strikethrough {
-  text-decoration: line-through !important;
-}
-
-.cmt-quote {
+/* Markdown equivalents */
+.ProseMirror blockquote {
   font-style: italic !important;
   color: #6a737d !important;
   border-left: 3px solid #dfe2e5 !important;
   padding-left: 10px !important;
+  margin-left: 0;
+}
+
+.ProseMirror ul {
+  list-style-type: disc;
+  padding-left: 20px;
+}
+
+.ProseMirror ol {
+  list-style-type: decimal;
+  padding-left: 20px;
+}
+
+.ProseMirror h1 {
+  font-size: 2em;
+  font-weight: bold;
+  margin-top: 0.67em;
+  margin-bottom: 0.67em;
+}
+
+.ProseMirror h2 {
+  font-size: 1.5em;
+  font-weight: bold;
+  margin-top: 0.83em;
+  margin-bottom: 0.83em;
+}
+
+.ProseMirror h3 {
+  font-size: 1.17em;
+  font-weight: bold;
+  margin-top: 1em;
+  margin-bottom: 1em;
 }
 
 /* Code blocks and inline code should stand out with monospace */
-.cmt-inlineCode,
-.cmt-comment {
+.ProseMirror code {
   font-family: "Courier Prime", "SFMono-Regular", Consolas, "Liberation Mono", "Courier New", monospace !important;
   background-color: #f6f8fa !important;
   padding: 0.1em 0.3em !important;
@@ -85,34 +100,74 @@ body,
   font-size: 0.9em !important;
 }
 
-/* Focused outline removal */
-.cm-editor.cm-focused {
-  outline: none !important;
+.ProseMirror pre {
+  background: #f6f8fa;
+  color: #24292e;
+  font-family: "Courier Prime", "SFMono-Regular", Consolas, "Liberation Mono", "Courier New", monospace;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  overflow-x: auto;
 }
 
-/* Yjs Cursors */
-.yjs-cursor {
+.ProseMirror pre code {
+  color: inherit;
+  padding: 0 !important;
+  background: none !important;
+  font-size: 0.85rem !important;
+}
+
+.ProseMirror img {
+  max-width: 100%;
+  height: auto;
+}
+
+ul[data-type="taskList"] {
+  list-style: none;
+  padding: 0;
+}
+
+ul[data-type="taskList"] li {
+  display: flex;
+  align-items: center;
+}
+
+ul[data-type="taskList"] li>label {
+  flex: 0 0 auto;
+  margin-right: 0.5rem;
+  user-select: none;
+}
+
+ul[data-type="taskList"] li>div {
+  flex: 1 1 auto;
+}
+
+ul[data-type="taskList"] input[type="checkbox"] {
+  cursor: pointer;
+}
+
+/* Yjs Cursors (TipTap Collaboration Cursor Extension) */
+.collaboration-cursor__caret {
   position: relative;
   border-left: 2px solid black;
   border-right: 2px solid transparent;
   margin-left: -2px;
   margin-right: -2px;
-  min-height: 1.2em;
+  word-break: normal;
+  pointer-events: none;
 }
 
-.yjs-cursor>div {
+.collaboration-cursor__label {
   position: absolute;
   top: -1.05em;
   left: -2px;
   font-size: 11px;
-  background-color: inherit;
-  font-family: sans-serif;
-  color: white;
-  white-space: nowrap;
+  font-style: normal;
   font-weight: bold;
+  line-height: normal;
   padding: 2px 4px;
   border-radius: 4px;
   border-bottom-left-radius: 0;
-  pointer-events: none;
-  z-index: 10;
+  color: white;
+  white-space: nowrap;
+  user-select: none;
 }
