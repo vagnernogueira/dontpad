@@ -1,4 +1,5 @@
 import * as Y from 'yjs';
+// @ts-ignore
 import { setupWSConnection as originalSetupWSConnection } from 'y-websocket/bin/utils';
 import { LeveldbPersistence } from 'y-leveldb';
 import path from 'path';
@@ -11,6 +12,7 @@ const dbPath = path.resolve(__dirname, '../../db/yjs-data');
 const persistence = new LeveldbPersistence(dbPath);
 
 // y-websocket looks at 'setPersistence' on its util object
+// @ts-ignore
 import * as utils from 'y-websocket/bin/utils';
 
 (utils as any).setPersistence({
@@ -24,7 +26,7 @@ import * as utils from 'y-websocket/bin/utils';
 
         Y.applyUpdate(ydoc, Y.encodeStateAsUpdate(persistedYdoc));
 
-        ydoc.on('update', (update) => {
+        ydoc.on('update', (update: Uint8Array) => {
             persistence.storeUpdate(docName, update);
         });
     },
