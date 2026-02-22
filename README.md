@@ -21,8 +21,8 @@ Este projeto foi construído focado em ser o mais leve possível para rodar na s
 - **Frontend:** Vue.js 3 (com Vite), Tailwind CSS e CodeMirror 6 (suporte poderoso a Markdown e edições colaborativas).
 - **Backend:** Node.js com Express e WebSockets (`ws`).
 - **Sincronização Integrada:** Resolvida usando o ecossistema [Yjs](https://yjs.dev/) (`y-websocket`, `y-codemirror.next`), garantindo colaboração por CRDT.
-- **Banco de Dados:** SQLite, armazenando o vetor de estados do Yjs via disco rígido de forma simples.
-- **Infraestrutura:** Podman com Compose Files, garantindo que tudo possa ser subido com um comando.
+- **Banco de Dados:** LevelDB. Utilizado nativamente via pacote `y-leveldb`, armazenando o vetor de estados estruturados como arquivos no disco de forma extremamente veloz e sem a necessidade de um servidor de SGBD separado.
+- **Infraestrutura:** Podman com Compose Files, garantindo que tudo possa rodar com um único comando.
 
 ## Rodando Localmente (Desenvolvimento)
 
