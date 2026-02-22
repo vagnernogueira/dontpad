@@ -62,7 +62,6 @@ class LinkWidget extends WidgetType {
         link.style.cursor = "pointer"
         // Stop propagation so clicking the link doesn't move the CodeMirror cursor
         link.onmousedown = (e) => e.stopPropagation()
-        link.onmousedown = (e: any) => e.stopPropagation()
         return link
     }
 }
@@ -73,8 +72,7 @@ const imageDecorator = new MatchDecorator({
     decoration: (match: RegExpExecArray) => {
         return Decoration.widget({
             widget: new ImageWidget(match[1]),
-            side: 1, // Draw the widget after the matched text
-            block: true // Draw it on its own line below
+            side: 1 // Draw the widget after the matched text inline
         })
     }
 })
@@ -110,7 +108,7 @@ export const markdownPreviewPlugin = [
             }
         },
         {
-            decorations: v => v.decorations
+            decorations: (v: any) => v.decorations
         }
     ),
     ViewPlugin.fromClass(
@@ -126,7 +124,7 @@ export const markdownPreviewPlugin = [
             }
         },
         {
-            decorations: v => v.decorations
+            decorations: (v: any) => v.decorations
         }
     )
 ]
