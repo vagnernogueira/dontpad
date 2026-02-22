@@ -20,10 +20,10 @@ body,
   line-height: 1.6;
 }
 
-/* Force a classic clean monospace for the content */
+/* Force a classic clean reading font for the content */
 .cm-content {
-  font-family: "Courier Prime", "SFMono-Regular", Consolas, "Liberation Mono", "Courier New", monospace !important;
-  padding: 20px 40px !important;
+  font-family: 'Inter', 'Roboto', 'Helvetica Neue', Arial, sans-serif !important;
+  padding: 20px 20px !important;
   max-width: 900px;
   margin: 0 auto;
   /* Center paper effect */
@@ -46,22 +46,43 @@ body,
 }
 
 /* Fix text selection visibility */
-.cm-selectionBackground,
-.cm-focused .cm-selectionBackground {
+.cm-selectionLayer .cm-selectionBackground,
+.cm-selectionBackground {
+  background-color: #cce2ff !important;
+}
+
+.cm-content ::selection {
   background-color: #cce2ff !important;
 }
 
 /* Ensure markdown formatting rules are globally applied if theme overrides them */
-.cm-em {
+.cmt-em {
   font-style: italic !important;
 }
 
-.cm-strong {
+.cmt-strong {
   font-weight: bold !important;
 }
 
-.cm-strikethrough {
+.cmt-strikethrough {
   text-decoration: line-through !important;
+}
+
+.cmt-quote {
+  font-style: italic !important;
+  color: #6a737d !important;
+  border-left: 3px solid #dfe2e5 !important;
+  padding-left: 10px !important;
+}
+
+/* Code blocks and inline code should stand out with monospace */
+.cmt-inlineCode,
+.cmt-comment {
+  font-family: "Courier Prime", "SFMono-Regular", Consolas, "Liberation Mono", "Courier New", monospace !important;
+  background-color: #f6f8fa !important;
+  padding: 0.1em 0.3em !important;
+  border-radius: 3px !important;
+  font-size: 0.9em !important;
 }
 
 /* Focused outline removal */
