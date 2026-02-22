@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-col items-center justify-center h-full max-w-2xl mx-auto text-center px-4">
-    <h1 class="text-5xl font-bold mb-4 text-emerald-600">Dontpad</h1>
+    <h1 class="text-5xl font-bold mb-4 text-gray-800">Dontpad</h1>
     <p class="text-xl mb-8 text-gray-600">Colaboração em texto, com suporte à Markdown.</p>
     
     <div class="w-full bg-white p-8 rounded-xl shadow-lg">
@@ -13,12 +13,12 @@
           v-model="docName" 
           type="text" 
           placeholder="nome-do-documento"
-          class="flex-1 border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+          class="flex-1 border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-gray-800"
           required
         />
         <button 
           type="submit"
-          class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-6 rounded-r-md transition-colors"
+          class="bg-gray-800 hover:bg-gray-900 text-white font-bold py-2 px-6 rounded-r-md transition-colors"
         >
           Acessar
         </button>

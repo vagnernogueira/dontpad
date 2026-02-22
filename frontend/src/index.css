@@ -23,7 +23,7 @@ body,
 /* Force a classic clean monospace for the content */
 .cm-content {
   font-family: "Courier Prime", "SFMono-Regular", Consolas, "Liberation Mono", "Courier New", monospace !important;
-  padding: 40px 60px !important;
+  padding: 20px 40px !important;
   max-width: 900px;
   margin: 0 auto;
   /* Center paper effect */
@@ -40,9 +40,28 @@ body,
   /* Scroller matches external bg */
 }
 
-/* Remove default active line background to clean it up */
+/* Active line highlight (subtle) */
 .cm-activeLine {
-  background-color: transparent !important;
+  background-color: #f8f9fa !important;
+}
+
+/* Fix text selection visibility */
+.cm-selectionBackground,
+.cm-focused .cm-selectionBackground {
+  background-color: #cce2ff !important;
+}
+
+/* Ensure markdown formatting rules are globally applied if theme overrides them */
+.cm-em {
+  font-style: italic !important;
+}
+
+.cm-strong {
+  font-weight: bold !important;
+}
+
+.cm-strikethrough {
+  text-decoration: line-through !important;
 }
 
 /* Focused outline removal */
