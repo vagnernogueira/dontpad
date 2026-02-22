@@ -41,6 +41,11 @@
       <button @click="applyFormat('`', '`')" class="px-2 py-1 hover:bg-gray-100 rounded font-mono text-xs focus:outline-none" title="Código Inline">` `</button>
       <button @click="applyFormat('```\n', '\n```')" class="px-2 py-1 hover:bg-gray-100 rounded font-mono text-xs focus:outline-none" title="Bloco de Código">{ }</button>
       <div class="w-px h-5 bg-gray-300 mx-1 self-center"></div>
+      <button @click="applyFormat('\n|  |  |\n|--|--|\n|  |  |\n')" class="px-2 py-1 hover:bg-gray-100 rounded focus:outline-none flex items-center" title="Tabela">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="3" y1="15" x2="21" y2="15"></line><line x1="9" y1="3" x2="9" y2="21"></line><line x1="15" y1="3" x2="15" y2="21"></line></svg>
+        Tabela
+      </button>
+      <div class="w-px h-5 bg-gray-300 mx-1 self-center"></div>
       <button @click="applyFormat('[', '](url)')" class="px-2 py-1 hover:bg-gray-100 rounded focus:outline-none" title="Link">Link</button>
       <button @click="applyFormat('![alt]', '(url)')" class="px-2 py-1 hover:bg-gray-100 rounded focus:outline-none" title="Imagem">Img</button>
       
