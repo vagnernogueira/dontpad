@@ -62,6 +62,7 @@ class LinkWidget extends WidgetType {
         link.style.cursor = "pointer"
         // Stop propagation so clicking the link doesn't move the CodeMirror cursor
         link.onmousedown = (e) => e.stopPropagation()
+        link.onmousedown = (e: any) => e.stopPropagation()
         return link
     }
 }
@@ -69,7 +70,7 @@ class LinkWidget extends WidgetType {
 // Regex to match Markdown Images: ![alt](url)
 const imageDecorator = new MatchDecorator({
     regexp: /!\[.*?\]\(([^)]+)\)/g,
-    decoration: (match) => {
+    decoration: (match: RegExpExecArray) => {
         return Decoration.widget({
             widget: new ImageWidget(match[1]),
             side: 1, // Draw the widget after the matched text
@@ -82,10 +83,10 @@ const imageDecorator = new MatchDecorator({
 // We use a simpler regex and just check if the match string starts with '!'
 const linkDecorator = new MatchDecorator({
     regexp: /!?\[.*?\]\(([^)]+)\)/g,
-    decoration: (match) => {
+    decoration: (match: RegExpExecArray) => {
         // If it starts with '!', it's an image. We skip it here, imageDecorator will handle it.
         if (match[0].startsWith('!')) {
-            return Decoration.none
+            return null
         }
         return Decoration.widget({
             widget: new LinkWidget(match[1]),
@@ -95,27 +96,37 @@ const linkDecorator = new MatchDecorator({
 })
 
 // --- View Plugin ---
-export const markdownPreviewPlugin = ViewPlugin.fromClass(
-    class {
-        imageDecorations: DecorationSet
-        linkDecorations: DecorationSet
-
-        constructor(view: EditorView) {
-            this.imageDecorations = imageDecorator.createDeco(view)
-            this.linkDecorations = linkDecorator.createDeco(view)
-        }
-
-        update(update: ViewUpdate) {
-            if (update.docChanged || update.viewportChanged) {
-                this.imageDecorations = imageDecorator.updateDeco(update, this.imageDecorations)
-                this.linkDecorations = linkDecorator.updateDeco(update, this.linkDecorations)
+export const markdownPreviewPlugin = [
+    ViewPlugin.fromClass(
+        class {
+            decorations: DecorationSet
+            constructor(view: EditorView) {
+                this.decorations = imageDecorator.createDeco(view)
             }
+            update(update: ViewUpdate) {
+                if (update.docChanged || update.viewportChanged) {
+                    this.decorations = imageDecorator.updateDeco(update, this.decorations)
+                }
+            }
+        },
+        {
+            decorations: v => v.decorations
         }
-    },
-    {
-        decorations: v => {
-            // Need to combine multiple decoration sets
-            return Decoration.set([...v.imageDecorations.iter(), ...v.linkDecorations.iter()], true)
+    ),
+    ViewPlugin.fromClass(
+        class {
+            decorations: DecorationSet
+            constructor(view: EditorView) {
+                this.decorations = linkDecorator.createDeco(view)
+            }
+            update(update: ViewUpdate) {
+                if (update.docChanged || update.viewportChanged) {
+                    this.decorations = linkDecorator.updateDeco(update, this.decorations)
+                }
+            }
+        },
+        {
+            decorations: v => v.decorations
         }
-    }
-)
+    )
+]
