@@ -6,5 +6,8 @@ export default defineConfig({
     plugins: [vue()],
     server: {
         host: '0.0.0.0'
+    },
+    optimizeDeps: {
+        include: ['@tiptap/y-tiptap', 'yjs']
     }
 })

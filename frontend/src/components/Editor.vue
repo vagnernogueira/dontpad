@@ -71,7 +71,7 @@
 
     <!-- Editor Area -->
     <main class="flex-1 overflow-hidden relative tiptap-wrapper" @click="focusEditor">
-      <editor-content :editor="editor" class="h-full" />
+      <editor-content :editor="editor || undefined" class="h-full" />
     </main>
 
     <!-- Dialogs -->
@@ -181,7 +181,7 @@ const initEditor = () => {
     extensions: [
       StarterKit.configure({
         history: false // turn off standard history for Yjs Collaboration
-      }),
+      } as any),
       Collaboration.configure({
         document: ydoc,
       }),
@@ -216,7 +216,7 @@ const undo = () => editor.value?.commands.undo()
 const redo = () => editor.value?.commands.redo()
 
 // Markdown equivalent button mapping
-const applyFormat = (formatType: string, level?: number) => {
+const applyFormat = (formatType: string) => {
   if (!editor.value) return
   editor.value.chain().focus()
 
