@@ -35,6 +35,7 @@
       <div class="w-px h-5 bg-gray-300 mx-1 self-center"></div>
       <button @click="applyFormat('- ')" class="px-2 py-1 hover:bg-gray-100 rounded focus:outline-none" title="Lista Bullet">&#8226; Lista</button>
       <button @click="applyFormat('1. ')" class="px-2 py-1 hover:bg-gray-100 rounded focus:outline-none" title="Lista Numérica">1. Lista</button>
+      <button @click="applyFormat('- [ ] ')" class="px-2 py-1 hover:bg-gray-100 rounded focus:outline-none" title="Checklist">&#9745; Checklist</button>
       <div class="w-px h-5 bg-gray-300 mx-1 self-center"></div>
       <button @click="applyFormat('> ')" class="px-2 py-1 hover:bg-gray-100 rounded font-serif italic focus:outline-none" title="Citação">“ ”</button>
       <button @click="applyFormat('`', '`')" class="px-2 py-1 hover:bg-gray-100 rounded font-mono text-xs focus:outline-none" title="Código Inline">` `</button>
