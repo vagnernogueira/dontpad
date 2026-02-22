@@ -40,6 +40,14 @@ body,
   /* Scroller matches external bg */
 }
 
+.cm-selectionLayer {
+  z-index: 2 !important;
+}
+
+.cm-cursorLayer {
+  z-index: 3 !important;
+}
+
 /* Active line highlight (subtle) */
 .cm-activeLine {
   background-color: #f8f9fa !important;
@@ -48,11 +56,17 @@ body,
 /* Fix text selection visibility */
 .cm-selectionLayer .cm-selectionBackground,
 .cm-selectionBackground {
-  background-color: #cce2ff !important;
+  background-color: rgba(59, 130, 246, 0.22) !important;
 }
 
-.cm-content ::selection {
-  background-color: #cce2ff !important;
+.cm-content::selection,
+.cm-line::selection {
+  background-color: rgba(59, 130, 246, 0.22) !important;
+}
+
+.cm-content::-moz-selection,
+.cm-line::-moz-selection {
+  background-color: rgba(59, 130, 246, 0.22) !important;
 }
 
 /* Ensure markdown formatting rules are globally applied if theme overrides them */

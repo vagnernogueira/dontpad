@@ -124,6 +124,7 @@ import { WebsocketProvider } from 'y-websocket'
 // CodeMirror
 import { EditorState } from '@codemirror/state'
 import { EditorView, basicSetup } from 'codemirror'
+import { drawSelection } from '@codemirror/view'
 import { markdown } from '@codemirror/lang-markdown'
 import { defaultHighlightStyle, syntaxHighlighting } from '@codemirror/language'
 import { yCollab } from 'y-codemirror.next'
@@ -190,6 +191,7 @@ const initEditor = () => {
     doc: ytext.toString(),
     extensions: [
       basicSetup,
+      drawSelection(),
       markdown(),
       syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
       yCollab(ytext, provider.awareness, { undoManager }),
