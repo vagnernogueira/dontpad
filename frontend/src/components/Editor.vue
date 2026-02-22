@@ -200,9 +200,64 @@ const downloadPDF = async () => {
   // Parse Markdown to HTML
   const htmlContent = await marked.parse(text, { breaks: true, gfm: true })
   
+  // Provide Markdown CSS styles similar to GitHub
+  const markdownStyles = `
+    <style>
+      .markdown-body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+        font-size: 16px;
+        line-height: 1.5;
+        color: #24292f;
+        padding: 20px;
+      }
+      .markdown-body h1, .markdown-body h2, .markdown-body h3, .markdown-body h4, .markdown-body h5, .markdown-body h6 {
+        margin-top: 24px;
+        margin-bottom: 16px;
+        font-weight: 600;
+        line-height: 1.25;
+      }
+      .markdown-body h1 { font-size: 2em; border-bottom: 1px solid #hsla(210,18%,87%,1); padding-bottom: .3em; }
+      .markdown-body h2 { font-size: 1.5em; border-bottom: 1px solid #hsla(210,18%,87%,1); padding-bottom: .3em; }
+      .markdown-body h3 { font-size: 1.25em; }
+      .markdown-body p, .markdown-body blockquote, .markdown-body ul, .markdown-body ol, .markdown-body dl, .markdown-body table, .markdown-body pre, .markdown-body details {
+        margin-top: 0;
+        margin-bottom: 16px;
+      }
+      .markdown-body blockquote {
+        padding: 0 1em;
+        color: #57606a;
+        border-left: .25em solid #d0d7de;
+      }
+      .markdown-body ul, .markdown-body ol { padding-left: 2em; }
+      .markdown-body code {
+        padding: .2em .4em;
+        margin: 0;
+        font-size: 85%;
+        white-space: break-spaces;
+        background-color: rgba(175, 184, 193, 0.2);
+        border-radius: 6px;
+      }
+      .markdown-body pre {
+        padding: 16px;
+        overflow: auto;
+        font-size: 85%;
+        line-height: 1.45;
+        background-color: #f6f8fa;
+        border-radius: 6px;
+      }
+      .markdown-body pre code {
+        padding: 0;
+        background-color: transparent;
+      }
+      .markdown-body a { color: #0969da; text-decoration: none; }
+      .markdown-body hr { height: .25em; padding: 0; margin: 24px 0; background-color: #d0d7de; border: 0; }
+    </style>
+  `
+  
   // Insert styled HTML into the hidden container
   pdfContainer.value.innerHTML = `
-    <div style="font-family: sans-serif; line-height: 1.6; color: #333;">
+    ${markdownStyles}
+    <div class="markdown-body">
       ${htmlContent}
     </div>
   `
