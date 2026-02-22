@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-col items-center justify-center h-full max-w-2xl mx-auto text-center px-4">
-    <h1 class="text-5xl font-bold mb-4 text-emerald-600">Dontpad Clone</h1>
-    <p class="text-xl mb-8 text-gray-600">Colaboração em texto, para todos.</p>
+    <h1 class="text-5xl font-bold mb-4 text-emerald-600">Dontpad</h1>
+    <p class="text-xl mb-8 text-gray-600">Colaboração em texto, com suporte à Markdown.</p>
     
     <div class="w-full bg-white p-8 rounded-xl shadow-lg">
       <p class="mb-4 text-left font-medium text-gray-700">Acesse um documento digitando a URL ou criando um aqui:</p>
