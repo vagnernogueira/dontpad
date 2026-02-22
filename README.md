@@ -52,7 +52,20 @@ Para isso, providenciamos suporte nativo via **Podman**. Você não precisa inst
    ```bash
    make run
    ```
-2. Acesse em seu navegador via `http://localhost:8080` (A porta dependerá do seu arquivo `docker-compose.yml`).
+2. **Setup do Reverse Proxy (Recomendado):**
+   Como o frontend rodará na porta `8080` e o backend WebSocket na porta `1234`, é altamente recomendável usar um servidor Web (como o Nginx ou Caddy) para expor a aplicação através de um domínio.
+   
+   Exemplo de `/etc/caddy/Caddyfile`:
+   ```caddyfile
+   dontpad.seusite.com {
+       reverse_proxy localhost:8080
+   }
+
+   dontpadsrv.seusite.com {
+       reverse_proxy localhost:1234
+   }
+   ```
+3. Acesse em seu navegador via `http://dontpad.seusite.com`.
 
 Para parar o serviço:
 ```bash
