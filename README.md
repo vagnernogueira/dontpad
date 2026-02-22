@@ -24,6 +24,12 @@ Este projeto foi construído focado em ser o mais leve possível para rodar na s
 - **Banco de Dados:** LevelDB. Utilizado nativamente via pacote `y-leveldb`, armazenando o vetor de estados estruturados como arquivos no disco de forma extremamente veloz e sem a necessidade de um servidor de SGBD separado.
 - **Infraestrutura:** Podman com Compose Files, garantindo que tudo possa rodar com um único comando.
 
+## Convenções de Frontend
+
+- **Ícones:** usar a biblioteca `lucide-vue-next` em todas as telas/componentes novos.
+- **Evitar SVG inline:** não adicionar tags `<svg>` diretamente em templates Vue.
+- **Consistência e manutenção:** ao precisar de um novo ícone, importar o componente correspondente da biblioteca em vez de criar SVG manual no template.
+
 ## Rodando Localmente (Desenvolvimento)
 
 Para rodar este projeto em sua máquina durante o desenvolvimento:
