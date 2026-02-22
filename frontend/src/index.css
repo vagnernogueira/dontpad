@@ -24,8 +24,7 @@ body,
 .cm-content {
   font-family: 'Inter', 'Roboto', 'Helvetica Neue', Arial, sans-serif !important;
   padding: 20px 20px !important;
-  max-width: 900px;
-  margin: 0 auto;
+  width: 100%;
   /* Center paper effect */
   background-color: white;
   /* Paper effect */
@@ -51,6 +50,10 @@ body,
 /* Active line highlight (subtle) */
 .cm-activeLine {
   background-color: #f8f9fa !important;
+}
+
+.cm-line.cm-list-line {
+  padding-left: 4ch;
 }
 
 /* Fix text selection visibility */

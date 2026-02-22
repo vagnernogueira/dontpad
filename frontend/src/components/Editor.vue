@@ -122,9 +122,9 @@ import * as Y from 'yjs'
 import { WebsocketProvider } from 'y-websocket'
 
 // CodeMirror
-import { EditorState } from '@codemirror/state'
+import { EditorState, RangeSetBuilder } from '@codemirror/state'
 import { EditorView, basicSetup } from 'codemirror'
-import { drawSelection } from '@codemirror/view'
+import { Decoration, ViewPlugin, ViewUpdate, drawSelection } from '@codemirror/view'
 import { markdown } from '@codemirror/lang-markdown'
 import { HighlightStyle, defaultHighlightStyle, syntaxHighlighting } from '@codemirror/language'
 import { tags } from '@lezer/highlight'
@@ -165,6 +165,9 @@ let undoManager: Y.UndoManager
 const markdownHighlightStyle = HighlightStyle.define([
   { tag: tags.emphasis, fontStyle: 'italic' },
   { tag: tags.strong, fontWeight: '700' },
+  { tag: tags.heading1, fontSize: '1.9em', fontWeight: '800' },
+  { tag: tags.heading2, fontSize: '1.55em', fontWeight: '750' },
+  { tag: tags.heading3, fontSize: '1.3em', fontWeight: '700' },
   { tag: tags.strikethrough, textDecoration: 'line-through' },
   {
     tag: tags.monospace,
@@ -173,6 +176,46 @@ const markdownHighlightStyle = HighlightStyle.define([
   },
   { tag: tags.quote, fontStyle: 'italic', color: '#6a737d' }
 ])
+
+const listLineRegex = /^\s{0,3}(?:[-+*]|\d+[.)])\s+/
+
+const buildListIndentDecorations = (view: EditorView) => {
+  const builder = new RangeSetBuilder<Decoration>()
+
+  for (const { from, to } of view.visibleRanges) {
+    let line = view.state.doc.lineAt(from)
+
+    while (line.from <= to) {
+      if (listLineRegex.test(line.text)) {
+        builder.add(line.from, line.from, Decoration.line({ class: 'cm-list-line' }))
+      }
+
+      if (line.to >= to) break
+      line = view.state.doc.line(line.number + 1)
+    }
+  }
+
+  return builder.finish()
+}
+
+const listIndentPlugin = ViewPlugin.fromClass(
+  class {
+    decorations
+
+    constructor(view: EditorView) {
+      this.decorations = buildListIndentDecorations(view)
+    }
+
+    update(update: ViewUpdate) {
+      if (update.docChanged || update.viewportChanged) {
+        this.decorations = buildListIndentDecorations(update.view)
+      }
+    }
+  },
+  {
+    decorations: (plugin) => plugin.decorations
+  }
+)
 
 const initEditor = () => {
   if (!editorContainer.value) return
@@ -209,6 +252,7 @@ const initEditor = () => {
       markdown({ extensions: [Strikethrough] }),
       syntaxHighlighting(defaultHighlightStyle),
       syntaxHighlighting(markdownHighlightStyle),
+      listIndentPlugin,
       yCollab(ytext, provider.awareness, { undoManager }),
       markdownPreviewPlugin,
       EditorView.theme({
