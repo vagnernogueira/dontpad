@@ -18,6 +18,13 @@
 
     <!-- Toolbar -->
     <div class="bg-white border-b border-gray-200 px-3 py-1 flex items-center flex-wrap gap-1 shadow-[0_2px_4px_rgba(0,0,0,0.02)] text-gray-700 z-10 text-sm overflow-x-auto whitespace-nowrap">
+      <button @click="undo" class="px-2 py-1 hover:bg-gray-100 rounded focus:outline-none" title="Desfazer">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg>
+      </button>
+      <button @click="redo" class="px-2 py-1 hover:bg-gray-100 rounded focus:outline-none" title="Refazer">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 7v6h-6"/><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7"/></svg>
+      </button>
+      <div class="w-px h-5 bg-gray-300 mx-1 self-center"></div>
       <button @click="applyFormat('**', '**')" class="px-2 py-1 hover:bg-gray-100 rounded font-bold focus:outline-none" title="Negrito">B</button>
       <button @click="applyFormat('*', '*')" class="px-2 py-1 hover:bg-gray-100 rounded italic focus:outline-none" title="Itálico">I</button>
       <button @click="applyFormat('~~', '~~')" class="px-2 py-1 hover:bg-gray-100 rounded line-through focus:outline-none" title="Tachado">S</button>
@@ -94,6 +101,7 @@ const status = ref('disconnected')
 let ydoc: Y.Doc
 let provider: WebsocketProvider
 let view: EditorView
+let undoManager: Y.UndoManager
 
 const initEditor = () => {
   if (!editorContainer.value) return
@@ -121,13 +129,14 @@ const initEditor = () => {
 
   // 4. Bind CodeMirror to Yjs Document
   const ytext = ydoc.getText('codemirror')
+  undoManager = new Y.UndoManager(ytext)
   
   const state = EditorState.create({
     doc: ytext.toString(),
     extensions: [
       basicSetup,
       markdown(),
-      yCollab(ytext, provider.awareness),
+      yCollab(ytext, provider.awareness, { undoManager }),
       markdownPreviewPlugin,
       EditorView.theme({
         "&": { height: "100%" },
@@ -140,6 +149,17 @@ const initEditor = () => {
     state,
     parent: editorContainer.value
   })
+}
+
+// Undo/Redo functions
+const undo = () => {
+  if (undoManager) undoManager.undo()
+  if (view) view.focus()
+}
+
+const redo = () => {
+  if (undoManager) undoManager.redo()
+  if (view) view.focus()
 }
 
 // Markdown formatting helper
