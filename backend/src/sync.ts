@@ -11,6 +11,13 @@ const setupWSConnectionOriginal = originalSetupWSConnection as any;
 const dbPath = path.resolve(__dirname, '../db/yjs-data');
 const persistence = new LeveldbPersistence(dbPath);
 
+export const listDocumentNames = async (): Promise<string[]> => {
+    const names = await (persistence as any).getAllDocNames();
+    return Array.isArray(names)
+        ? names.filter((name: unknown): name is string => typeof name === 'string' && name.length > 0).sort((a, b) => a.localeCompare(b))
+        : [];
+}
+
 // y-websocket looks at 'setPersistence' on its util object
 // @ts-ignore
 import * as utils from 'y-websocket/bin/utils';
