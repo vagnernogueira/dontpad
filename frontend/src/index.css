@@ -74,11 +74,19 @@ body,
   font-style: italic !important;
 }
 
+.cm-em {
+  font-style: italic !important;
+}
+
 .cmt-strong {
   font-weight: bold !important;
 }
 
 .cmt-strikethrough {
+  text-decoration: line-through !important;
+}
+
+.cm-strikethrough {
   text-decoration: line-through !important;
 }
 

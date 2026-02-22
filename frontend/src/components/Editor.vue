@@ -126,7 +126,9 @@ import { EditorState } from '@codemirror/state'
 import { EditorView, basicSetup } from 'codemirror'
 import { drawSelection } from '@codemirror/view'
 import { markdown } from '@codemirror/lang-markdown'
-import { defaultHighlightStyle, syntaxHighlighting } from '@codemirror/language'
+import { HighlightStyle, defaultHighlightStyle, syntaxHighlighting } from '@codemirror/language'
+import { tags } from '@lezer/highlight'
+import { Strikethrough } from '@lezer/markdown'
 import { yCollab } from 'y-codemirror.next'
 import { markdownPreviewPlugin } from '../cm-preview-plugin'
 
@@ -160,6 +162,18 @@ let provider: WebsocketProvider
 let view: EditorView
 let undoManager: Y.UndoManager
 
+const markdownHighlightStyle = HighlightStyle.define([
+  { tag: tags.emphasis, fontStyle: 'italic' },
+  { tag: tags.strong, fontWeight: '700' },
+  { tag: tags.strikethrough, textDecoration: 'line-through' },
+  {
+    tag: tags.monospace,
+    fontFamily: '"Courier Prime", "SFMono-Regular", Consolas, "Liberation Mono", "Courier New", monospace',
+    backgroundColor: '#f6f8fa'
+  },
+  { tag: tags.quote, fontStyle: 'italic', color: '#6a737d' }
+])
+
 const initEditor = () => {
   if (!editorContainer.value) return
 
@@ -192,8 +206,9 @@ const initEditor = () => {
     extensions: [
       basicSetup,
       drawSelection(),
-      markdown(),
-      syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
+      markdown({ extensions: [Strikethrough] }),
+      syntaxHighlighting(defaultHighlightStyle),
+      syntaxHighlighting(markdownHighlightStyle),
       yCollab(ytext, provider.awareness, { undoManager }),
       markdownPreviewPlugin,
       EditorView.theme({
