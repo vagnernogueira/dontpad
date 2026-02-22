@@ -61,7 +61,7 @@ const initEditor = () => {
   // 2. Connect to WebSocket
   // Assuming backend runs on 1234 port or same host in prod
   const wsUrl = import.meta.env.PROD 
-    ? `ws://${window.location.host}` 
+    ? `wss://dontpadsrv.vagnernogueira.com` 
     : `ws://localhost:1234`
     
   provider = new WebsocketProvider(wsUrl, documentId.value, ydoc)

@@ -8,7 +8,7 @@ import path from 'path';
 const setupWSConnectionOriginal = originalSetupWSConnection as any;
 
 // Use y-leveldb as a backend for storing Yjs documents. We will store it in the db folder.
-const dbPath = path.resolve(__dirname, '../../db/yjs-data');
+const dbPath = path.resolve(__dirname, '../db/yjs-data');
 const persistence = new LeveldbPersistence(dbPath);
 
 // y-websocket looks at 'setPersistence' on its util object
