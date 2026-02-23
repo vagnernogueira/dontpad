@@ -12,6 +12,7 @@ services:
     restart: unless-stopped
     environment:
       - PORT=1234
+      - DOCUMENTS_MASTER_PASSWORD=${VITE_HOME_DOCS_PASSWORD}
     networks:
       - dontpad_net
 
@@ -21,6 +22,8 @@ services:
       args:
         VITE_HOME_DOCS_PASSWORD: ${VITE_HOME_DOCS_PASSWORD}
         VITE_HOME_DOCS_SHORTCUT: ${VITE_HOME_DOCS_SHORTCUT:-Alt+R}
+        VITE_BACKEND_HTTP_URL: ${VITE_BACKEND_HTTP_URL:-}
+        VITE_BACKEND_WS_URL: ${VITE_BACKEND_WS_URL:-}
     container_name: dontpad_frontend
     ports:
       - "127.0.0.1:8080:80"

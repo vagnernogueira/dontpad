@@ -60,9 +60,26 @@ Crie um arquivo `.env` na raiz do projeto (mesmo nível do `docker-compose.yml`)
 ```bash
 VITE_HOME_DOCS_PASSWORD=defina-uma-senha-forte
 VITE_HOME_DOCS_SHORTCUT=Alt+R
+VITE_BACKEND_HTTP_URL=https://dontpad.vagnernogueira.com
+VITE_BACKEND_WS_URL=wss://dontpad.vagnernogueira.com/api
 ```
 
 > Essas variáveis são injetadas no build da imagem frontend. Sem `VITE_HOME_DOCS_PASSWORD`, o build falha por segurança.
+
+`VITE_BACKEND_HTTP_URL` e `VITE_BACKEND_WS_URL` definem explicitamente os endpoints do backend HTTP e WebSocket usados pelo frontend em produção. Em cenário com proxy único no domínio do frontend, use WebSocket com sufixo `/api`.
+
+No backend, a variável `DOCUMENTS_MASTER_PASSWORD` é preenchida automaticamente via `docker-compose` com o valor de `VITE_HOME_DOCS_PASSWORD`. Essa senha mestre permite:
+
+- autorizar a enumeração de todos os documentos na tela inicial;
+- abrir documentos travados por senha (bypass administrativo).
+
+### Documentos com senha (cadeado)
+
+Na tela de edição, use o botão de cadeado na barra de ferramentas para definir/atualizar a senha do documento atual.
+
+- após travar, novas aberturas do documento exigem senha;
+- o desbloqueio aceita a senha do próprio documento ou a senha mestre de ambiente;
+- as senhas de trava são armazenadas no backend e persistidas em `backend/db/document-locks.json`.
 
 ### Como iniciar o serviço
 

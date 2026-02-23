@@ -49,6 +49,9 @@
       <div class="w-px h-5 bg-gray-300 mx-1.5 self-center"></div>
       <button @click="openLinkDialog" class="px-2.5 py-1.5 hover:bg-gray-200 hover:text-gray-900 rounded transition-colors focus:outline-none" title="Link">Link</button>
       <button @click="openImageDialog" class="px-2.5 py-1.5 hover:bg-gray-200 hover:text-gray-900 rounded transition-colors focus:outline-none" title="Imagem">Img</button>
+      <button @click="openLockDialog" class="px-2.5 py-1.5 hover:bg-gray-200 hover:text-gray-900 rounded transition-colors focus:outline-none" title="Travar com senha">
+        <Lock :size="14" />
+      </button>
       
       <div class="flex-1"></div> <!-- Spacer -->
       
@@ -70,10 +73,13 @@
     </div>
 
     <!-- Editor Area -->
-    <main class="flex-1 overflow-hidden relative" ref="editorContainer"></main>
+    <main v-if="hasDocumentAccess" class="flex-1 overflow-hidden relative" ref="editorContainer"></main>
+    <main v-else class="flex-1 flex items-center justify-center bg-gray-50 text-gray-500 text-sm px-4 text-center">
+      Este documento está protegido por senha. Insira a senha para continuar.
+    </main>
 
     <!-- Dialogs -->
-    <div v-if="showLinkDialog || showImageDialog" class="absolute inset-0 bg-black bg-opacity-30 z-50 flex items-center justify-center">
+    <div v-if="showLinkDialog || showImageDialog || showLockDialog || showAccessDialog" class="absolute inset-0 bg-black bg-opacity-30 z-50 flex items-center justify-center">
       
       <!-- Link Dialog -->
       <div v-if="showLinkDialog" class="bg-white rounded-lg shadow-xl p-5 w-80 max-w-full m-4">
@@ -109,14 +115,43 @@
         </div>
       </div>
 
+      <!-- Lock Dialog -->
+      <div v-if="showLockDialog" class="bg-white rounded-lg shadow-xl p-5 w-80 max-w-full m-4">
+        <h3 class="font-bold text-gray-800 mb-4 text-lg">Travar Documento</h3>
+        <div class="mb-3">
+          <label class="block text-sm text-gray-600 mb-1">Senha do Documento</label>
+          <input ref="lockPasswordInput" v-model="lockPassword" type="password" class="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" :placeholder="isDocumentLocked ? 'Senha atual ou senha mestre' : 'Digite a senha'" @keyup.enter="lockDocument">
+        </div>
+        <p v-if="lockError" class="mb-3 text-xs text-red-600">{{ lockError }}</p>
+        <div class="flex justify-end gap-2 text-sm">
+          <button @click="closeDialogs" class="px-3 py-1.5 text-gray-600 hover:bg-gray-100 rounded focus:outline-none">Cancelar</button>
+          <button v-if="isDocumentLocked" @click="removeDocumentLock" class="px-3 py-1.5 bg-red-600 text-white hover:bg-red-700 rounded shadow-sm focus:outline-none">Remover senha</button>
+          <button @click="lockDocument" class="px-3 py-1.5 bg-emerald-600 text-white hover:bg-emerald-700 rounded shadow-sm focus:outline-none" :disabled="!lockPassword.trim()">Travar</button>
+        </div>
+      </div>
+
+      <!-- Access Dialog -->
+      <div v-if="showAccessDialog" class="bg-white rounded-lg shadow-xl p-5 w-80 max-w-full m-4">
+        <h3 class="font-bold text-gray-800 mb-4 text-lg">Documento Protegido</h3>
+        <div class="mb-3">
+          <label class="block text-sm text-gray-600 mb-1">Senha para abrir</label>
+          <input ref="accessPasswordInput" v-model="accessPassword" type="password" class="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" placeholder="Digite a senha" @keyup.enter="unlockDocument">
+        </div>
+        <p v-if="accessError" class="mb-3 text-xs text-red-600">{{ accessError }}</p>
+        <div class="flex justify-end gap-2 text-sm">
+          <button @click="closeAccessDialog" class="px-3 py-1.5 text-gray-600 hover:bg-gray-100 rounded focus:outline-none">Cancelar</button>
+          <button @click="unlockDocument" class="px-3 py-1.5 bg-emerald-600 text-white hover:bg-emerald-700 rounded shadow-sm focus:outline-none" :disabled="!accessPassword.trim()">Abrir</button>
+        </div>
+      </div>
+
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
+import { ref, reactive, onMounted, onBeforeUnmount, watch, nextTick, computed } from 'vue'
 import { useRoute } from 'vue-router'
-import { ArrowLeft, Download, Redo2, Table2, Undo2 } from 'lucide-vue-next'
+import { ArrowLeft, Download, Lock, Redo2, Table2, Undo2 } from 'lucide-vue-next'
 
 // Yjs
 import * as Y from 'yjs'
@@ -157,6 +192,38 @@ const linkData = reactive({ text: '', url: 'https://' })
 const imageData = reactive({ alt: '', url: 'https://' })
 const linkTextInput = ref<HTMLInputElement | null>(null)
 const imageAltInput = ref<HTMLInputElement | null>(null)
+const lockPasswordInput = ref<HTMLInputElement | null>(null)
+const accessPasswordInput = ref<HTMLInputElement | null>(null)
+const showLockDialog = ref(false)
+const showAccessDialog = ref(false)
+const lockPassword = ref('')
+const accessPassword = ref('')
+const lockError = ref('')
+const accessError = ref('')
+const hasDocumentAccess = ref(false)
+const documentAccessPassword = ref('')
+const isDocumentLocked = ref(false)
+
+const apiBaseUrl = computed(() => {
+  if (!import.meta.env.PROD) {
+    return 'http://localhost:1234'
+  }
+
+  return (import.meta.env.VITE_BACKEND_HTTP_URL as string | undefined)?.trim() || 'http://localhost:1234'
+})
+
+const wsBaseUrl = computed(() => {
+  if (!import.meta.env.PROD) {
+    return 'ws://localhost:1234'
+  }
+
+  const explicitWsUrl = (import.meta.env.VITE_BACKEND_WS_URL as string | undefined)?.trim()
+  if (explicitWsUrl) {
+    return explicitWsUrl
+  }
+
+  return 'ws://localhost:1234'
+})
 
 let ydoc: Y.Doc
 let provider: WebsocketProvider
@@ -225,11 +292,25 @@ const initEditor = () => {
   ydoc = new Y.Doc()
   
   // 2. Connect to WebSocket
-  const wsUrl = import.meta.env.PROD 
-    ? `wss://dontpadsrv.vagnernogueira.com` 
-    : `ws://localhost:1234`
+  const wsUrl = wsBaseUrl.value
     
-  provider = new WebsocketProvider(wsUrl, documentId.value, ydoc)
+  provider = documentAccessPassword.value
+    ? new WebsocketProvider(wsUrl, documentId.value, ydoc, {
+      params: { password: documentAccessPassword.value }
+    })
+    : new WebsocketProvider(wsUrl, documentId.value, ydoc)
+
+  provider.on('connection-close', (event: { code?: number }) => {
+    if (event?.code === 4403) {
+      hasDocumentAccess.value = false
+      accessError.value = 'Senha necessária para abrir este documento.'
+      showAccessDialog.value = true
+      nextTick(() => {
+        accessPasswordInput.value?.focus()
+      })
+    }
+  })
+
   provider.on('status', (event: { status: string }) => {
     status.value = event.status
   })
@@ -267,6 +348,58 @@ const initEditor = () => {
     state,
     parent: editorContainer.value
   })
+}
+
+const verifyDocumentAccess = async (password: string): Promise<boolean> => {
+  const response = await fetch(`${apiBaseUrl.value}/api/document-access`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      documentId: documentId.value,
+      password
+    })
+  })
+
+  return response.ok
+}
+
+const openEditorAfterAccess = async () => {
+  hasDocumentAccess.value = true
+  await nextTick()
+  initEditor()
+}
+
+const ensureDocumentAccess = async () => {
+  hasDocumentAccess.value = false
+
+  try {
+    const response = await fetch(`${apiBaseUrl.value}/api/document-lock?documentId=${encodeURIComponent(documentId.value)}`)
+    if (!response.ok) {
+      documentAccessPassword.value = ''
+      await openEditorAfterAccess()
+      return
+    }
+
+    const payload = await response.json() as { locked?: boolean }
+    const isLocked = !!payload.locked
+    isDocumentLocked.value = isLocked
+
+    if (!isLocked) {
+      documentAccessPassword.value = ''
+      await openEditorAfterAccess()
+      return
+    }
+
+    showAccessDialog.value = true
+    await nextTick()
+    accessPasswordInput.value?.focus()
+  } catch {
+    documentAccessPassword.value = ''
+    isDocumentLocked.value = false
+    await openEditorAfterAccess()
+  }
 }
 
 // Undo/Redo functions
@@ -357,6 +490,92 @@ const openImageDialog = async () => {
   if (imageAltInput.value) imageAltInput.value.select()
 }
 
+const openLockDialog = async () => {
+  if (!view) return
+  lockPassword.value = ''
+  lockError.value = ''
+  showLockDialog.value = true
+  await nextTick()
+  lockPasswordInput.value?.focus()
+}
+
+const lockDocument = async () => {
+  lockError.value = ''
+  const password = lockPassword.value.trim()
+  if (!password) return
+
+  const response = await fetch(`${apiBaseUrl.value}/api/document-lock`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      documentId: documentId.value,
+      password
+    })
+  })
+
+  if (!response.ok) {
+    lockError.value = 'Não foi possível travar este documento.'
+    return
+  }
+
+  isDocumentLocked.value = true
+  documentAccessPassword.value = password
+  closeDialogs()
+}
+
+const removeDocumentLock = async () => {
+  lockError.value = ''
+  const password = lockPassword.value.trim() || documentAccessPassword.value
+
+  if (!password) {
+    lockError.value = 'Informe a senha atual do documento ou a senha mestre.'
+    return
+  }
+
+  const response = await fetch(`${apiBaseUrl.value}/api/document-lock`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      documentId: documentId.value,
+      password
+    })
+  })
+
+  if (!response.ok) {
+    lockError.value = 'Senha inválida para remover a proteção.'
+    return
+  }
+
+  isDocumentLocked.value = false
+  documentAccessPassword.value = ''
+  closeDialogs()
+}
+
+const closeAccessDialog = () => {
+  showAccessDialog.value = false
+  accessPassword.value = ''
+  accessError.value = ''
+}
+
+const unlockDocument = async () => {
+  const password = accessPassword.value.trim()
+  if (!password) return
+
+  const canAccess = await verifyDocumentAccess(password)
+  if (!canAccess) {
+    accessError.value = 'Senha inválida.'
+    return
+  }
+
+  documentAccessPassword.value = password
+  closeAccessDialog()
+  await openEditorAfterAccess()
+}
+
 const insertImage = () => {
   if (!imageData.url) return
   const alt = imageData.alt || 'imagem'
@@ -367,6 +586,9 @@ const insertImage = () => {
 const closeDialogs = () => {
   showLinkDialog.value = false
   showImageDialog.value = false
+  showLockDialog.value = false
+  lockPassword.value = ''
+  lockError.value = ''
   if (view) view.focus()
 }
 
@@ -434,7 +656,7 @@ const cleanup = () => {
 }
 
 onMounted(() => {
-  initEditor()
+  ensureDocumentAccess()
 })
 
 onBeforeUnmount(() => {
@@ -445,7 +667,7 @@ watch(() => route.params.documentId, (newId) => {
   if (newId && typeof newId === 'string' && newId !== documentId.value) {
     documentId.value = newId
     cleanup()
-    initEditor()
+    ensureDocumentAccess()
   }
 })
 </script>

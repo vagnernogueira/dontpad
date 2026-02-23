@@ -133,6 +133,7 @@ const documents = ref<string[]>([])
 const isLoadingDocuments = ref(false)
 const documentsError = ref('')
 const hasDocumentsAccess = ref(false)
+const documentsAccessPassword = ref('')
 const showDocumentsBox = ref(false)
 const showAuthDialog = ref(false)
 const passwordInput = ref('')
@@ -153,9 +154,11 @@ const goToDocument = () => {
 }
 
 const apiBaseUrl = computed(() => {
-  return import.meta.env.PROD
-    ? 'https://dontpadsrv.vagnernogueira.com'
-    : 'http://localhost:1234'
+  if (!import.meta.env.PROD) {
+    return 'http://localhost:1234'
+  }
+
+  return (import.meta.env.VITE_BACKEND_HTTP_URL as string | undefined)?.trim() || 'http://localhost:1234'
 })
 
 const toDocumentPath = (document: string) => {
@@ -188,6 +191,7 @@ const unlockDocuments = async () => {
   }
 
   hasDocumentsAccess.value = true
+  documentsAccessPassword.value = passwordInput.value
   showDocumentsBox.value = true
   closeAuthDialog()
   await fetchDocuments()
@@ -219,7 +223,11 @@ const fetchDocuments = async () => {
   documentsError.value = ''
 
   try {
-    const response = await fetch(`${apiBaseUrl.value}/api/documents`)
+    const response = await fetch(`${apiBaseUrl.value}/api/documents`, {
+      headers: {
+        'x-docs-password': documentsAccessPassword.value
+      }
+    })
     if (!response.ok) {
       throw new Error('Erro ao listar documentos')
     }
