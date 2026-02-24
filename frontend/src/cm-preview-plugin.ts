@@ -1,5 +1,5 @@
 import { ViewPlugin, Decoration, WidgetType, EditorView, DecorationSet, ViewUpdate } from "@codemirror/view"
-import { RangeSetBuilder } from "@codemirror/state"
+import { RangeSetBuilder, EditorSelection } from "@codemirror/state"
 import { keymap } from "@codemirror/view"
 
 // --- Image Widget ---
@@ -437,3 +437,86 @@ export const markdownPreviewPlugin = [
         }
     )
 ]
+
+// --- Triple/Quadruple Click Plugin ---
+// Triple click: select entire line
+// Quadruple click: select entire paragraph
+
+/**
+ * Helper function to find paragraph boundaries
+ * A paragraph is delimited by empty lines or start/end of document
+ */
+function findParagraphBounds(view: EditorView, pos: number): { from: number, to: number } {
+    const doc = view.state.doc
+    const line = doc.lineAt(pos)
+    
+    // Find start of paragraph (go up until we hit an empty line or start of doc)
+    let startLine = line
+    while (startLine.number > 1) {
+        const prevLine = doc.line(startLine.number - 1)
+        if (prevLine.text.trim() === '') {
+            break
+        }
+        startLine = prevLine
+    }
+    
+    // Find end of paragraph (go down until we hit an empty line or end of doc)
+    let endLine = line
+    while (endLine.number < doc.lines) {
+        const nextLine = doc.line(endLine.number + 1)
+        if (nextLine.text.trim() === '') {
+            break
+        }
+        endLine = nextLine
+    }
+    
+    return { from: startLine.from, to: endLine.to }
+}
+
+export const multiClickPlugin = ViewPlugin.fromClass(
+    class {
+        constructor(readonly view: EditorView) {
+            // Add mousedown listener directly to the editor's DOM
+            view.dom.addEventListener('mousedown', this.handleMouseDown)
+        }
+
+        handleMouseDown = (event: MouseEvent) => {
+            // Only handle left mouse button
+            if (event.button !== 0) return
+            
+            const detail = event.detail
+            
+            // Triple click (detail === 3)
+            if (detail === 3) {
+                event.preventDefault()
+                event.stopPropagation()
+                
+                const pos = this.view.posAtCoords({ x: event.clientX, y: event.clientY })
+                if (pos === null) return
+                
+                const line = this.view.state.doc.lineAt(pos)
+                this.view.dispatch({
+                    selection: EditorSelection.single(line.from, line.to)
+                })
+            }
+            
+            // Quadruple click (detail === 4)
+            else if (detail === 4) {
+                event.preventDefault()
+                event.stopPropagation()
+                
+                const pos = this.view.posAtCoords({ x: event.clientX, y: event.clientY })
+                if (pos === null) return
+                
+                const { from, to } = findParagraphBounds(this.view, pos)
+                this.view.dispatch({
+                    selection: EditorSelection.single(from, to)
+                })
+            }
+        }
+
+        destroy() {
+            this.view.dom.removeEventListener('mousedown', this.handleMouseDown)
+        }
+    }
+)

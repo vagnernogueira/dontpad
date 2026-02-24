@@ -172,7 +172,8 @@ import {
   customTabKeymap, 
   enterKeymap,
   codeBlockPlugin,
-  horizontalRulePlugin
+  horizontalRulePlugin,
+  multiClickPlugin
 } from '../cm-preview-plugin'
 
 // PDF & Markdown Exports
@@ -317,6 +318,7 @@ const initEditor = () => {
       customTabKeymap,
       enterKeymap,
       markdownPreviewPlugin,
+      multiClickPlugin,
       EditorView.theme({
         "&": { height: "100%" },
         ".cm-scroller": { overflow: "auto" },
