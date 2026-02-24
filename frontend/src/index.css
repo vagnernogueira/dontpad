@@ -99,6 +99,24 @@ body,
   text-decoration: line-through !important;
 }
 
+/* Remove underline from markdown headings in CodeMirror */
+.cm-heading,
+.cm-header,
+.cmt-heading,
+.cmt-heading1,
+.cmt-heading2,
+.cmt-heading3,
+.cm-line.cm-heading,
+.cm-line.cm-header {
+  text-decoration: none !important;
+  border-bottom: none !important;
+}
+
+/* Force remove text-decoration from all spans in editor lines */
+.cm-line > span {
+  text-decoration: none !important;
+}
+
 .cmt-quote {
   font-style: italic !important;
   color: #6a737d !important;

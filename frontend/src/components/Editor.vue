@@ -239,9 +239,9 @@ let undoManager: Y.UndoManager
 const markdownHighlightStyle = HighlightStyle.define([
   { tag: tags.emphasis, fontStyle: 'italic' },
   { tag: tags.strong, fontWeight: '700' },
-  { tag: tags.heading1, fontSize: '1.9em', fontWeight: '800' },
-  { tag: tags.heading2, fontSize: '1.55em', fontWeight: '750' },
-  { tag: tags.heading3, fontSize: '1.3em', fontWeight: '700' },
+  { tag: tags.heading1, fontSize: '1.9em', fontWeight: '800', textDecoration: 'none' },
+  { tag: tags.heading2, fontSize: '1.55em', fontWeight: '750', textDecoration: 'none' },
+  { tag: tags.heading3, fontSize: '1.3em', fontWeight: '700', textDecoration: 'none' },
   { tag: tags.strikethrough, textDecoration: 'line-through' },
   // Código inline (entre acentos graves simples)
   {
@@ -325,6 +325,14 @@ const initEditor = () => {
           fontFamily: "inherit !important",
           fontSize: "inherit !important",
           color: "inherit !important"
+        },
+        ".cm-header, .cm-heading, .cm-heading1, .cm-heading2, .cm-heading3, .cm-formatting-header, .cm-formatting-heading": {
+          textDecoration: "none !important",
+          borderBottom: "none !important"
+        },
+        ".cm-line.cm-header, .cm-line.cm-heading": {
+          textDecoration: "none !important",
+          borderBottom: "none !important"
         }
       })
     ]

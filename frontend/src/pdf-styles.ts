@@ -26,8 +26,8 @@ export const markdownStyles = `
       line-height: 1.25 !important;
       color: #000000 !important;
     }
-    .markdown-body h1 { font-size: 2em !important; border-bottom: 1px solid #eaecef !important; padding-bottom: 0.3em !important; }
-    .markdown-body h2 { font-size: 1.5em !important; border-bottom: 1px solid #eaecef !important; padding-bottom: 0.3em !important; }
+    .markdown-body h1 { font-size: 2em !important; border-bottom: none !important; padding-bottom: 0.3em !important; }
+    .markdown-body h2 { font-size: 1.5em !important; border-bottom: none !important; padding-bottom: 0.3em !important; }
     .markdown-body h3 { font-size: 1.25em !important; }
     
     /* Fix lists stripped by Tailwind */
