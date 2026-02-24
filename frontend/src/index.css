@@ -62,10 +62,6 @@ body,
   background-color: #f8f9fa !important;
 }
 
-.cm-line.cm-list-line {
-  /* Indentation is now handled by actual spaces in the content, not CSS padding */
-}
-
 /* Fix text selection visibility */
 .cm-selectionLayer .cm-selectionBackground,
 .cm-selectionBackground {

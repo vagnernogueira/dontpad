@@ -109,7 +109,7 @@ function buildLinkDecorations(view: EditorView) {
 
 const listLineRegex = /^\s{0,3}(?:[-+*]|\d+[.)])\s+/
 
-function buildListIndentDecorations(view: EditorView) {
+function buildListDecorations(view: EditorView) {
   const builder = new RangeSetBuilder<Decoration>()
 
   for (const { from, to } of view.visibleRanges) {
@@ -167,18 +167,18 @@ function buildCodeBlockDecorations(view: EditorView) {
   return builder.finish()
 }
 
-// --- List Indent Plugin ---
-export const listIndentPlugin = ViewPlugin.fromClass(
+// --- List Custom Plugin ---
+export const listCustomPlugin = ViewPlugin.fromClass(
   class {
     decorations
 
     constructor(view: EditorView) {
-      this.decorations = buildListIndentDecorations(view)
+      this.decorations = buildListDecorations(view)
     }
 
     update(update: ViewUpdate) {
       if (update.docChanged || update.viewportChanged) {
-        this.decorations = buildListIndentDecorations(update.view)
+        this.decorations = buildListDecorations(update.view)
       }
     }
   },
@@ -204,47 +204,6 @@ export const codeBlockPlugin = ViewPlugin.fromClass(
   },
   {
     decorations: (plugin) => plugin.decorations
-  }
-)
-
-// --- Auto-indent Lists Plugin ---
-export const autoIndentListPlugin = ViewPlugin.fromClass(
-  class {
-    update(update: ViewUpdate) {
-      if (!update.docChanged) return
-
-      update.changes.iterChanges((_fromA, _toA, fromB, _toB, text) => {
-        // Only process single character insertions
-        if (text.length !== 1) return
-
-        const char = text.toString()[0]
-        // Check if it's a list/quote marker
-        if (!['-', '*', '+', '1', '2', '3', '4', '5', '6', '7', '8', '9', '>', '#'].includes(char)) return
-
-        const state = update.view.state
-        const line = state.doc.lineAt(fromB)
-        const lineText = line.text
-        const posInLine = fromB - line.from
-
-        // Get text before cursor position
-        const beforeCursor = lineText.slice(0, posInLine)
-        // Only process if at line start (only whitespace before)
-        if (!/^\s*$/.test(beforeCursor)) return
-
-        // For list markers (-, *, +) at line start
-        if (['-', '*', '+'].includes(char)) {
-          const leadingSpaces = beforeCursor.match(/^(\s*)/)?.[1]?.length || 0
-          if (leadingSpaces < 4) {
-            const spacesToAdd = 4 - leadingSpaces
-            update.view.dispatch({
-              changes: { from: line.from, insert: ' '.repeat(spacesToAdd) }
-            })
-          }
-        }
-        // NOTE: Blockquotes (>) should NOT have 4 spaces indentation
-        // In Markdown, 4 spaces = code block. Blockquotes must have 0-3 spaces.
-      })
-    }
   }
 )
 

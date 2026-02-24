@@ -168,8 +168,7 @@ import { Strikethrough } from '@lezer/markdown'
 import { yCollab } from 'y-codemirror.next'
 import { 
   markdownPreviewPlugin, 
-  listIndentPlugin, 
-  autoIndentListPlugin, 
+  listCustomPlugin,
   customTabKeymap, 
   enterKeymap,
   codeBlockPlugin
@@ -310,8 +309,7 @@ const initEditor = () => {
       markdown({ extensions: [Strikethrough, { remove: ['IndentedCode'] }] }),
       syntaxHighlighting(defaultHighlightStyle),
       syntaxHighlighting(markdownHighlightStyle),
-      listIndentPlugin,
-      autoIndentListPlugin,
+      listCustomPlugin,
       codeBlockPlugin,
       yCollab(ytext, provider.awareness, { undoManager }),
       customTabKeymap,
@@ -411,18 +409,13 @@ const applyFormat = (prefix: string, suffix: string = '') => {
   
   // Checking if it's a line-level format like headers or lists
   const isLineFormat = !suffix && prefix.endsWith(' ')
-  // Detect list formats: bullet list, numbered list, checklist (NOT blockquote)
-  // Blockquotes (>) should NOT have 4 spaces indentation (would become code block)
-  const isListFormat = (/^[-\d]/.test(prefix) || prefix.includes('[ ]')) && !prefix.startsWith('>')
 
   if (isLineFormat) {
     // Apply prefix to the start of the current line
     const line = state.doc.lineAt(selection.from)
-    // Add 4 spaces before list items for indentation (but NOT for blockquotes)
-    const indentedPrefix = isListFormat ? '    ' + prefix : prefix
     view.dispatch({
-      changes: { from: line.from, insert: indentedPrefix },
-      selection: { anchor: selection.from + indentedPrefix.length, head: selection.to + indentedPrefix.length }
+      changes: { from: line.from, insert: prefix },
+      selection: { anchor: selection.from + prefix.length, head: selection.to + prefix.length }
     })
   } else {
     // Wrap the selected text (or insert at cursor if no selection)
