@@ -244,6 +244,7 @@ const markdownHighlightStyle = HighlightStyle.define([
   { tag: tags.heading2, fontSize: '1.55em', fontWeight: '750' },
   { tag: tags.heading3, fontSize: '1.3em', fontWeight: '700' },
   { tag: tags.strikethrough, textDecoration: 'line-through' },
+  // Código inline (entre acentos graves simples)
   {
     tag: tags.monospace,
     fontFamily: '"Fira Code", "Consolas", monospace',
@@ -251,6 +252,7 @@ const markdownHighlightStyle = HighlightStyle.define([
     fontSize: '0.88em'
   },
   { tag: tags.quote, fontStyle: 'italic', color: '#6a737d' },
+  // Blocos de código delimitados por ``` (code fences)
   {
     tag: tags.processingInstruction,
     fontFamily: '"Fira Code", "JetBrains Mono", "Consolas", monospace',
@@ -305,7 +307,7 @@ const initEditor = () => {
     extensions: [
       basicSetup,
       drawSelection(),
-      markdown({ extensions: [Strikethrough] }),
+      markdown({ extensions: [Strikethrough, { remove: ['IndentedCode'] }] }),
       syntaxHighlighting(defaultHighlightStyle),
       syntaxHighlighting(markdownHighlightStyle),
       listIndentPlugin,
@@ -317,7 +319,15 @@ const initEditor = () => {
       markdownPreviewPlugin,
       EditorView.theme({
         "&": { height: "100%" },
-        ".cm-scroller": { overflow: "auto" }
+        ".cm-scroller": { overflow: "auto" },
+        // Desabilita estilo de código para blocos indentados (4 espaços)
+        // Mantém apenas blocos delimitados por ``` (code fences)
+        ".cm-line.cm-codeBlock": {
+          background: "transparent !important",
+          fontFamily: "inherit !important",
+          fontSize: "inherit !important",
+          color: "inherit !important"
+        }
       })
     ]
   })
