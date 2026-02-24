@@ -68,6 +68,36 @@ class LinkWidget extends WidgetType {
     }
 }
 
+// --- Horizontal Rule Widget ---
+class HorizontalRuleWidget extends WidgetType {
+    constructor() {
+        super()
+    }
+
+    eq(_other: HorizontalRuleWidget) {
+        return true
+    }
+
+    toDOM() {
+        const wrap = document.createElement("div")
+        wrap.style.display = "block"
+        wrap.style.width = "100%"
+        wrap.style.margin = "0"
+        wrap.style.padding = "0"
+        
+        const hr = document.createElement("hr")
+        hr.style.border = "none"
+        hr.style.borderTop = "2px solid #dfe2e5"
+        hr.style.margin = "16px 0"
+        hr.style.padding = "0"
+        hr.style.height = "0"
+        hr.style.width = "100%"
+        
+        wrap.appendChild(hr)
+        return wrap
+    }
+}
+
 // --- Helper Functions ---
 
 function buildImageDecorations(view: EditorView) {
@@ -167,6 +197,34 @@ function buildCodeBlockDecorations(view: EditorView) {
   return builder.finish()
 }
 
+function buildHorizontalRuleDecorations(view: EditorView) {
+  const builder = new RangeSetBuilder<Decoration>()
+  
+  for (const { from, to } of view.visibleRanges) {
+    let line = view.state.doc.lineAt(from)
+
+    while (line.from <= to) {
+      const lineText = line.text.trim()
+      
+      // Check if line contains only --- or ___ or *** (at least 3 characters)
+      if (/^(-{3,}|_{3,}|\*{3,})$/.test(lineText)) {
+        // Replace the entire line content with the horizontal rule widget
+        const startPos = line.from
+        const endPos = line.to
+        
+        builder.add(startPos, endPos, Decoration.replace({
+          widget: new HorizontalRuleWidget()
+        }))
+      }
+
+      if (line.to >= to) break
+      line = view.state.doc.line(line.number + 1)
+    }
+  }
+
+  return builder.finish()
+}
+
 // --- List Custom Plugin ---
 export const listCustomPlugin = ViewPlugin.fromClass(
   class {
@@ -199,6 +257,26 @@ export const codeBlockPlugin = ViewPlugin.fromClass(
     update(update: ViewUpdate) {
       if (update.docChanged || update.viewportChanged) {
         this.decorations = buildCodeBlockDecorations(update.view)
+      }
+    }
+  },
+  {
+    decorations: (plugin) => plugin.decorations
+  }
+)
+
+// --- Horizontal Rule Plugin ---
+export const horizontalRulePlugin = ViewPlugin.fromClass(
+  class {
+    decorations
+
+    constructor(view: EditorView) {
+      this.decorations = buildHorizontalRuleDecorations(view)
+    }
+
+    update(update: ViewUpdate) {
+      if (update.docChanged || update.viewportChanged) {
+        this.decorations = buildHorizontalRuleDecorations(update.view)
       }
     }
   },

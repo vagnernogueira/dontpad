@@ -171,7 +171,8 @@ import {
   listCustomPlugin,
   customTabKeymap, 
   enterKeymap,
-  codeBlockPlugin
+  codeBlockPlugin,
+  horizontalRulePlugin
 } from '../cm-preview-plugin'
 
 // PDF & Markdown Exports
@@ -311,6 +312,7 @@ const initEditor = () => {
       syntaxHighlighting(markdownHighlightStyle),
       listCustomPlugin,
       codeBlockPlugin,
+      horizontalRulePlugin,
       yCollab(ytext, provider.awareness, { undoManager }),
       customTabKeymap,
       enterKeymap,
