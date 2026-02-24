@@ -3,8 +3,9 @@
 @tailwind utilities;
 
 :root {
-  --font-ui: 'Fira Code', 'JetBrains Mono', monospace;
-  --font-code: 'JetBrains Mono', 'Fira Code', monospace;
+  --font-ui: 'Fira Code', -apple-system, system-ui, sans-serif;
+  --font-code: 'Fira Code', 'Consolas', monospace;
+  --code-bg: #e8eef2;
 }
 
 html,
@@ -62,7 +63,7 @@ body,
 }
 
 .cm-line.cm-list-line {
-  padding-left: 4ch;
+  /* Indentation is now handled by actual spaces in the content, not CSS padding */
 }
 
 /* Fix text selection visibility */
@@ -109,16 +110,58 @@ body,
   padding-left: 10px !important;
 }
 
+.cm-quote {
+  font-style: italic !important;
+  color: #6a737d !important;
+  border-left: 3px solid #dfe2e5 !important;
+  padding-left: 10px !important;
+}
+
 /* Code blocks and inline code should stand out with monospace */
 .cmt-inlineCode,
-.cmt-comment {
+.cmt-comment,
+.cm-comment {
   font-family: var(--font-code) !important;
   font-variant-ligatures: common-ligatures contextual discretionary-ligatures;
-  font-feature-settings: "liga" 1, "calt" 1;
-  background-color: #f6f8fa !important;
-  padding: 0.1em 0.3em !important;
+  font-feature-settings: "liga" 1, "calt" 1, "clig" 1;
+  background-color: var(--code-bg) !important;
+  padding: 0.15em 0.35em !important;
   border-radius: 3px !important;
-  font-size: 0.9em !important;
+  font-size: 0.88em !important;
+}
+
+/* Code Block Styles */
+.cm-line.cm-code-block-line {
+  font-family: var(--font-code) !important;
+  background-color: var(--code-bg) !important;
+  font-size: 0.88em !important;
+  font-variant-ligatures: common-ligatures contextual discretionary-ligatures;
+  font-feature-settings: "liga" 1, "calt" 1, "clig" 1;
+  line-height: 1.5;
+}
+
+.cm-line.cm-code-block-marker {
+  font-family: var(--font-code) !important;
+  background-color: var(--code-bg) !important;
+  font-size: 0.88em !important;
+  color: #5a6872 !important;
+}
+
+.cm-code-block {
+  font-family: var(--font-code) !important;
+  background-color: var(--code-bg) !important;
+}
+
+.cm-formatting-code,
+.cm-formatting-code-block {
+  font-family: var(--font-code) !important;
+  background-color: var(--code-bg) !important;
+  color: #5a6872 !important;
+}
+
+.cm-content .cm-formatting-code::before,
+.cm-content .cm-formatting-code::after {
+  font-family: var(--font-code) !important;
 }
 
 /* Focused outline removal */

@@ -158,15 +158,22 @@ import * as Y from 'yjs'
 import { WebsocketProvider } from 'y-websocket'
 
 // CodeMirror
-import { EditorState, RangeSetBuilder } from '@codemirror/state'
+import { EditorState } from '@codemirror/state'
 import { EditorView, basicSetup } from 'codemirror'
-import { Decoration, ViewPlugin, ViewUpdate, drawSelection } from '@codemirror/view'
+import { drawSelection } from '@codemirror/view'
 import { markdown } from '@codemirror/lang-markdown'
 import { HighlightStyle, defaultHighlightStyle, syntaxHighlighting } from '@codemirror/language'
 import { tags } from '@lezer/highlight'
 import { Strikethrough } from '@lezer/markdown'
 import { yCollab } from 'y-codemirror.next'
-import { markdownPreviewPlugin } from '../cm-preview-plugin'
+import { 
+  markdownPreviewPlugin, 
+  listIndentPlugin, 
+  autoIndentListPlugin, 
+  customTabKeymap, 
+  enterKeymap,
+  codeBlockPlugin
+} from '../cm-preview-plugin'
 
 // PDF & Markdown Exports
 import { markdownStyles } from '../pdf-styles'
@@ -239,51 +246,18 @@ const markdownHighlightStyle = HighlightStyle.define([
   { tag: tags.strikethrough, textDecoration: 'line-through' },
   {
     tag: tags.monospace,
-    fontFamily: '"JetBrains Mono", "Fira Code", monospace',
-    backgroundColor: '#f6f8fa'
+    fontFamily: '"Fira Code", "Consolas", monospace',
+    backgroundColor: '#e8eef2',
+    fontSize: '0.88em'
   },
-  { tag: tags.quote, fontStyle: 'italic', color: '#6a737d' }
-])
-
-const listLineRegex = /^\s{0,3}(?:[-+*]|\d+[.)])\s+/
-
-const buildListIndentDecorations = (view: EditorView) => {
-  const builder = new RangeSetBuilder<Decoration>()
-
-  for (const { from, to } of view.visibleRanges) {
-    let line = view.state.doc.lineAt(from)
-
-    while (line.from <= to) {
-      if (listLineRegex.test(line.text)) {
-        builder.add(line.from, line.from, Decoration.line({ class: 'cm-list-line' }))
-      }
-
-      if (line.to >= to) break
-      line = view.state.doc.line(line.number + 1)
-    }
-  }
-
-  return builder.finish()
-}
-
-const listIndentPlugin = ViewPlugin.fromClass(
-  class {
-    decorations
-
-    constructor(view: EditorView) {
-      this.decorations = buildListIndentDecorations(view)
-    }
-
-    update(update: ViewUpdate) {
-      if (update.docChanged || update.viewportChanged) {
-        this.decorations = buildListIndentDecorations(update.view)
-      }
-    }
-  },
+  { tag: tags.quote, fontStyle: 'italic', color: '#6a737d' },
   {
-    decorations: (plugin) => plugin.decorations
+    tag: tags.processingInstruction,
+    fontFamily: '"Fira Code", "JetBrains Mono", "Consolas", monospace',
+    color: '#5a6872',
+    fontSize: '0.88em'
   }
-)
+])
 
 const initEditor = () => {
   if (!editorContainer.value) return
@@ -335,7 +309,11 @@ const initEditor = () => {
       syntaxHighlighting(defaultHighlightStyle),
       syntaxHighlighting(markdownHighlightStyle),
       listIndentPlugin,
+      autoIndentListPlugin,
+      codeBlockPlugin,
       yCollab(ytext, provider.awareness, { undoManager }),
+      customTabKeymap,
+      enterKeymap,
       markdownPreviewPlugin,
       EditorView.theme({
         "&": { height: "100%" },
@@ -423,13 +401,18 @@ const applyFormat = (prefix: string, suffix: string = '') => {
   
   // Checking if it's a line-level format like headers or lists
   const isLineFormat = !suffix && prefix.endsWith(' ')
+  // Detect list formats: bullet list, numbered list, checklist (NOT blockquote)
+  // Blockquotes (>) should NOT have 4 spaces indentation (would become code block)
+  const isListFormat = (/^[-\d]/.test(prefix) || prefix.includes('[ ]')) && !prefix.startsWith('>')
 
   if (isLineFormat) {
     // Apply prefix to the start of the current line
     const line = state.doc.lineAt(selection.from)
+    // Add 4 spaces before list items for indentation (but NOT for blockquotes)
+    const indentedPrefix = isListFormat ? '    ' + prefix : prefix
     view.dispatch({
-      changes: { from: line.from, insert: prefix },
-      selection: { anchor: selection.from + prefix.length, head: selection.to + prefix.length }
+      changes: { from: line.from, insert: indentedPrefix },
+      selection: { anchor: selection.from + indentedPrefix.length, head: selection.to + indentedPrefix.length }
     })
   } else {
     // Wrap the selected text (or insert at cursor if no selection)
