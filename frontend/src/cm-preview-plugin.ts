@@ -84,11 +84,12 @@ class HorizontalRuleWidget extends WidgetType {
         wrap.style.width = "100%"
         wrap.style.margin = "0"
         wrap.style.padding = "0"
+        wrap.style.backgroundColor = "transparent"
         
         const hr = document.createElement("hr")
         hr.style.border = "none"
-        hr.style.borderTop = "2px solid #dfe2e5"
-        hr.style.margin = "16px 0"
+        hr.style.borderTop = "1px solid #dfe2e5"
+        hr.style.margin = "8px 0"
         hr.style.padding = "0"
         hr.style.height = "0"
         hr.style.width = "100%"

@@ -315,7 +315,7 @@ const initEditor = () => {
       basicSetup,
       drawSelection(),
       EditorView.lineWrapping,
-      markdown({ extensions: [Strikethrough, { remove: ['IndentedCode'] }] }),
+      markdown({ extensions: [Strikethrough, { remove: ['IndentedCode', 'SetextHeading'] }] }),
       syntaxHighlighting(defaultHighlightStyle),
       syntaxHighlighting(markdownHighlightStyle),
       listCustomPlugin,
