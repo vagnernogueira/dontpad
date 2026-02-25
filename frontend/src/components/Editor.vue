@@ -174,7 +174,9 @@ import {
   codeBlockPlugin,
   horizontalRulePlugin,
   multiClickPlugin,
-  deleteLineKeymap
+  deleteLineKeymap,
+  plainUrlPlugin,
+  ctrlClickNavigationPlugin
 } from '../cm-preview-plugin'
 
 // PDF & Markdown Exports
@@ -246,6 +248,8 @@ const markdownHighlightStyle = HighlightStyle.define([
   { tag: tags.heading2, fontSize: '1.55em', fontWeight: '750', textDecoration: 'none' },
   { tag: tags.heading3, fontSize: '1.3em', fontWeight: '700', textDecoration: 'none' },
   { tag: tags.strikethrough, textDecoration: 'line-through' },
+  // Links do markdown
+  { tag: tags.link, color: '#0969da', textDecoration: 'underline' },
   // Código inline (entre acentos graves simples)
   {
     tag: tags.monospace,
@@ -315,6 +319,8 @@ const initEditor = () => {
       listCustomPlugin,
       codeBlockPlugin,
       horizontalRulePlugin,
+      plainUrlPlugin,
+      ctrlClickNavigationPlugin,
       yCollab(ytext, provider.awareness, { undoManager }),
       customTabKeymap,
       enterKeymap,
