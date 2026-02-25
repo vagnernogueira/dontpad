@@ -178,6 +178,7 @@ import {
   plainUrlPlugin,
   ctrlClickNavigationPlugin
 } from '../cm-preview-plugin'
+import { mathCalculationPlugin } from '../cm-math-plugin'
 
 // PDF & Markdown Exports
 import { markdownStyles } from '../pdf-styles'
@@ -325,6 +326,7 @@ const initEditor = () => {
       customTabKeymap,
       enterKeymap,
       deleteLineKeymap,
+      mathCalculationPlugin,
       markdownPreviewPlugin,
       multiClickPlugin,
       EditorView.theme({
