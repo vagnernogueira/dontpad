@@ -50,6 +50,16 @@ body,
   /* Scroller matches external bg */
 }
 
+/* Line numbers styling */
+.cm-lineNumbers {
+  font-size: 12px !important;
+  color: #999 !important;
+}
+
+.cm-gutterElement {
+  font-size: 12px !important;
+}
+
 .cm-selectionLayer {
   z-index: 2 !important;
 }
