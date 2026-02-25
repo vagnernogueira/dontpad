@@ -166,19 +166,17 @@ import { HighlightStyle, defaultHighlightStyle, syntaxHighlighting } from '@code
 import { tags } from '@lezer/highlight'
 import { Strikethrough } from '@lezer/markdown'
 import { yCollab } from 'y-codemirror.next'
-import { 
-  markdownPreviewPlugin, 
-  listCustomPlugin,
-  customTabKeymap, 
-  enterKeymap,
-  codeBlockPlugin,
-  horizontalRulePlugin,
-  multiClickPlugin,
-  deleteLineKeymap,
-  plainUrlPlugin,
-  ctrlClickNavigationPlugin
-} from '../cm-preview-plugin'
-import { mathCalculationPlugin } from '../cm-math-plugin'
+import { markdownPreviewPlugin } from '../cm-plugins/markdown-preview'
+import { listCustomPlugin } from '../cm-plugins/list'
+import { customTabKeymap } from '../cm-plugins/tab-keymap'
+import { enterKeymap } from '../cm-plugins/enter-keymap'
+import { codeBlockPlugin } from '../cm-plugins/code-block'
+import { horizontalRulePlugin } from '../cm-plugins/horizontal-rule-widget'
+import { multiClickPlugin } from '../cm-plugins/multi-click'
+import { deleteLineKeymap } from '../cm-plugins/delete-line-keymap'
+import { plainUrlPlugin } from '../cm-plugins/plain-url'
+import { ctrlClickNavigationPlugin } from '../cm-plugins/ctrl-click-navigation'
+import { mathCalculationPlugin } from '../cm-plugins/math'
 
 // PDF & Markdown Exports
 import { markdownStyles } from '../pdf-styles'

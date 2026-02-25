@@ -1,3 +1,22 @@
+/**
+ * Math Calculation Plugin
+ * 
+ * Este plugin avalia expressões matemáticas automaticamente quando o usuário
+ * digita "= " (sinal de igual seguido de espaço).
+ * 
+ * Funcionalidades:
+ * - Trigger: Digite "= " após uma expressão matemática
+ * - Avalia a expressão e insere o resultado automaticamente
+ * - Suporta operações básicas: +, -, *, /, %, ^ (potência)
+ * - Suporta funções matemáticas: sqrt, sin, cos, tan, log, ln, abs, etc.
+ * - Suporta constantes: pi, e
+ * - Validação de segurança para prevenir código malicioso
+ * 
+ * Exemplo:
+ *   Antes: "2 + 2" (usuário digita "= ")
+ *   Depois: "2 + 2 = 4"
+ */
+
 import { keymap } from "@codemirror/view"
 import { EditorView } from "@codemirror/view"
 
@@ -101,15 +120,7 @@ function formatResult(num: number): string {
 }
 
 /**
- * Math Calculation Plugin
- * 
- * Trigger: Type "= " (equals sign followed by space)
- * Action: Evaluates the mathematical expression from the start of the line
- *         to the "=" sign and inserts the result after it.
- * 
- * Example:
- *   Before: "1 + 1" (user types "= ")
- *   After:  "1 + 1 = 2"
+ * Plugin do CodeMirror para cálculos matemáticos automáticos
  */
 export const mathCalculationPlugin = keymap.of([
   {
