@@ -112,9 +112,13 @@ body,
   border-bottom: none !important;
 }
 
-/* Force remove text-decoration from all spans in editor lines */
-.cm-line > span {
-  text-decoration: none !important;
+/* Make ~~ markers less visually loud */
+.cm-line span.cm-formatting-strikethrough,
+.cm-line span.cmt-formatting-strikethrough,
+.cm-line span.cm-formatting.cm-strikethrough {
+  font-size: 0.8em !important;
+  opacity: 0.6;
+  color: #9aa0a6 !important;
 }
 
 .cmt-quote {

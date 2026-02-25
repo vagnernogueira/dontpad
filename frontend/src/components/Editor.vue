@@ -421,13 +421,46 @@ const redo = () => {
   if (view) view.focus()
 }
 
+// Helper function to get word boundaries around a position
+const getWordBoundaries = (doc: any, pos: number): { start: number; end: number } => {
+  const line = doc.lineAt(pos)
+  const lineText = line.text
+  const posInLine = pos - line.from
+
+  // Find start of word
+  let start = posInLine
+  while (start > 0 && /\w/.test(lineText[start - 1])) {
+    start--
+  }
+
+  // Find end of word
+  let end = posInLine
+  while (end < lineText.length && /\w/.test(lineText[end])) {
+    end++
+  }
+
+  return {
+    start: line.from + start,
+    end: line.from + end
+  }
+}
+
+const isWordCharAt = (doc: any, pos: number): boolean => {
+  if (pos < 0 || pos >= doc.length) return false
+  const line = doc.lineAt(pos)
+  const index = pos - line.from
+  if (index < 0 || index >= line.text.length) return false
+  return /\w/.test(line.text[index])
+}
+
 // Markdown formatting helper
 const applyFormat = (prefix: string, suffix: string = '') => {
   if (!view) return
   
   const { state } = view
   const selection = state.selection.main
-  const selectedText = state.sliceDoc(selection.from, selection.to)
+  let formatStart = selection.from
+  let formatEnd = selection.to
   
   // Checking if it's a line-level format like headers or lists
   const isLineFormat = !suffix && prefix.endsWith(' ')
@@ -440,18 +473,55 @@ const applyFormat = (prefix: string, suffix: string = '') => {
       selection: { anchor: selection.from + prefix.length, head: selection.to + prefix.length }
     })
   } else {
-    // Wrap the selected text (or insert at cursor if no selection)
-    view.dispatch({
-      changes: {
-        from: selection.from,
-        to: selection.to,
-        insert: `${prefix}${selectedText}${suffix}`
-      },
-      selection: {
-        anchor: selection.from + prefix.length,
-        head: selection.to + prefix.length
+    // For inline formats (bold, italic, code), handle word expansion
+    if (selection.empty) {
+      // No selection: expand to word boundaries around cursor
+      const wordBounds = getWordBoundaries(state.doc, selection.from)
+      if (wordBounds.start < wordBounds.end) {
+        formatStart = wordBounds.start
+        formatEnd = wordBounds.end
       }
-    })
+    } else {
+      // Has selection: expand to include complete words at both ends when needed
+      if (isWordCharAt(state.doc, formatStart)) {
+        const wordBoundsAtStart = getWordBoundaries(state.doc, formatStart)
+        formatStart = wordBoundsAtStart.start
+      }
+
+      if (isWordCharAt(state.doc, formatEnd - 1)) {
+        const wordBoundsAtEnd = getWordBoundaries(state.doc, formatEnd - 1)
+        formatEnd = wordBoundsAtEnd.end
+      }
+    }
+    
+    const selectedText = state.sliceDoc(formatStart, formatEnd)
+
+    // If we still don't have text to format, just insert at cursor
+    if (!selectedText) {
+      view.dispatch({
+        changes: {
+          from: selection.from,
+          insert: `${prefix}${suffix}`
+        },
+        selection: {
+          anchor: selection.from + prefix.length,
+          head: selection.from + prefix.length
+        }
+      })
+    } else {
+      // Wrap the selected text with markers
+      view.dispatch({
+        changes: {
+          from: formatStart,
+          to: formatEnd,
+          insert: `${prefix}${selectedText}${suffix}`
+        },
+        selection: {
+          anchor: formatStart + prefix.length,
+          head: formatEnd + prefix.length
+        }
+      })
+    }
   }
 
   // Return focus back to CodeMirror
@@ -499,8 +569,6 @@ const openImageDialog = async () => {
 }
 
 const openLockDialog = async () => {
-  if (!view) return
-  lockPassword.value = ''
   lockError.value = ''
   showLockDialog.value = true
   await nextTick()
@@ -510,7 +578,11 @@ const openLockDialog = async () => {
 const lockDocument = async () => {
   lockError.value = ''
   const password = lockPassword.value.trim()
-  if (!password) return
+
+  if (!password) {
+    lockError.value = 'Informe uma senha para travar este documento.'
+    return
+  }
 
   const response = await fetch(`${apiBaseUrl.value}/api/document-lock`, {
     method: 'POST',
