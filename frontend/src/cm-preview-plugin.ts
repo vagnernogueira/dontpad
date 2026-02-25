@@ -402,6 +402,61 @@ export const enterKeymap = keymap.of([
   }
 ])
 
+// --- Delete Line Keymap (Ctrl+L) ---
+export const deleteLineKeymap = keymap.of([
+  {
+    key: 'Ctrl-l',
+    run: (editorView: EditorView) => {
+      const { state } = editorView
+      const selection = state.selection.main
+      const pos = selection.from
+      const line = state.doc.lineAt(pos)
+      console.log('[delete-line] triggered', {
+        pos,
+        lineNumber: line.number,
+        lineFrom: line.from,
+        lineTo: line.to,
+        lineText: line.text
+      })
+      
+      // Calculate the range to delete
+      // If this is not the last line, include the newline character after the line
+      // If this is the last line, include the newline before (if it exists)
+      let deleteFrom = line.from
+      let deleteTo = line.to
+      
+      if (line.number < state.doc.lines) {
+        // Not the last line: delete line + newline after it
+        deleteTo = line.to + 1
+      } else if (line.number > 1) {
+        // Last line and not the only line: delete newline before + line
+        deleteFrom = line.from - 1
+      }
+      
+      // Calculate new cursor position
+      // Place cursor at the beginning of the next line, or at the beginning of the previous line if we deleted the last line
+      let newPos = deleteFrom
+      if (deleteFrom > 0 && line.number === state.doc.lines && line.number > 1) {
+        // If we deleted the last line, put cursor at the end of the previous line
+        newPos = deleteFrom
+      }
+      
+      editorView.dispatch({
+        changes: { from: deleteFrom, to: deleteTo },
+        selection: { anchor: newPos }
+      })
+
+      console.log('[delete-line] applied', {
+        deleteFrom,
+        deleteTo,
+        newPos
+      })
+      
+      return true
+    }
+  }
+])
+
 // --- Image & Link Preview Plugins ---
 export const markdownPreviewPlugin = [
     ViewPlugin.fromClass(
@@ -475,48 +530,97 @@ function findParagraphBounds(view: EditorView, pos: number): { from: number, to:
 
 export const multiClickPlugin = ViewPlugin.fromClass(
     class {
+        lastClickTime = 0
+        lastClickPos = -1
+        clickCount = 0
+        clickTimeout: number | null = null
+
         constructor(readonly view: EditorView) {
-            // Add mousedown listener directly to the editor's DOM
-            view.dom.addEventListener('mousedown', this.handleMouseDown)
+            // Add click listener to the editor's content DOM
+            const contentDom = view.contentDOM
+            contentDom.addEventListener('click', this.handleClick, true)
         }
 
-        handleMouseDown = (event: MouseEvent) => {
-            // Only handle left mouse button
-            if (event.button !== 0) return
+        handleClick = (event: MouseEvent) => {
+            const now = Date.now()
+            const pos = this.view.posAtCoords({ x: event.clientX, y: event.clientY })
             
-            const detail = event.detail
-            
-            // Triple click (detail === 3)
-            if (detail === 3) {
-                event.preventDefault()
-                event.stopPropagation()
-                
-                const pos = this.view.posAtCoords({ x: event.clientX, y: event.clientY })
-                if (pos === null) return
-                
-                const line = this.view.state.doc.lineAt(pos)
-                this.view.dispatch({
-                    selection: EditorSelection.single(line.from, line.to)
-                })
+            if (pos === null) return
+
+            console.log('[multi-click] click event', {
+                timestamp: now,
+                clientX: event.clientX,
+                clientY: event.clientY,
+                pos,
+                lastClickTime: this.lastClickTime,
+                timeDiff: now - this.lastClickTime
+            })
+
+            // Reset if click is more than 400ms apart or in a different position
+            if (now - this.lastClickTime > 400 || Math.abs(pos - this.lastClickPos) > 5) {
+                this.clickCount = 1
+                console.log('[multi-click] reset counter (new sequence)')
+            } else {
+                this.clickCount++
+                console.log('[multi-click] increment counter', { clickCount: this.clickCount })
             }
-            
-            // Quadruple click (detail === 4)
-            else if (detail === 4) {
-                event.preventDefault()
-                event.stopPropagation()
-                
-                const pos = this.view.posAtCoords({ x: event.clientX, y: event.clientY })
-                if (pos === null) return
-                
-                const { from, to } = findParagraphBounds(this.view, pos)
-                this.view.dispatch({
-                    selection: EditorSelection.single(from, to)
-                })
+
+            this.lastClickTime = now
+            this.lastClickPos = pos
+
+            // Clear previous timeout
+            if (this.clickTimeout !== null) {
+                clearTimeout(this.clickTimeout)
             }
+
+            // Set timeout to process multi-click after a brief delay
+            this.clickTimeout = window.setTimeout(() => {
+                console.log('[multi-click] processing', { clickCount: this.clickCount, pos })
+
+                // Triple click (3 clicks)
+                if (this.clickCount === 3) {
+                    event.preventDefault()
+                    event.stopPropagation()
+
+                    const line = this.view.state.doc.lineAt(pos)
+                    console.log('[multi-click] triple action', {
+                        lineNumber: line.number,
+                        lineFrom: line.from,
+                        lineTo: line.to,
+                        lineText: line.text
+                    })
+
+                    this.view.dispatch({
+                        selection: EditorSelection.single(line.from, line.to)
+                    })
+                }
+
+                // Quadruple click (4 clicks)
+                if (this.clickCount === 4) {
+                    event.preventDefault()
+                    event.stopPropagation()
+
+                    const { from, to } = findParagraphBounds(this.view, pos)
+                    console.log('[multi-click] quadruple action', {
+                        from,
+                        to
+                    })
+
+                    this.view.dispatch({
+                        selection: EditorSelection.single(from, to)
+                    })
+                }
+
+                this.clickTimeout = null
+            }, 150)
         }
 
         destroy() {
-            this.view.dom.removeEventListener('mousedown', this.handleMouseDown)
+            const contentDom = this.view.contentDOM
+            contentDom.removeEventListener('click', this.handleClick, true)
+            if (this.clickTimeout !== null) {
+                clearTimeout(this.clickTimeout)
+            }
         }
     }
 )

@@ -173,7 +173,8 @@ import {
   enterKeymap,
   codeBlockPlugin,
   horizontalRulePlugin,
-  multiClickPlugin
+  multiClickPlugin,
+  deleteLineKeymap
 } from '../cm-preview-plugin'
 
 // PDF & Markdown Exports
@@ -317,6 +318,7 @@ const initEditor = () => {
       yCollab(ytext, provider.awareness, { undoManager }),
       customTabKeymap,
       enterKeymap,
+      deleteLineKeymap,
       markdownPreviewPlugin,
       multiClickPlugin,
       EditorView.theme({
