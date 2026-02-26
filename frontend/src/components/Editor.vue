@@ -178,17 +178,13 @@ import { Strikethrough } from '@lezer/markdown'
 import { yCollab } from 'y-codemirror.next'
 import { markdownPreviewPlugin } from '../cm-plugins/markdown-preview'
 import { listCustomPlugin } from '../cm-plugins/list'
-import { snippetKeymap } from '../cm-plugins/snippet'
-import { tabIndentKeymap } from '../cm-plugins/tab-keymap'
-import { enterKeymap } from '../cm-plugins/enter-keymap'
 import { codeBlockPlugin } from '../cm-plugins/code-block'
 import { horizontalRulePlugin } from '../cm-plugins/horizontal-rule-widget'
 import { multiClickPlugin } from '../cm-plugins/multi-click'
-import { deleteLineKeymap } from '../cm-plugins/delete-line-keymap'
 import { plainUrlPlugin } from '../cm-plugins/plain-url'
 import { ctrlClickNavigationPlugin } from '../cm-plugins/ctrl-click-navigation'
-import { mathCalculationKeymap } from '../cm-plugins/math'
 import { spellcheckPlugin } from '../cm-plugins/spellcheck'
+import { editorKeymaps } from '../cm-plugins/keymaps'
 
 // Commands and Extensions
 import { applyFormat as applyFormatCommand, insertLink as insertLinkCommand, insertImage as insertImageCommand } from '../cm-commands'
@@ -295,11 +291,7 @@ const initEditor = () => {
       plainUrlPlugin,
       ctrlClickNavigationPlugin,
       yCollab(ytext, provider.awareness, { undoManager }),
-      snippetKeymap,
-      tabIndentKeymap,
-      enterKeymap,
-      deleteLineKeymap,
-      mathCalculationKeymap,
+      ...editorKeymaps,
       markdownPreviewPlugin,
       multiClickPlugin
     ]

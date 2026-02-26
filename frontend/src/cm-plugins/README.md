@@ -19,10 +19,11 @@ Este diretório contém todos os plugins customizados do CodeMirror utilizados n
 ### Keymaps (Atalhos de Teclado)
 
 - **tab-keymap.ts** - Customiza comportamento da tecla Tab (indentação com 4 espaços)
-- **enter-keymap.ts** - Mantém formatação de listas e citações ao pressionar Enter
+- **enter-keymap.ts** - Mantém formatação de listas, task lists e citações ao pressionar Enter; sai da lista quando item está vazio
 - **delete-line-keymap.ts** - Adiciona atalho Ctrl+L para deletar linha inteira
 - **snippet.ts** - Sistema de snippets gerenciáveis (dt+TAB → data, hr+TAB → hora, lorem+TAB → lorem ipsum)
 - **math.ts** - Avalia expressões matemáticas automaticamente ao digitar "= "
+- **keymaps.ts** - Agrupamento de todos os keymaps com precedência explícita
 
 ### Funcionalidades de Interação
 
@@ -41,6 +42,24 @@ Para utilizar os plugins no editor, importe-os individualmente:
 ```typescript
 import { listCustomPlugin } from './cm-plugins/list'
 import { codeBlockPlugin } from './cm-plugins/code-block'
+// ... outros imports
+```
+
+Para os keymaps, prefira importar o agrupamento com precedência:
+
+```typescript
+import { editorKeymaps } from './cm-plugins/keymaps'
+
+// Nas extensions:
+extensions: [
+  ...editorKeymaps,  // Todos os keymaps com precedência configurada
+  // outros plugins
+]
+```
+
+Keymaps individuais ainda podem ser importados se necessário:
+
+```typescript
 import { tabIndentKeymap } from './cm-plugins/tab-keymap'
 import { mathCalculationKeymap } from './cm-plugins/math'
 // ... outros imports
@@ -103,4 +122,21 @@ Edite o array `defaultSnippets` em [snippet.ts](snippet.ts) e adicione novos obj
 - Todos os plugins foram refatorados a partir do arquivo original `cm-preview-plugin.ts`
 - Cada plugin é independente e pode ser usado separadamente
 - Os plugins utilizam a API do CodeMirror 6
-- O plugin de snippets tem prioridade sobre a indentação TAB apenas quando há um gatilho válido
+- O plugin de snippets tem prioridade baixa; Tab de indentação tem prioridade alta
+
+### Precedência de Keymaps
+
+Os keymaps seguem uma hierarquia de precedência explícita para evitar conflitos:
+
+1. **Alta prioridade** (`Prec.high`):
+   - Tab de indentação (sempre tem prioridade sobre snippets)
+   - Delete line (Ctrl+L)
+
+2. **Prioridade normal**:
+   - Enter para listas e citações
+   - Math calculation (espaço após "=")
+
+3. **Baixa prioridade** (`Prec.low`):
+   - Snippets (só ativam quando não há seleção e gatilho é válido)
+
+Esta estrutura garante que comandos essenciais (como indentação) nunca sejam bloqueados por funcionalidades auxiliares (como snippets).
