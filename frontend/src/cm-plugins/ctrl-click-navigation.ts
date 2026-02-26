@@ -16,6 +16,7 @@
 
 import { ViewPlugin, Decoration, EditorView, DecorationSet, ViewUpdate } from "@codemirror/view"
 import { RangeSetBuilder } from "@codemirror/state"
+import { findUrlAtPosition, normalizeUrl } from '../cm-utils/markdown-parsing'
 
 /**
  * Plugin do CodeMirror para navegação com Ctrl+Click
@@ -70,42 +71,31 @@ export const ctrlClickNavigationPlugin = ViewPlugin.fromClass(
             const pos = this.view.posAtCoords({ x: e.clientX, y: e.clientY })
             if (pos === null) return
             
-            const url = this.findUrlAtPosition(pos)
-            if (url) {
+            const result = findUrlAtPosition(this.view.state.doc, pos)
+            if (result) {
                 e.preventDefault()
                 e.stopPropagation()
                 
-                // Ensure URL has protocol
-                let fullUrl = url
-                if (url.startsWith('www.')) {
-                    fullUrl = 'https://' + url
-                } else if (!url.match(/^[a-z]+:\/\//i)) {
-                    fullUrl = 'https://' + url
-                }
-                
+                const fullUrl = normalizeUrl(result.url)
                 window.open(fullUrl, '_blank', 'noopener,noreferrer')
             }
         }
         
         private updateHoverDecoration() {
             if (this.ctrlPressed && this.currentPos !== null) {
-                const url = this.findUrlAtPosition(this.currentPos)
-                if (url) {
-                    // Find the exact range of the URL
-                    const range = this.findUrlRangeAtPosition(this.currentPos)
-                    if (range) {
-                        const builder = new RangeSetBuilder<Decoration>()
-                        builder.add(
-                            range.from,
-                            range.to,
-                            Decoration.mark({
-                                class: 'cm-ctrl-hover-link'
-                            })
-                        )
-                        this.hoverDecoration = builder.finish()
-                        this.view.update([])
-                        return
-                    }
+                const result = findUrlAtPosition(this.view.state.doc, this.currentPos)
+                if (result) {
+                    const builder = new RangeSetBuilder<Decoration>()
+                    builder.add(
+                        result.range.from,
+                        result.range.to,
+                        Decoration.mark({
+                            class: 'cm-ctrl-hover-link'
+                        })
+                    )
+                    this.hoverDecoration = builder.finish()
+                    this.view.update([])
+                    return
                 }
             }
             
@@ -114,74 +104,6 @@ export const ctrlClickNavigationPlugin = ViewPlugin.fromClass(
                 this.hoverDecoration = Decoration.none
                 this.view.update([])
             }
-        }
-        
-        private findUrlAtPosition(pos: number): string | null {
-            const doc = this.view.state.doc
-            const line = doc.lineAt(pos)
-            const lineText = line.text
-            const posInLine = pos - line.from
-            
-            // Check for markdown links [text](url)
-            const markdownLinkRegex = /!?\[([^\]]*)\]\(([^)]+)\)/g
-            let match
-            while ((match = markdownLinkRegex.exec(lineText))) {
-                const matchStart = match.index
-                const matchEnd = match.index + match[0].length
-                if (posInLine >= matchStart && posInLine <= matchEnd) {
-                    return match[2] // Return the URL part
-                }
-            }
-            
-            // Check for plain URLs
-            const urlRegex = /\b(https?:\/\/|www\.|ftp:\/\/)[^\s<>"\[\](){}]+/gi
-            urlRegex.lastIndex = 0
-            while ((match = urlRegex.exec(lineText))) {
-                const matchStart = match.index
-                const matchEnd = match.index + match[0].length
-                if (posInLine >= matchStart && posInLine <= matchEnd) {
-                    return match[0]
-                }
-            }
-            
-            return null
-        }
-        
-        private findUrlRangeAtPosition(pos: number): { from: number, to: number } | null {
-            const doc = this.view.state.doc
-            const line = doc.lineAt(pos)
-            const lineText = line.text
-            const posInLine = pos - line.from
-            
-            // Check for markdown links [text](url)
-            const markdownLinkRegex = /!?\[([^\]]*)\]\(([^)]+)\)/g
-            let match
-            while ((match = markdownLinkRegex.exec(lineText))) {
-                const matchStart = match.index
-                const matchEnd = match.index + match[0].length
-                if (posInLine >= matchStart && posInLine <= matchEnd) {
-                    return {
-                        from: line.from + matchStart,
-                        to: line.from + matchEnd
-                    }
-                }
-            }
-            
-            // Check for plain URLs
-            const urlRegex = /\b(https?:\/\/|www\.|ftp:\/\/)[^\s<>"\[\](){}]+/gi
-            urlRegex.lastIndex = 0
-            while ((match = urlRegex.exec(lineText))) {
-                const matchStart = match.index
-                const matchEnd = match.index + match[0].length
-                if (posInLine >= matchStart && posInLine <= matchEnd) {
-                    return {
-                        from: line.from + matchStart,
-                        to: line.from + matchEnd
-                    }
-                }
-            }
-            
-            return null
         }
         
         update(update: ViewUpdate) {

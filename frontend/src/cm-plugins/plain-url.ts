@@ -13,6 +13,7 @@
 
 import { ViewPlugin, Decoration, EditorView, DecorationSet, ViewUpdate } from "@codemirror/view"
 import { RangeSetBuilder } from "@codemirror/state"
+import { findPlainUrls } from '../cm-utils/markdown-parsing'
 
 /**
  * Constrói decorações para URLs avulsas
@@ -20,45 +21,18 @@ import { RangeSetBuilder } from "@codemirror/state"
 function buildPlainUrlDecorations(view: EditorView) {
     const builder = new RangeSetBuilder<Decoration>()
     
-    // Regex para detectar URLs (http://, https://, www., ftp://, etc.)
-    const urlRegex = /\b(https?:\/\/|www\.|ftp:\/\/)[^\s<>"\[\](){}]+/gi
-    
     for (let { from, to } of view.visibleRanges) {
         const text = view.state.doc.sliceString(from, to)
+        const plainUrls = findPlainUrls(text, from)
         
-        // Primeiro, vamos encontrar todas as posições de links markdown para evitá-las
-        const markdownLinkRegex = /!?\[[^\]]*\]\([^)]+\)/g
-        const markdownLinkRanges: Array<{ from: number, to: number }> = []
-        let mdMatch
-        while ((mdMatch = markdownLinkRegex.exec(text))) {
-            markdownLinkRanges.push({
-                from: mdMatch.index,
-                to: mdMatch.index + mdMatch[0].length
-            })
-        }
-        
-        // Agora vamos encontrar URLs avulsas e aplicar decoração
-        let match
-        urlRegex.lastIndex = 0 // Reset regex
-        while ((match = urlRegex.exec(text))) {
-            const urlStart = match.index
-            const urlEnd = match.index + match[0].length
-            
-            // Verifica se esta URL está dentro de um link markdown
-            const isInsideMarkdownLink = markdownLinkRanges.some(
-                range => urlStart >= range.from && urlEnd <= range.to
+        for (const url of plainUrls) {
+            builder.add(
+                url.from,
+                url.to,
+                Decoration.mark({
+                    class: 'cm-plain-url'
+                })
             )
-            
-            // Se não está dentro de um link markdown, aplica a decoração
-            if (!isInsideMarkdownLink) {
-                builder.add(
-                    from + urlStart,
-                    from + urlEnd,
-                    Decoration.mark({
-                        class: 'cm-plain-url'
-                    })
-                )
-            }
         }
     }
     
