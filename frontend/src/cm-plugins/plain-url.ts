@@ -55,10 +55,7 @@ function buildPlainUrlDecorations(view: EditorView) {
                     from + urlStart,
                     from + urlEnd,
                     Decoration.mark({
-                        class: 'cm-plain-url',
-                        attributes: {
-                            style: 'color: #0969da; text-decoration: underline;'
-                        }
+                        class: 'cm-plain-url'
                     })
                 )
             }

@@ -266,7 +266,3 @@ export const snippetKeymap = keymap.of([
   }
 ])
 
-/**
- * Export as default for use in Editor
- */
-export const snippetPlugin = snippetKeymap

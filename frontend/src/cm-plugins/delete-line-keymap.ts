@@ -22,13 +22,6 @@ export const deleteLineKeymap = keymap.of([
             const selection = state.selection.main
             const pos = selection.from
             const line = state.doc.lineAt(pos)
-            console.log('[delete-line] triggered', {
-                pos,
-                lineNumber: line.number,
-                lineFrom: line.from,
-                lineTo: line.to,
-                lineText: line.text
-            })
             
             // Calculate the range to delete
             // If this is not the last line, include the newline character after the line
@@ -55,12 +48,6 @@ export const deleteLineKeymap = keymap.of([
             editorView.dispatch({
                 changes: { from: deleteFrom, to: deleteTo },
                 selection: { anchor: newPos }
-            })
-
-            console.log('[delete-line] applied', {
-                deleteFrom,
-                deleteTo,
-                newPos
             })
             
             return true

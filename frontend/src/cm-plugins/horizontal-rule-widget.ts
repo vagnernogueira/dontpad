@@ -27,19 +27,10 @@ class HorizontalRuleWidget extends WidgetType {
 
     toDOM() {
         const wrap = document.createElement("div")
-        wrap.style.display = "block"
-        wrap.style.width = "100%"
-        wrap.style.margin = "0"
-        wrap.style.padding = "0"
-        wrap.style.backgroundColor = "transparent"
+        wrap.className = "cm-hr-widget"
         
         const hr = document.createElement("hr")
-        hr.style.border = "none"
-        hr.style.borderTop = "1px solid #dfe2e5"
-        hr.style.margin = "8px 0"
-        hr.style.padding = "0"
-        hr.style.height = "0"
-        hr.style.width = "100%"
+        hr.className = "cm-hr-widget-line"
         
         wrap.appendChild(hr)
         return wrap

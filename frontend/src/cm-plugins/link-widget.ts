@@ -28,14 +28,12 @@ class LinkWidget extends WidgetType {
 
     toDOM() {
         const link = document.createElement("a")
+        link.className = "cm-link-widget"
         link.href = this.url
         link.target = "_blank"
         link.rel = "noopener noreferrer"
         link.title = `Abrir: ${this.url}`
         link.innerHTML = " 🔗 "
-        link.style.textDecoration = "none"
-        link.style.fontSize = "0.9em"
-        link.style.cursor = "pointer"
         // Stop propagation so clicking the link doesn't move the CodeMirror cursor
         link.onmousedown = (e) => e.stopPropagation()
         return link

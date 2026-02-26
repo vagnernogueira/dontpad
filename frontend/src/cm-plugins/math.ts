@@ -60,7 +60,6 @@ function evaluateMathExpression(expr: string): number | null {
     // Allow: numbers, operators, parentheses, dots, Math object, whitespace
     const safePattern = /^[\d+\-*/(). \s,Math.a-z]+$/i
     if (!safePattern.test(processedExpr)) {
-      console.warn('[math-plugin] Expression contains unsafe characters:', expr)
       return null
     }
 
@@ -81,7 +80,6 @@ function evaluateMathExpression(expr: string): number | null {
 
     for (const pattern of dangerousPatterns) {
       if (pattern.test(processedExpr)) {
-        console.warn('[math-plugin] Expression contains dangerous pattern:', expr)
         return null
       }
     }
@@ -97,7 +95,6 @@ function evaluateMathExpression(expr: string): number | null {
 
     return null
   } catch (error) {
-    console.error('[math-plugin] Error evaluating expression:', expr, error)
     return null
   }
 }
@@ -122,7 +119,7 @@ function formatResult(num: number): string {
 /**
  * Plugin do CodeMirror para cálculos matemáticos automáticos
  */
-export const mathCalculationPlugin = keymap.of([
+export const mathCalculationKeymap = keymap.of([
   {
     key: ' ', // Space key
     run: (editorView: EditorView) => {

@@ -99,10 +99,7 @@ export const ctrlClickNavigationPlugin = ViewPlugin.fromClass(
                             range.from,
                             range.to,
                             Decoration.mark({
-                                class: 'cm-ctrl-hover-link',
-                                attributes: {
-                                    style: 'cursor: pointer;'
-                                }
+                                class: 'cm-ctrl-hover-link'
                             })
                         )
                         this.hoverDecoration = builder.finish()

@@ -28,26 +28,18 @@ class ImageWidget extends WidgetType {
 
     toDOM() {
         const wrap = document.createElement("div")
-        wrap.style.display = "block"
-        wrap.style.marginTop = "0.5rem"
-        wrap.style.marginBottom = "0.5rem"
+        wrap.className = "cm-image-widget"
 
         const img = document.createElement("img")
         img.src = this.url
-        img.style.maxHeight = "250px"
-        img.style.maxWidth = "100%"
-        img.style.borderRadius = "0.375rem" // Tailwind rounded-md
-        img.style.boxShadow = "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)" // shadow
-        img.style.objectFit = "contain"
-        img.style.backgroundColor = "#f3f4f6" // gray-100 placeholder background
+        img.className = "cm-image-widget-img"
 
         // Handle broken images gracefully
         img.onerror = () => {
             img.style.display = "none"
             const errorMsg = document.createElement("span")
             errorMsg.textContent = " ⚠️ Imagem não carregada"
-            errorMsg.style.color = "#dc2626"
-            errorMsg.style.fontSize = "0.875rem"
+            errorMsg.className = "cm-image-widget-error"
             wrap.appendChild(errorMsg)
         }
 

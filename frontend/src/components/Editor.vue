@@ -178,8 +178,8 @@ import { Strikethrough } from '@lezer/markdown'
 import { yCollab } from 'y-codemirror.next'
 import { markdownPreviewPlugin } from '../cm-plugins/markdown-preview'
 import { listCustomPlugin } from '../cm-plugins/list'
-import { snippetPlugin } from '../cm-plugins/snippet'
-import { customTabKeymap } from '../cm-plugins/tab-keymap'
+import { snippetKeymap } from '../cm-plugins/snippet'
+import { tabIndentKeymap } from '../cm-plugins/tab-keymap'
 import { enterKeymap } from '../cm-plugins/enter-keymap'
 import { codeBlockPlugin } from '../cm-plugins/code-block'
 import { horizontalRulePlugin } from '../cm-plugins/horizontal-rule-widget'
@@ -187,7 +187,7 @@ import { multiClickPlugin } from '../cm-plugins/multi-click'
 import { deleteLineKeymap } from '../cm-plugins/delete-line-keymap'
 import { plainUrlPlugin } from '../cm-plugins/plain-url'
 import { ctrlClickNavigationPlugin } from '../cm-plugins/ctrl-click-navigation'
-import { mathCalculationPlugin } from '../cm-plugins/math'
+import { mathCalculationKeymap } from '../cm-plugins/math'
 import { spellcheckPlugin } from '../cm-plugins/spellcheck'
 
 // Commands and Extensions
@@ -295,11 +295,11 @@ const initEditor = () => {
       plainUrlPlugin,
       ctrlClickNavigationPlugin,
       yCollab(ytext, provider.awareness, { undoManager }),
-      snippetPlugin,
-      customTabKeymap,
+      snippetKeymap,
+      tabIndentKeymap,
       enterKeymap,
       deleteLineKeymap,
-      mathCalculationPlugin,
+      mathCalculationKeymap,
       markdownPreviewPlugin,
       multiClickPlugin
     ]

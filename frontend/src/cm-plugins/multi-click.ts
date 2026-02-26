@@ -68,22 +68,11 @@ export const multiClickPlugin = ViewPlugin.fromClass(
             
             if (pos === null) return
 
-            console.log('[multi-click] click event', {
-                timestamp: now,
-                clientX: event.clientX,
-                clientY: event.clientY,
-                pos,
-                lastClickTime: this.lastClickTime,
-                timeDiff: now - this.lastClickTime
-            })
-
             // Reset if click is more than 400ms apart or in a different position
             if (now - this.lastClickTime > 400 || Math.abs(pos - this.lastClickPos) > 5) {
                 this.clickCount = 1
-                console.log('[multi-click] reset counter (new sequence)')
             } else {
                 this.clickCount++
-                console.log('[multi-click] increment counter', { clickCount: this.clickCount })
             }
 
             this.lastClickTime = now
@@ -96,20 +85,12 @@ export const multiClickPlugin = ViewPlugin.fromClass(
 
             // Set timeout to process multi-click after a brief delay
             this.clickTimeout = window.setTimeout(() => {
-                console.log('[multi-click] processing', { clickCount: this.clickCount, pos })
-
                 // Triple click (3 clicks)
                 if (this.clickCount === 3) {
                     event.preventDefault()
                     event.stopPropagation()
 
                     const line = this.view.state.doc.lineAt(pos)
-                    console.log('[multi-click] triple action', {
-                        lineNumber: line.number,
-                        lineFrom: line.from,
-                        lineTo: line.to,
-                        lineText: line.text
-                    })
 
                     this.view.dispatch({
                         selection: EditorSelection.single(line.from, line.to)
@@ -122,10 +103,6 @@ export const multiClickPlugin = ViewPlugin.fromClass(
                     event.stopPropagation()
 
                     const { from, to } = findParagraphBounds(this.view, pos)
-                    console.log('[multi-click] quadruple action', {
-                        from,
-                        to
-                    })
 
                     this.view.dispatch({
                         selection: EditorSelection.single(from, to)

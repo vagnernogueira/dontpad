@@ -176,6 +176,59 @@ body,
   color: #5a6872 !important;
 }
 
+/* Plugin widget styles */
+.cm-link-widget {
+  text-decoration: none;
+  font-size: 0.9em;
+  cursor: pointer;
+}
+
+.cm-image-widget {
+  display: block;
+  margin: 0.5rem 0;
+}
+
+.cm-image-widget-img {
+  max-height: 250px;
+  max-width: 100%;
+  border-radius: 0.375rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  object-fit: contain;
+  background-color: #f3f4f6;
+}
+
+.cm-image-widget-error {
+  color: #dc2626;
+  font-size: 0.875rem;
+}
+
+.cm-hr-widget {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  background-color: transparent;
+}
+
+.cm-hr-widget-line {
+  border: none;
+  border-top: 1px solid #dfe2e5;
+  margin: 8px 0;
+  padding: 0;
+  height: 0;
+  width: 100%;
+}
+
+.cm-plain-url {
+  color: #0969da;
+  text-decoration: underline;
+}
+
+.cm-ctrl-hover-link {
+  cursor: pointer;
+  text-decoration: underline;
+}
+
 /* Desabilita formatação de blocos indentados (4 espaços)
    Apenas blocos delimitados por ``` devem ter formatação especial */
 .cm-code-block {

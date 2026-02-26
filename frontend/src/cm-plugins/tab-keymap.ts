@@ -15,7 +15,7 @@
 import { keymap } from "@codemirror/view"
 import { EditorView } from "@codemirror/view"
 
-export const customTabKeymap = keymap.of([
+export const tabIndentKeymap = keymap.of([
     {
         key: 'Tab',
         run: (editorView: EditorView) => {

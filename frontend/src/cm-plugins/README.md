@@ -41,8 +41,8 @@ Para utilizar os plugins no editor, importe-os individualmente:
 ```typescript
 import { listCustomPlugin } from './cm-plugins/list'
 import { codeBlockPlugin } from './cm-plugins/code-block'
-import { customTabKeymap } from './cm-plugins/tab-keymap'
-import { mathCalculationPlugin } from './cm-plugins/math'
+import { tabIndentKeymap } from './cm-plugins/tab-keymap'
+import { mathCalculationKeymap } from './cm-plugins/math'
 // ... outros imports
 ```
 
