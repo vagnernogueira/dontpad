@@ -80,18 +80,15 @@ export const multiClickPlugin = ViewPlugin.fromClass(
         clickCount = 0
 
         constructor(readonly view: EditorView) {
-            console.log('[MULTI-CLICK] Plugin initialized')
             // Usar pointerdown no root do editor para capturar todas as pressões individuais
             // antes de handlers internos consumirem os eventos de click.
             view.dom.addEventListener('pointerdown', this.handleClick, true)
-            console.log('[MULTI-CLICK] Pointerdown listener attached with capturing=true')
         }
 
         handleClick = (event: PointerEvent) => {
             // ✅ IMPORTANTE: Ignorar quando Ctrl/Cmd está pressionado
             // Deixar o plugin ctrl-click (navegação) lidar com esses eventos
             if (event.ctrlKey || event.metaKey) {
-                console.log('[MULTI-CLICK] Skipping - Ctrl/Cmd modifier detected, let ctrl-click handler take over')
                 return
             }
 
@@ -100,14 +97,6 @@ export const multiClickPlugin = ViewPlugin.fromClass(
 
             const now = Date.now()
             const pos = this.view.posAtCoords({ x: event.clientX, y: event.clientY })
-            
-            console.log('[MULTI-CLICK] Pointerdown event', {
-                button: event.button,
-                ctrlKey: event.ctrlKey,
-                metaKey: event.metaKey,
-                pos,
-                target: event.target
-            })
             
             if (pos === null) return
 
@@ -118,22 +107,12 @@ export const multiClickPlugin = ViewPlugin.fromClass(
             const timeSinceLastClick = now - this.lastClickTime
             const distanceSinceLastClick = Math.abs(pos - this.lastClickPos)
             
-            console.log('[MULTI-CLICK] Click metrics', {
-                timeSinceLastClick,
-                distanceSinceLastClick,
-                currentClickCount: this.clickCount,
-                lastClickTime: this.lastClickTime,
-                lastClickPos: this.lastClickPos
-            })
-            
             if (timeSinceLastClick > MULTI_CLICK_CONFIG.CLICK_TIMEOUT || 
                 distanceSinceLastClick > MULTI_CLICK_CONFIG.CLICK_DISTANCE ||
                 this.clickCount >= MULTI_CLICK_CONFIG.MAX_CLICK_COUNT) {
                 this.clickCount = 1
-                console.log('[MULTI-CLICK] Reset click count to 1')
             } else {
                 this.clickCount++
-                console.log('[MULTI-CLICK] Increment click count to', this.clickCount)
             }
 
             this.lastClickTime = now
@@ -142,12 +121,10 @@ export const multiClickPlugin = ViewPlugin.fromClass(
             // ✅ FIX: Processar imediatamente (não usar setTimeout)
             // Triple click (3 clicks) - seleciona linha inteira
             if (this.clickCount === 3) {
-                console.log('[MULTI-CLICK] Triple click detected - selecting line')
                 event.preventDefault()
                 event.stopPropagation()
 
                 const line = this.view.state.doc.lineAt(pos)
-                console.log('[MULTI-CLICK] Selecting line', { from: line.from, to: line.to })
                 this.view.dispatch({
                     selection: EditorSelection.single(line.from, line.to)
                 })
@@ -156,12 +133,10 @@ export const multiClickPlugin = ViewPlugin.fromClass(
 
             // Quadruple click (4 clicks) - seleciona parágrafo inteiro
             if (this.clickCount === 4) {
-                console.log('[MULTI-CLICK] Quadruple click detected - selecting paragraph')
                 event.preventDefault()
                 event.stopPropagation()
 
                 const { from, to } = findParagraphBounds(this.view, pos)
-                console.log('[MULTI-CLICK] Selecting paragraph', { from, to })
                 this.view.dispatch({
                     selection: EditorSelection.single(from, to)
                 })
@@ -169,13 +144,11 @@ export const multiClickPlugin = ViewPlugin.fromClass(
             }
 
             // Para 1 e 2 clicks: deixar CodeMirror processar normalmente
-            console.log('[MULTI-CLICK] Allowing default behavior for clickCount:', this.clickCount)
         }
 
         destroy() {
             // Limpa listener local (pointerdown)
             this.view.dom.removeEventListener('pointerdown', this.handleClick, true)
-            console.log('[MULTI-CLICK] Plugin destroyed, pointerdown listener removed')
         }
     }
 )
