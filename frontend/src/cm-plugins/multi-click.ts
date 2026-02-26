@@ -9,11 +9,34 @@
  * - Detecta sequências de cliques rápidos
  * - Triple click: seleciona linha completa
  * - Quadruple click: seleciona parágrafo (delimitado por linhas vazias)
- * - Timeout de 400ms para resetar contagem de cliques
+ * - Usa handlers locais ao editor (sem listeners globais)
+ * - Limites claros de tempo e espaço para reset de contagem
+ * - Processamento síncrono para permitir preventDefault/stopPropagation
+ * 
+ * Fix aplicado em 26/02/2026:
+ * - Removido setTimeout que causava processamento assíncrono
+ * - preventDefault/stopPropagation agora funcionam corretamente
+ * - Seleção de linha/parágrafo acontece imediatamente no handler
+ * - Mudado de 'click' para 'pointerdown' para capturar todos os cliques
+ *   (evento 'click' é consumido pelo browser em dblclick/triple-click)
  */
 
 import { ViewPlugin, EditorView } from "@codemirror/view"
 import { EditorSelection } from "@codemirror/state"
+
+/**
+ * Constantes que definem comportamento e limites do multi-click
+ */
+const MULTI_CLICK_CONFIG = {
+  /** Tempo máximo em ms entre cliques para contar como sequência */
+  CLICK_TIMEOUT: 400,
+  
+  /** Distância máxima em pixels entre cliques para contar como mesma posição */
+  CLICK_DISTANCE: 5,
+  
+  /** Número máximo de cliques a processar (limita a 4: triple e quadruple) */
+  MAX_CLICK_COUNT: 5
+} as const
 
 /**
  * Helper function to find paragraph boundaries
@@ -48,77 +71,111 @@ function findParagraphBounds(view: EditorView, pos: number): { from: number, to:
 
 /**
  * Plugin do CodeMirror para múltiplos cliques
+ * Usa handlers locais ao editor para melhor controle de escopo
  */
 export const multiClickPlugin = ViewPlugin.fromClass(
     class {
         lastClickTime = 0
         lastClickPos = -1
         clickCount = 0
-        clickTimeout: number | null = null
 
         constructor(readonly view: EditorView) {
-            // Add click listener to the editor's content DOM
-            const contentDom = view.contentDOM
-            contentDom.addEventListener('click', this.handleClick, true)
+            console.log('[MULTI-CLICK] Plugin initialized')
+            // Usar pointerdown no root do editor para capturar todas as pressões individuais
+            // antes de handlers internos consumirem os eventos de click.
+            view.dom.addEventListener('pointerdown', this.handleClick, true)
+            console.log('[MULTI-CLICK] Pointerdown listener attached with capturing=true')
         }
 
-        handleClick = (event: MouseEvent) => {
+        handleClick = (event: PointerEvent) => {
+            // ✅ IMPORTANTE: Ignorar quando Ctrl/Cmd está pressionado
+            // Deixar o plugin ctrl-click (navegação) lidar com esses eventos
+            if (event.ctrlKey || event.metaKey) {
+                console.log('[MULTI-CLICK] Skipping - Ctrl/Cmd modifier detected, let ctrl-click handler take over')
+                return
+            }
+
+            // Ignorar botão direito e botão do meio
+            if (event.button !== 0) return
+
             const now = Date.now()
             const pos = this.view.posAtCoords({ x: event.clientX, y: event.clientY })
             
+            console.log('[MULTI-CLICK] Pointerdown event', {
+                button: event.button,
+                ctrlKey: event.ctrlKey,
+                metaKey: event.metaKey,
+                pos,
+                target: event.target
+            })
+            
             if (pos === null) return
 
-            // Reset if click is more than 400ms apart or in a different position
-            if (now - this.lastClickTime > 400 || Math.abs(pos - this.lastClickPos) > 5) {
+            // Reset se:
+            // 1. Tempo entre cliques > CLICK_TIMEOUT
+            // 2. Distância entre cliques > CLICK_DISTANCE  
+            // 3. Click count já alcançou máximo
+            const timeSinceLastClick = now - this.lastClickTime
+            const distanceSinceLastClick = Math.abs(pos - this.lastClickPos)
+            
+            console.log('[MULTI-CLICK] Click metrics', {
+                timeSinceLastClick,
+                distanceSinceLastClick,
+                currentClickCount: this.clickCount,
+                lastClickTime: this.lastClickTime,
+                lastClickPos: this.lastClickPos
+            })
+            
+            if (timeSinceLastClick > MULTI_CLICK_CONFIG.CLICK_TIMEOUT || 
+                distanceSinceLastClick > MULTI_CLICK_CONFIG.CLICK_DISTANCE ||
+                this.clickCount >= MULTI_CLICK_CONFIG.MAX_CLICK_COUNT) {
                 this.clickCount = 1
+                console.log('[MULTI-CLICK] Reset click count to 1')
             } else {
                 this.clickCount++
+                console.log('[MULTI-CLICK] Increment click count to', this.clickCount)
             }
 
             this.lastClickTime = now
             this.lastClickPos = pos
 
-            // Clear previous timeout
-            if (this.clickTimeout !== null) {
-                clearTimeout(this.clickTimeout)
+            // ✅ FIX: Processar imediatamente (não usar setTimeout)
+            // Triple click (3 clicks) - seleciona linha inteira
+            if (this.clickCount === 3) {
+                console.log('[MULTI-CLICK] Triple click detected - selecting line')
+                event.preventDefault()
+                event.stopPropagation()
+
+                const line = this.view.state.doc.lineAt(pos)
+                console.log('[MULTI-CLICK] Selecting line', { from: line.from, to: line.to })
+                this.view.dispatch({
+                    selection: EditorSelection.single(line.from, line.to)
+                })
+                return  // Importante: impedir processamento adicional
             }
 
-            // Set timeout to process multi-click after a brief delay
-            this.clickTimeout = window.setTimeout(() => {
-                // Triple click (3 clicks)
-                if (this.clickCount === 3) {
-                    event.preventDefault()
-                    event.stopPropagation()
+            // Quadruple click (4 clicks) - seleciona parágrafo inteiro
+            if (this.clickCount === 4) {
+                console.log('[MULTI-CLICK] Quadruple click detected - selecting paragraph')
+                event.preventDefault()
+                event.stopPropagation()
 
-                    const line = this.view.state.doc.lineAt(pos)
+                const { from, to } = findParagraphBounds(this.view, pos)
+                console.log('[MULTI-CLICK] Selecting paragraph', { from, to })
+                this.view.dispatch({
+                    selection: EditorSelection.single(from, to)
+                })
+                return  // Importante: impedir processamento adicional
+            }
 
-                    this.view.dispatch({
-                        selection: EditorSelection.single(line.from, line.to)
-                    })
-                }
-
-                // Quadruple click (4 clicks)
-                if (this.clickCount === 4) {
-                    event.preventDefault()
-                    event.stopPropagation()
-
-                    const { from, to } = findParagraphBounds(this.view, pos)
-
-                    this.view.dispatch({
-                        selection: EditorSelection.single(from, to)
-                    })
-                }
-
-                this.clickTimeout = null
-            }, 150)
+            // Para 1 e 2 clicks: deixar CodeMirror processar normalmente
+            console.log('[MULTI-CLICK] Allowing default behavior for clickCount:', this.clickCount)
         }
 
         destroy() {
-            const contentDom = this.view.contentDOM
-            contentDom.removeEventListener('click', this.handleClick, true)
-            if (this.clickTimeout !== null) {
-                clearTimeout(this.clickTimeout)
-            }
+            // Limpa listener local (pointerdown)
+            this.view.dom.removeEventListener('pointerdown', this.handleClick, true)
+            console.log('[MULTI-CLICK] Plugin destroyed, pointerdown listener removed')
         }
     }
 )

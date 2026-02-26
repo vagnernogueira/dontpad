@@ -224,11 +224,6 @@ body,
   text-decoration: underline;
 }
 
-.cm-ctrl-hover-link {
-  cursor: pointer;
-  text-decoration: underline;
-}
-
 /* Desabilita formatação de blocos indentados (4 espaços)
    Apenas blocos delimitados por ``` devem ter formatação especial */
 .cm-code-block {

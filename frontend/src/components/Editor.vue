@@ -182,7 +182,6 @@ import { codeBlockPlugin } from '../cm-plugins/code-block'
 import { horizontalRulePlugin } from '../cm-plugins/horizontal-rule-widget'
 import { multiClickPlugin } from '../cm-plugins/multi-click'
 import { plainUrlPlugin } from '../cm-plugins/plain-url'
-import { ctrlClickNavigationPlugin } from '../cm-plugins/ctrl-click-navigation'
 import { spellcheckPlugin } from '../cm-plugins/spellcheck'
 import { editorKeymaps } from '../cm-plugins/keymaps'
 
@@ -289,7 +288,6 @@ const initEditor = () => {
       codeBlockPlugin,
       horizontalRulePlugin,
       plainUrlPlugin,
-      ctrlClickNavigationPlugin,
       yCollab(ytext, provider.awareness, { undoManager }),
       ...editorKeymaps,
       markdownPreviewPlugin,
