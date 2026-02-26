@@ -21,6 +21,7 @@ Este diretório contém todos os plugins customizados do CodeMirror utilizados n
 - **tab-keymap.ts** - Customiza comportamento da tecla Tab (indentação com 4 espaços)
 - **enter-keymap.ts** - Mantém formatação de listas e citações ao pressionar Enter
 - **delete-line-keymap.ts** - Adiciona atalho Ctrl+L para deletar linha inteira
+- **snippet.ts** - Sistema de snippets gerenciáveis (dt+TAB → data, hr+TAB → hora, lorem+TAB → lorem ipsum)
 - **math.ts** - Avalia expressões matemáticas automaticamente ao digitar "= "
 
 ### Funcionalidades de Interação
@@ -60,8 +61,45 @@ Cada arquivo de plugin segue esta estrutura básica:
 4. **Funções auxiliares** - Funções para construir decorações
 5. **Export do plugin** - Exporta o plugin configurado usando `ViewPlugin.fromClass`
 
+## Snippets Disponíveis
+
+O plugin **snippet.ts** fornece os seguintes snippets prontos para uso:
+
+| Gatilho | TAB | Resultado |
+|---------|-----|-----------|
+| `dt` | TAB | Data atual (DD/MM/YYYY) |
+| `hr` | TAB | Hora atual (HH:MM) |
+| `lorem` | TAB | Parágrafo lorem ipsum completo |
+| `table` | TAB | Tabela markdown básica |
+| `code` | TAB | Bloco de código com ``` |
+| `link` | TAB | Link markdown `[texto](url)` |
+| `img` | TAB | Imagem markdown `![alt](url)` |
+| `task` | TAB | Item de checklist `- [ ]` |
+| `snippets` | TAB | Lista todos os snippets disponíveis |
+
+### Como adicionar novos snippets
+
+Edite o array `defaultSnippets` em [snippet.ts](snippet.ts) e adicione novos objetos seguindo o padrão:
+
+```typescript
+{
+  prefix: "gatilho",
+  body: "texto a inserir ${VARIAVEL}",
+  description: "Descrição do snippet"
+}
+```
+
+### Variáveis suportadas
+
+- `${CURRENT_DATE}` - Substitui pela data atual
+- `${CURRENT_TIME}` - Substitui pela hora atual
+- `${LOREM}` - Substitui por parágrafo lorem ipsum
+- `${SNIPPET_LIST}` - Substitui pela lista completa de snippets disponíveis
+- `${QUALQUER_TEXTO}` - Placeholders que posicionam o cursor
+
 ## Observações
 
 - Todos os plugins foram refatorados a partir do arquivo original `cm-preview-plugin.ts`
 - Cada plugin é independente e pode ser usado separadamente
 - Os plugins utilizam a API do CodeMirror 6
+- O plugin de snippets tem prioridade sobre a indentação TAB apenas quando há um gatilho válido
