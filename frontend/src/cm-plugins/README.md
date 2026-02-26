@@ -140,3 +140,14 @@ Os keymaps seguem uma hierarquia de precedência explícita para evitar conflito
    - Snippets (só ativam quando não há seleção e gatilho é válido)
 
 Esta estrutura garante que comandos essenciais (como indentação) nunca sejam bloqueados por funcionalidades auxiliares (como snippets).
+
+## Limites do Parser de Math
+
+O parser de math é propositalmente simples e seguro, com suporte apenas ao conjunto abaixo:
+
+- Operadores: `+`, `-`, `*`, `/`, `%`, `^`, parênteses e unário `+`/`-`.
+- Funções: `sqrt`, `sin`, `cos`, `tan`, `asin`, `acos`, `atan`, `log`, `ln`, `log10`, `exp`, `abs`, `floor`, `ceil`, `round`, `min`, `max`, `pow`.
+- Constantes: `pi`, `e`.
+- Argumentos de funções separados por vírgula.
+
+Fora desse conjunto, a expressão é rejeitada (sem execução de código externo).
