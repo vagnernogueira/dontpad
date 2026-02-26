@@ -5,52 +5,53 @@
  * e aplica estilos especiais para diferenciá-los do texto normal.
  * 
  * Funcionalidades:
- * - Detecta abertura e fechamento de blocos de código (```)
+ * - Usa syntax tree do Markdown para detectar blocos de código (FencedCode)
  * - Aplica classes CSS diferentes para marcadores e conteúdo
- * - Rastreia estado de bloco de código através do documento
  * - Suporta especificação de linguagem após ```
+ * - Detecta casos de fences aninhados com precisão do parser
  */
 
 import { ViewPlugin, Decoration, EditorView, DecorationSet, ViewUpdate } from "@codemirror/view"
 import { RangeSetBuilder } from "@codemirror/state"
+import { syntaxTree } from "@codemirror/language"
 
 /**
- * Constrói decorações para blocos de código
+ * Constrói decorações para blocos de código usando a syntax tree
  */
 function buildCodeBlockDecorations(view: EditorView) {
     const builder = new RangeSetBuilder<Decoration>()
-    const doc = view.state.doc
+    const tree = syntaxTree(view.state)
 
-    // Track code block state across the entire document
-    let inCodeBlock = false
-
-    for (let lineNum = 1; lineNum <= doc.lines; lineNum++) {
-        const line = doc.line(lineNum)
-        const lineText = line.text
-        
-        // Check if this line is in visible range
-        const isVisible = view.visibleRanges.some(
-            range => line.from <= range.to && line.to >= range.from
-        )
-        
-        // Toggle code block state when we encounter exactly 3 backticks
-        // Must match: (optional spaces) + ``` + (optional language)
-        if (/^\s*```/.test(lineText)) {
-            if (!inCodeBlock) {
-                inCodeBlock = true
-                if (isVisible) {
-                    builder.add(line.from, line.from, Decoration.line({ class: 'cm-code-block-marker' }))
-                }
-            } else {
-                inCodeBlock = false
-                if (isVisible) {
-                    builder.add(line.from, line.from, Decoration.line({ class: 'cm-code-block-marker' }))
+    for (const { from, to } of view.visibleRanges) {
+        tree.iterate({
+            from,
+            to,
+            enter: (node) => {
+                // FencedCode é o nó que representa um bloco de código delimitado por ```
+                if (node.name === "FencedCode") {
+                    const doc = view.state.doc
+                    const startLine = doc.lineAt(node.from)
+                    const endLine = doc.lineAt(node.to)
+                    
+                    // Decorar a linha de abertura (```)
+                    builder.add(startLine.from, startLine.from, 
+                        Decoration.line({ class: 'cm-code-block-marker' }))
+                    
+                    // Decorar linhas intermediárias (conteúdo do código)
+                    for (let lineNum = startLine.number + 1; lineNum < endLine.number; lineNum++) {
+                        const line = doc.line(lineNum)
+                        builder.add(line.from, line.from, 
+                            Decoration.line({ class: 'cm-code-block-line' }))
+                    }
+                    
+                    // Decorar a linha de fechamento (```) se não for a mesma que a de abertura
+                    if (endLine.number > startLine.number) {
+                        builder.add(endLine.from, endLine.from, 
+                            Decoration.line({ class: 'cm-code-block-marker' }))
+                    }
                 }
             }
-        } else if (inCodeBlock && isVisible) {
-            // Lines inside code block (only decorate if visible)
-            builder.add(line.from, line.from, Decoration.line({ class: 'cm-code-block-line' }))
-        }
+        })
     }
 
     return builder.finish()
