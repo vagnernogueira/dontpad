@@ -160,7 +160,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, onBeforeUnmount, watch, nextTick, computed } from 'vue'
+import { ref, reactive, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 import { ArrowLeft, Download, Lock, Redo2, Table2, Undo2 } from 'lucide-vue-next'
 
@@ -173,8 +173,7 @@ import { Compartment, EditorState } from '@codemirror/state'
 import { EditorView, basicSetup } from 'codemirror'
 import { drawSelection } from '@codemirror/view'
 import { markdown } from '@codemirror/lang-markdown'
-import { HighlightStyle, defaultHighlightStyle, syntaxHighlighting } from '@codemirror/language'
-import { tags } from '@lezer/highlight'
+import { defaultHighlightStyle, syntaxHighlighting } from '@codemirror/language'
 import { Strikethrough } from '@lezer/markdown'
 import { yCollab } from 'y-codemirror.next'
 import { markdownPreviewPlugin } from '../cm-plugins/markdown-preview'
@@ -191,39 +190,31 @@ import { ctrlClickNavigationPlugin } from '../cm-plugins/ctrl-click-navigation'
 import { mathCalculationPlugin } from '../cm-plugins/math'
 import { spellcheckPlugin } from '../cm-plugins/spellcheck'
 
+// Commands and Extensions
+import { applyFormat as applyFormatCommand, insertLink as insertLinkCommand, insertImage as insertImageCommand } from '../cm-commands'
+import { editorTheme } from '../cm-extensions'
+import * as persistence from '../services/persistence'
+import * as exportService from '../services/export'
+import { createDocumentAPI } from '../services/document-api'
+import { getApiBaseUrl, getWsBaseUrl } from '../services/config'
+import { getRandomCursorColor, getRandomCursorName, getCursorAwarenessState } from '../cm-utils/cursor'
+
 // PDF & Markdown Exports
 import { markdownStyles } from '../pdf-styles'
 
-// Random color/name for cursor
-const userColors = [
-  '#30bced', '#6eeb83', '#ffbc42', '#ecd444', '#ee6352',
-  '#9ac2c9', '#8acb88', '#1be7ff'
-]
-const randomColor = userColors[Math.floor(Math.random() * userColors.length)]
-const randomName = `Anon ${Math.floor(Math.random() * 1000)}`
-
-const SPELLCHECK_STORAGE_KEY = 'dontpad:spellcheck'
-
-const readSpellcheckPreference = () => {
-  if (typeof window === 'undefined') return true
-
-  const stored = window.localStorage.getItem(SPELLCHECK_STORAGE_KEY)
-  if (stored === 'false') return false
-  if (stored === 'true') return true
-  return true
-}
-
-const persistSpellcheckPreference = (value: boolean) => {
-  if (typeof window === 'undefined') return
-  window.localStorage.setItem(SPELLCHECK_STORAGE_KEY, value ? 'true' : 'false')
-}
+// Initialize services
+const apiBaseUrl = getApiBaseUrl()
+const wsBaseUrl = getWsBaseUrl()
+const documentAPI = createDocumentAPI(apiBaseUrl)
+const randomColor = getRandomCursorColor()
+const randomName = getRandomCursorName()
 
 const route = useRoute()
 const documentId = ref(route.params.documentId as string || 'default')
 const editorContainer = ref<HTMLElement | null>(null)
 const pdfContainer = ref<HTMLElement | null>(null) // Ref for PDF rendering
 const status = ref('disconnected')
-const isSpellcheckEnabled = ref(readSpellcheckPreference())
+const isSpellcheckEnabled = ref(persistence.get('spellcheck', true))
 
 // Dialog states
 const showLinkDialog = ref(false)
@@ -244,26 +235,7 @@ const hasDocumentAccess = ref(false)
 const documentAccessPassword = ref('')
 const isDocumentLocked = ref(false)
 
-const apiBaseUrl = computed(() => {
-  if (!import.meta.env.PROD) {
-    return 'http://localhost:1234'
-  }
 
-  return (import.meta.env.VITE_BACKEND_HTTP_URL as string | undefined)?.trim() || 'http://localhost:1234'
-})
-
-const wsBaseUrl = computed(() => {
-  if (!import.meta.env.PROD) {
-    return 'ws://localhost:1234'
-  }
-
-  const explicitWsUrl = (import.meta.env.VITE_BACKEND_WS_URL as string | undefined)?.trim()
-  if (explicitWsUrl) {
-    return explicitWsUrl
-  }
-
-  return 'ws://localhost:1234'
-})
 
 let ydoc: Y.Doc
 let provider: WebsocketProvider
@@ -272,32 +244,6 @@ let undoManager: Y.UndoManager
 
 const spellcheckCompartment = new Compartment()
 
-const markdownHighlightStyle = HighlightStyle.define([
-  { tag: tags.emphasis, fontStyle: 'italic' },
-  { tag: tags.strong, fontWeight: '700' },
-  { tag: tags.heading1, fontSize: '1.9em', fontWeight: '800', textDecoration: 'none' },
-  { tag: tags.heading2, fontSize: '1.55em', fontWeight: '750', textDecoration: 'none' },
-  { tag: tags.heading3, fontSize: '1.3em', fontWeight: '700', textDecoration: 'none' },
-  { tag: tags.strikethrough, textDecoration: 'line-through' },
-  // Links do markdown
-  { tag: tags.link, color: '#0969da', textDecoration: 'underline' },
-  // Código inline (entre acentos graves simples)
-  {
-    tag: tags.monospace,
-    fontFamily: '"Fira Code", "Consolas", monospace',
-    backgroundColor: '#e8eef2',
-    fontSize: '0.88em'
-  },
-  { tag: tags.quote, fontStyle: 'italic', color: '#6a737d' },
-  // Blocos de código delimitados por ``` (code fences)
-  {
-    tag: tags.processingInstruction,
-    fontFamily: '"Fira Code", "JetBrains Mono", "Consolas", monospace',
-    color: '#5a6872',
-    fontSize: '0.88em'
-  }
-])
-
 const initEditor = () => {
   if (!editorContainer.value) return
 
@@ -305,13 +251,11 @@ const initEditor = () => {
   ydoc = new Y.Doc()
   
   // 2. Connect to WebSocket
-  const wsUrl = wsBaseUrl.value
-    
   provider = documentAccessPassword.value
-    ? new WebsocketProvider(wsUrl, documentId.value, ydoc, {
+    ? new WebsocketProvider(wsBaseUrl, documentId.value, ydoc, {
       params: { password: documentAccessPassword.value }
     })
-    : new WebsocketProvider(wsUrl, documentId.value, ydoc)
+    : new WebsocketProvider(wsBaseUrl, documentId.value, ydoc)
 
   provider.on('connection-close', (event: { code?: number }) => {
     if (event?.code === 4403) {
@@ -329,11 +273,7 @@ const initEditor = () => {
   })
 
   // 3. Set Awareness (Cursor Info)
-  provider.awareness.setLocalStateField('user', {
-    name: randomName,
-    color: randomColor,
-    colorLight: randomColor + '33' // add opacity
-  })
+  provider.awareness.setLocalStateField('user', getCursorAwarenessState(randomName, randomColor))
 
   // 4. Bind CodeMirror to Yjs Document
   const ytext = ydoc.getText('codemirror')
@@ -348,7 +288,7 @@ const initEditor = () => {
       EditorView.lineWrapping,
       markdown({ extensions: [Strikethrough, { remove: ['IndentedCode', 'SetextHeading'] }] }),
       syntaxHighlighting(defaultHighlightStyle),
-      syntaxHighlighting(markdownHighlightStyle),
+      ...editorTheme,
       listCustomPlugin,
       codeBlockPlugin,
       horizontalRulePlugin,
@@ -361,27 +301,7 @@ const initEditor = () => {
       deleteLineKeymap,
       mathCalculationPlugin,
       markdownPreviewPlugin,
-      multiClickPlugin,
-      EditorView.theme({
-        "&": { height: "100%" },
-        ".cm-scroller": { overflow: "auto" },
-        // Desabilita estilo de código para blocos indentados (4 espaços)
-        // Mantém apenas blocos delimitados por ``` (code fences)
-        ".cm-line.cm-codeBlock": {
-          background: "transparent !important",
-          fontFamily: "inherit !important",
-          fontSize: "inherit !important",
-          color: "inherit !important"
-        },
-        ".cm-header, .cm-heading, .cm-heading1, .cm-heading2, .cm-heading3, .cm-formatting-header, .cm-formatting-heading": {
-          textDecoration: "none !important",
-          borderBottom: "none !important"
-        },
-        ".cm-line.cm-header, .cm-line.cm-heading": {
-          textDecoration: "none !important",
-          borderBottom: "none !important"
-        }
-      })
+      multiClickPlugin
     ]
   })
 
@@ -391,20 +311,7 @@ const initEditor = () => {
   })
 }
 
-const verifyDocumentAccess = async (password: string): Promise<boolean> => {
-  const response = await fetch(`${apiBaseUrl.value}/api/document-access`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      documentId: documentId.value,
-      password
-    })
-  })
 
-  return response.ok
-}
 
 const openEditorAfterAccess = async () => {
   hasDocumentAccess.value = true
@@ -416,18 +323,10 @@ const ensureDocumentAccess = async () => {
   hasDocumentAccess.value = false
 
   try {
-    const response = await fetch(`${apiBaseUrl.value}/api/document-lock?documentId=${encodeURIComponent(documentId.value)}`)
-    if (!response.ok) {
-      documentAccessPassword.value = ''
-      await openEditorAfterAccess()
-      return
-    }
+    const lockStatus = await documentAPI.getLockStatus(documentId.value)
+    isDocumentLocked.value = lockStatus.locked
 
-    const payload = await response.json() as { locked?: boolean }
-    const isLocked = !!payload.locked
-    isDocumentLocked.value = isLocked
-
-    if (!isLocked) {
+    if (!lockStatus.locked) {
       documentAccessPassword.value = ''
       await openEditorAfterAccess()
       return
@@ -456,7 +355,7 @@ const redo = () => {
 
 const toggleSpellcheck = () => {
   isSpellcheckEnabled.value = !isSpellcheckEnabled.value
-  persistSpellcheckPreference(isSpellcheckEnabled.value)
+  persistence.set('spellcheck', isSpellcheckEnabled.value)
 
   if (view) {
     view.dispatch({
@@ -468,111 +367,10 @@ const toggleSpellcheck = () => {
   }
 }
 
-// Helper function to get word boundaries around a position
-const getWordBoundaries = (doc: any, pos: number): { start: number; end: number } => {
-  const line = doc.lineAt(pos)
-  const lineText = line.text
-  const posInLine = pos - line.from
-
-  // Find start of word
-  let start = posInLine
-  while (start > 0 && /\w/.test(lineText[start - 1])) {
-    start--
-  }
-
-  // Find end of word
-  let end = posInLine
-  while (end < lineText.length && /\w/.test(lineText[end])) {
-    end++
-  }
-
-  return {
-    start: line.from + start,
-    end: line.from + end
-  }
-}
-
-const isWordCharAt = (doc: any, pos: number): boolean => {
-  if (pos < 0 || pos >= doc.length) return false
-  const line = doc.lineAt(pos)
-  const index = pos - line.from
-  if (index < 0 || index >= line.text.length) return false
-  return /\w/.test(line.text[index])
-}
-
-// Markdown formatting helper
+// Formatting wrapper (calls imported command from cm-commands)
 const applyFormat = (prefix: string, suffix: string = '') => {
   if (!view) return
-  
-  const { state } = view
-  const selection = state.selection.main
-  let formatStart = selection.from
-  let formatEnd = selection.to
-  
-  // Checking if it's a line-level format like headers or lists
-  const isLineFormat = !suffix && prefix.endsWith(' ')
-
-  if (isLineFormat) {
-    // Apply prefix to the start of the current line
-    const line = state.doc.lineAt(selection.from)
-    view.dispatch({
-      changes: { from: line.from, insert: prefix },
-      selection: { anchor: selection.from + prefix.length, head: selection.to + prefix.length }
-    })
-  } else {
-    // For inline formats (bold, italic, code), handle word expansion
-    if (selection.empty) {
-      // No selection: expand to word boundaries around cursor
-      const wordBounds = getWordBoundaries(state.doc, selection.from)
-      if (wordBounds.start < wordBounds.end) {
-        formatStart = wordBounds.start
-        formatEnd = wordBounds.end
-      }
-    } else {
-      // Has selection: expand to include complete words at both ends when needed
-      if (isWordCharAt(state.doc, formatStart)) {
-        const wordBoundsAtStart = getWordBoundaries(state.doc, formatStart)
-        formatStart = wordBoundsAtStart.start
-      }
-
-      if (isWordCharAt(state.doc, formatEnd - 1)) {
-        const wordBoundsAtEnd = getWordBoundaries(state.doc, formatEnd - 1)
-        formatEnd = wordBoundsAtEnd.end
-      }
-    }
-    
-    const selectedText = state.sliceDoc(formatStart, formatEnd)
-
-    // If we still don't have text to format, just insert at cursor
-    if (!selectedText) {
-      view.dispatch({
-        changes: {
-          from: selection.from,
-          insert: `${prefix}${suffix}`
-        },
-        selection: {
-          anchor: selection.from + prefix.length,
-          head: selection.from + prefix.length
-        }
-      })
-    } else {
-      // Wrap the selected text with markers
-      view.dispatch({
-        changes: {
-          from: formatStart,
-          to: formatEnd,
-          insert: `${prefix}${selectedText}${suffix}`
-        },
-        selection: {
-          anchor: formatStart + prefix.length,
-          head: formatEnd + prefix.length
-        }
-      })
-    }
-  }
-
-  // Return focus back to CodeMirror
-  view.focus()
+  applyFormatCommand(view, prefix, suffix)
 }
 
 // Dialog functions
@@ -594,8 +392,7 @@ const openLinkDialog = async () => {
 
 const insertLink = () => {
   if (!linkData.url) return
-  const text = linkData.text || 'link'
-  applyFormat(`[${text}](${linkData.url})`, '')
+  insertLinkCommand(view, linkData.text, linkData.url)
   closeDialogs()
 }
 
@@ -631,18 +428,8 @@ const lockDocument = async () => {
     return
   }
 
-  const response = await fetch(`${apiBaseUrl.value}/api/document-lock`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      documentId: documentId.value,
-      password
-    })
-  })
-
-  if (!response.ok) {
+  const success = await documentAPI.lock(documentId.value, password)
+  if (!success) {
     lockError.value = 'Não foi possível travar este documento.'
     return
   }
@@ -661,18 +448,8 @@ const removeDocumentLock = async () => {
     return
   }
 
-  const response = await fetch(`${apiBaseUrl.value}/api/document-lock`, {
-    method: 'DELETE',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      documentId: documentId.value,
-      password
-    })
-  })
-
-  if (!response.ok) {
+  const success = await documentAPI.unlock(documentId.value, password)
+  if (!success) {
     lockError.value = 'Senha inválida para remover a proteção.'
     return
   }
@@ -692,7 +469,7 @@ const unlockDocument = async () => {
   const password = accessPassword.value.trim()
   if (!password) return
 
-  const canAccess = await verifyDocumentAccess(password)
+  const canAccess = await documentAPI.verifyAccess(documentId.value, password)
   if (!canAccess) {
     accessError.value = 'Senha inválida.'
     return
@@ -705,8 +482,7 @@ const unlockDocument = async () => {
 
 const insertImage = () => {
   if (!imageData.url) return
-  const alt = imageData.alt || 'imagem'
-  applyFormat(`![${alt}](${imageData.url})`, '')
+  insertImageCommand(view, imageData.alt, imageData.url)
   closeDialogs()
 }
 
@@ -723,57 +499,13 @@ const closeDialogs = () => {
 const downloadMarkdown = () => {
   if (!view) return
   const text = view.state.doc.toString()
-  const blob = new Blob([text], { type: 'text/markdown;charset=utf-8' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = `${documentId.value}.md`
-  document.body.appendChild(a)
-  a.click()
-  document.body.removeChild(a)
-  URL.revokeObjectURL(url)
+  exportService.downloadMarkdown(text, documentId.value)
 }
 
 const downloadPDF = async () => {
-  if (!view || !pdfContainer.value) return
-
-  const [{ marked }, { default: html2pdf }] = await Promise.all([
-    import('marked'),
-    import('html2pdf.js')
-  ])
-
+  if (!view) return
   const text = view.state.doc.toString()
-  
-  // Parse Markdown to HTML
-  const htmlContent = await marked.parse(text, { breaks: true, gfm: true })
-  
-  // Insert styled HTML into the hidden container
-  pdfContainer.value.innerHTML = `
-    ${markdownStyles}
-    <div class="markdown-body">
-      ${htmlContent}
-    </div>
-  `
-  
-  // Make sure image tags have max-width to avoid breaking PDF layout
-  const images = pdfContainer.value.querySelectorAll('img')
-  images.forEach(img => {
-    img.style.maxWidth = '100%'
-    img.style.height = 'auto'
-  })
-
-  // html2pdf options (using any to bypass missing type defs)
-  const opt = {
-    margin:       15,
-    filename:     `${documentId.value}.pdf`,
-    image:        { type: 'jpeg', quality: 0.98 },
-    html2canvas:  { scale: 2, useCORS: true },
-    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-  }
-
-  // Trigger generation
-  // @ts-ignore
-  html2pdf().set(opt).from(pdfContainer.value).save()
+  await exportService.downloadPDF(text, documentId.value, markdownStyles)
 }
 
 const cleanup = () => {
