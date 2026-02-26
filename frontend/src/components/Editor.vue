@@ -52,6 +52,17 @@
       <button @click="openLockDialog" class="px-2.5 py-2 sm:py-1.5 hover:bg-gray-200 hover:text-gray-900 rounded transition-colors focus:outline-none touch-manipulation shrink-0" title="Travar com senha">
         <Lock :size="14" />
       </button>
+      <button
+        @click="toggleSpellcheck"
+        :class="[
+          'px-2.5 py-2 sm:py-1.5 rounded transition-colors focus:outline-none touch-manipulation shrink-0 font-mono text-xs',
+          isSpellcheckEnabled ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200' : 'hover:bg-gray-200 hover:text-gray-900'
+        ]"
+        title="Correção ortográfica"
+        :aria-pressed="isSpellcheckEnabled"
+      >
+        ABC
+      </button>
       
       <div class="flex-1 min-w-[8px]"></div> <!-- Spacer -->
       
@@ -158,7 +169,7 @@ import * as Y from 'yjs'
 import { WebsocketProvider } from 'y-websocket'
 
 // CodeMirror
-import { EditorState } from '@codemirror/state'
+import { Compartment, EditorState } from '@codemirror/state'
 import { EditorView, basicSetup } from 'codemirror'
 import { drawSelection } from '@codemirror/view'
 import { markdown } from '@codemirror/lang-markdown'
@@ -178,6 +189,7 @@ import { deleteLineKeymap } from '../cm-plugins/delete-line-keymap'
 import { plainUrlPlugin } from '../cm-plugins/plain-url'
 import { ctrlClickNavigationPlugin } from '../cm-plugins/ctrl-click-navigation'
 import { mathCalculationPlugin } from '../cm-plugins/math'
+import { spellcheckPlugin } from '../cm-plugins/spellcheck'
 
 // PDF & Markdown Exports
 import { markdownStyles } from '../pdf-styles'
@@ -190,11 +202,28 @@ const userColors = [
 const randomColor = userColors[Math.floor(Math.random() * userColors.length)]
 const randomName = `Anon ${Math.floor(Math.random() * 1000)}`
 
+const SPELLCHECK_STORAGE_KEY = 'dontpad:spellcheck'
+
+const readSpellcheckPreference = () => {
+  if (typeof window === 'undefined') return true
+
+  const stored = window.localStorage.getItem(SPELLCHECK_STORAGE_KEY)
+  if (stored === 'false') return false
+  if (stored === 'true') return true
+  return true
+}
+
+const persistSpellcheckPreference = (value: boolean) => {
+  if (typeof window === 'undefined') return
+  window.localStorage.setItem(SPELLCHECK_STORAGE_KEY, value ? 'true' : 'false')
+}
+
 const route = useRoute()
 const documentId = ref(route.params.documentId as string || 'default')
 const editorContainer = ref<HTMLElement | null>(null)
 const pdfContainer = ref<HTMLElement | null>(null) // Ref for PDF rendering
 const status = ref('disconnected')
+const isSpellcheckEnabled = ref(readSpellcheckPreference())
 
 // Dialog states
 const showLinkDialog = ref(false)
@@ -240,6 +269,8 @@ let ydoc: Y.Doc
 let provider: WebsocketProvider
 let view: EditorView
 let undoManager: Y.UndoManager
+
+const spellcheckCompartment = new Compartment()
 
 const markdownHighlightStyle = HighlightStyle.define([
   { tag: tags.emphasis, fontStyle: 'italic' },
@@ -313,6 +344,7 @@ const initEditor = () => {
     extensions: [
       basicSetup,
       drawSelection(),
+      spellcheckCompartment.of(spellcheckPlugin(isSpellcheckEnabled.value)),
       EditorView.lineWrapping,
       markdown({ extensions: [Strikethrough, { remove: ['IndentedCode', 'SetextHeading'] }] }),
       syntaxHighlighting(defaultHighlightStyle),
@@ -420,6 +452,20 @@ const undo = () => {
 const redo = () => {
   if (undoManager) undoManager.redo()
   if (view) view.focus()
+}
+
+const toggleSpellcheck = () => {
+  isSpellcheckEnabled.value = !isSpellcheckEnabled.value
+  persistSpellcheckPreference(isSpellcheckEnabled.value)
+
+  if (view) {
+    view.dispatch({
+      effects: spellcheckCompartment.reconfigure(
+        spellcheckPlugin(isSpellcheckEnabled.value)
+      )
+    })
+    view.focus()
+  }
 }
 
 // Helper function to get word boundaries around a position

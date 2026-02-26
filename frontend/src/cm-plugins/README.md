@@ -28,6 +28,7 @@ Este diretório contém todos os plugins customizados do CodeMirror utilizados n
 
 - **multi-click.ts** - Triple click seleciona linha, quadruple click seleciona parágrafo
 - **ctrl-click-navigation.ts** - Ctrl+Click para abrir links em nova aba
+- **spellcheck.ts** - Liga/desliga o spellcheck nativo do navegador no editor
 
 ### Plugins Compostos
 
