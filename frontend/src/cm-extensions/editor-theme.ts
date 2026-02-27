@@ -16,8 +16,8 @@ export const markdownHighlightStyle = HighlightStyle.define([
   { tag: tags.emphasis, fontStyle: 'italic' },
   { tag: tags.strong, fontWeight: '700' },
   { tag: tags.strikethrough, textDecoration: 'line-through' },
-  // Links do markdown
-  { tag: tags.link, color: '#0969da', textDecoration: 'underline' },
+  // Links do markdown (sem underline para não afetar checkboxes e imagens)
+  { tag: tags.link, color: '#0969da' },
   // Código inline (entre acentos graves simples)
   {
     tag: tags.monospace,

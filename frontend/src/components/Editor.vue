@@ -179,6 +179,7 @@ import { yCollab } from 'y-codemirror.next'
 import { markdownPreviewPlugin } from '../cm-plugins/markdown-preview'
 import { listCustomPlugin } from '../cm-plugins/list'
 import { codeBlockPlugin } from '../cm-plugins/code-block'
+import { checkboxClickPlugin } from '../cm-plugins/checkbox-widget'
 import { horizontalRulePlugin } from '../cm-plugins/horizontal-rule-widget'
 import { multiClickPlugin } from '../cm-plugins/multi-click'
 import { plainUrlPlugin } from '../cm-plugins/plain-url'
@@ -282,6 +283,7 @@ const initEditor = () => {
       markdown({ extensions: [Strikethrough, { remove: ['IndentedCode', 'SetextHeading'] }] }),
       ...editorTheme,
       listCustomPlugin,
+      checkboxClickPlugin,
       codeBlockPlugin,
       horizontalRulePlugin,
       plainUrlPlugin,

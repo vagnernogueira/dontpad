@@ -15,6 +15,7 @@
 
 import { keymap } from "@codemirror/view"
 import { EditorView } from "@codemirror/view"
+import { parseCheckboxStatus } from '../cm-utils/markdown-parsing'
 
 export const enterKeymap = keymap.of([
     {
@@ -26,14 +27,16 @@ export const enterKeymap = keymap.of([
             const line = state.doc.lineAt(pos)
             const lineText = line.text
 
-            // Match task list items: - [ ] or - [x] or - [X]
-            const taskMatch = lineText.match(/^(\s*)([-*+])\s+\[([xX\s])\](\s+)(.*)$/)
+            const checkboxStatus = parseCheckboxStatus(lineText)
+
+            // Match task list items: - [ ] or - [x] or - [X] and ordered lists (1. / 1))
+            const taskMatch = lineText.match(/^(\s*)(-|\d+[.)])\s+\[([xX\s])\](\s+)(.*)$/)
             
             // Match regular list markers or blockquotes at the start of current line
             const listMatch = lineText.match(/^(\s*)([-*+]|(\d+)[.)])(\s+)(.*)$/)
             const quoteMatch = lineText.match(/^(\s{0,3})(>)(\s+)/)
 
-            if (taskMatch) {
+            if (checkboxStatus !== null && taskMatch) {
                 const indent = taskMatch[1]
                 const marker = taskMatch[2]
                 const space = taskMatch[4]

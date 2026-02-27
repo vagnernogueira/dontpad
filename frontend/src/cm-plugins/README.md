@@ -8,6 +8,7 @@ Este diretório contém todos os plugins customizados do CodeMirror utilizados n
 
 - **image-widget.ts** - Renderiza imagens inline a partir da sintaxe `![alt](url)`
 - **link-widget.ts** - Adiciona ícones clicáveis aos links Markdown `[texto](url)`
+- **checkbox-widget.ts** - Torna o texto de checklists (`[ ]`, `[x]`, `[X]`) clicável sem substituir por ícones
 - **horizontal-rule-widget.ts** - Renderiza linhas horizontais (`---`, `___`, `***`) como elementos `<hr>`
 
 ### Estilização de Elementos

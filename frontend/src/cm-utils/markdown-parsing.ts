@@ -31,6 +31,16 @@ export interface PlainUrl extends Range {
 }
 
 /**
+ * Checkbox Markdown em lista de tarefas
+ */
+export interface MarkdownCheckbox extends Range {
+  checkboxFrom: number
+  checkboxTo: number
+  marker: string
+  status: 'checked' | 'unchecked'
+}
+
+/**
  * Regex para links Markdown: [texto](url) ou ![alt](url)
  */
 const MARKDOWN_LINK_REGEX = /(!?)\[([^\]]*)\]\(([^)]+)\)/g
@@ -39,6 +49,20 @@ const MARKDOWN_LINK_REGEX = /(!?)\[([^\]]*)\]\(([^)]+)\)/g
  * Regex para URLs avulsas
  */
 const PLAIN_URL_REGEX = /\b(https?:\/\/|www\.|ftp:\/\/)[^\s<>"\[\](){}]+/gi
+
+/**
+ * Regex para task list:
+ * - [ ] item
+ * - [x] item
+ * - [X] item
+ * 1. [ ] item
+ * 1) [x] item
+ *
+ * Decisão do plano:
+ * - Suporta '-' e listas ordenadas
+ * - Não suporta '*' e '+' para checkbox clicável
+ */
+const CHECKBOX_LINE_REGEX = /^(\s{0,3})(-|\d+[.)])\s+\[([xX\s])\](?=\s|$)/
 
 /**
  * Encontra todos os links Markdown em um texto
@@ -168,4 +192,58 @@ export function normalizeUrl(url: string): string {
     return 'https://' + url
   }
   return url
+}
+
+/**
+ * Encontra checkboxes markdown em um texto
+ *
+ * @param text - Texto (linha única ou múltiplas linhas)
+ * @param offset - Offset inicial para posições absolutas
+ * @returns Array de checkboxes encontrados
+ */
+export function findCheckboxes(text: string, offset: number = 0): MarkdownCheckbox[] {
+  const checkboxes: MarkdownCheckbox[] = []
+  const lines = text.split('\n')
+  let lineOffset = offset
+
+  for (const lineText of lines) {
+    const match = lineText.match(CHECKBOX_LINE_REGEX)
+    if (match) {
+      const marker = match[2]
+      const statusChar = match[3]
+      const markerStart = match[0].indexOf(marker)
+      const checkboxRelFrom = match[0].indexOf('[', markerStart)
+      const checkboxRelTo = checkboxRelFrom + 3
+
+      checkboxes.push({
+        from: lineOffset,
+        to: lineOffset + lineText.length,
+        checkboxFrom: lineOffset + checkboxRelFrom,
+        checkboxTo: lineOffset + checkboxRelTo,
+        marker,
+        status: statusChar.toLowerCase() === 'x' ? 'checked' : 'unchecked'
+      })
+    }
+
+    lineOffset += lineText.length + 1
+  }
+
+  return checkboxes
+}
+
+/**
+ * Verifica se uma linha é um item de checklist markdown suportado
+ */
+export function isCheckboxLine(text: string): boolean {
+  return CHECKBOX_LINE_REGEX.test(text)
+}
+
+/**
+ * Extrai o status do checkbox de uma linha markdown
+ */
+export function parseCheckboxStatus(text: string): 'checked' | 'unchecked' | null {
+  const match = text.match(CHECKBOX_LINE_REGEX)
+  if (!match) return null
+
+  return match[3].toLowerCase() === 'x' ? 'checked' : 'unchecked'
 }
