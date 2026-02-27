@@ -110,7 +110,7 @@ body,
   text-decoration: line-through !important;
 }
 
-/* Remove underline from markdown headings in CodeMirror */
+/* Remove underline decoration from markdown headings */
 .cm-heading,
 .cm-header,
 .cmt-heading,
@@ -120,7 +120,6 @@ body,
 .cm-line.cm-heading,
 .cm-line.cm-header {
   text-decoration: none !important;
-  border-bottom: none !important;
 }
 
 /* Make ~~ markers less visually loud */

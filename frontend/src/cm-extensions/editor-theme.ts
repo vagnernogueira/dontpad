@@ -15,9 +15,6 @@ import { tags } from '@lezer/highlight'
 export const markdownHighlightStyle = HighlightStyle.define([
   { tag: tags.emphasis, fontStyle: 'italic' },
   { tag: tags.strong, fontWeight: '700' },
-  { tag: tags.heading1, fontSize: '1.9em', fontWeight: '800', textDecoration: 'none' },
-  { tag: tags.heading2, fontSize: '1.55em', fontWeight: '750', textDecoration: 'none' },
-  { tag: tags.heading3, fontSize: '1.3em', fontWeight: '700', textDecoration: 'none' },
   { tag: tags.strikethrough, textDecoration: 'line-through' },
   // Links do markdown
   { tag: tags.link, color: '#0969da', textDecoration: 'underline' },
@@ -35,7 +32,11 @@ export const markdownHighlightStyle = HighlightStyle.define([
     fontFamily: '"Fira Code", "JetBrains Mono", "Consolas", monospace',
     color: '#5a6872',
     fontSize: '0.88em'
-  }
+  },
+  // Heading styles LAST para máxima precedência (removem underline acidentalmente herdado)
+  { tag: tags.heading1, fontSize: '1.9em', fontWeight: '800', textDecoration: 'none' },
+  { tag: tags.heading2, fontSize: '1.55em', fontWeight: '750', textDecoration: 'none' },
+  { tag: tags.heading3, fontSize: '1.3em', fontWeight: '700', textDecoration: 'none' }
 ])
 
 /**
