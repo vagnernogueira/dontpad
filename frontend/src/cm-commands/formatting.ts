@@ -125,3 +125,77 @@ export function applyFormat(view: EditorView, prefix: string, suffix: string = '
     return formatInline(view, prefix, suffix)
   }
 }
+
+/**
+ * Transform text case (uppercase, lowercase, or camelCase)
+ * If no selection, expands to word boundaries around cursor.
+ * 
+ * @param view - CodeMirror EditorView instance
+ * @param caseType - Type of transformation: 'upper', 'lower', or 'camel'
+ * @returns true if successful
+ */
+export function transformCase(view: EditorView, caseType: 'upper' | 'lower' | 'camel'): boolean {
+  if (!view) return false
+
+  const { state } = view
+  const selection = state.selection.main
+  let transformStart = selection.from
+  let transformEnd = selection.to
+
+  // Handle word expansion for empty selection
+  if (selection.empty) {
+    const wordBounds = getWordBoundaries(state.doc, selection.from)
+    if (wordBounds.start < wordBounds.end) {
+      transformStart = wordBounds.start
+      transformEnd = wordBounds.end
+    }
+  }
+
+  const selectedText = state.sliceDoc(transformStart, transformEnd)
+
+  if (!selectedText) {
+    view.focus()
+    return false
+  }
+
+  let transformedText: string
+
+  if (caseType === 'upper') {
+    transformedText = selectedText.toUpperCase()
+  } else if (caseType === 'lower') {
+    transformedText = selectedText.toLowerCase()
+  } else if (caseType === 'camel') {
+    // Convert to camelCase: split by spaces, hyphens, underscores
+    // First word lowercase, subsequent words capitalized, remove separators
+    const words = selectedText.split(/[\s\-_]+/).filter(w => w.length > 0)
+    if (words.length === 0) {
+      transformedText = selectedText
+    } else {
+      transformedText = words
+        .map((word, index) => {
+          if (index === 0) {
+            return word.toLowerCase()
+          }
+          return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+        })
+        .join('')
+    }
+  } else {
+    return false
+  }
+
+  view.dispatch({
+    changes: {
+      from: transformStart,
+      to: transformEnd,
+      insert: transformedText
+    },
+    selection: {
+      anchor: transformStart,
+      head: transformStart + transformedText.length
+    }
+  })
+
+  view.focus()
+  return true
+}

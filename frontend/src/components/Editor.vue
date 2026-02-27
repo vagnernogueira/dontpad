@@ -29,6 +29,7 @@
       <button @click="applyFormat('**', '**')" class="px-2.5 py-2 sm:py-1.5 hover:bg-gray-200 hover:text-gray-900 rounded font-bold transition-colors focus:outline-none touch-manipulation shrink-0" title="Negrito">B</button>
       <button @click="applyFormat('*', '*')" class="px-2.5 py-2 sm:py-1.5 hover:bg-gray-200 hover:text-gray-900 rounded italic transition-colors focus:outline-none touch-manipulation shrink-0" title="Itálico">I</button>
       <button @click="applyFormat('~~', '~~')" class="px-2.5 py-2 sm:py-1.5 hover:bg-gray-200 hover:text-gray-900 rounded line-through transition-colors focus:outline-none touch-manipulation shrink-0" title="Tachado">S</button>
+      <button @click="transformCaseClick" class="px-2.5 py-2 sm:py-1.5 hover:bg-gray-200 hover:text-gray-900 rounded transition-colors focus:outline-none touch-manipulation shrink-0 font-medium text-sm" title="Transformar caixa (UPPER / lower / camelCase)">Aa</button>
       <div class="w-px h-5 bg-gray-300 mx-1.5 self-center shrink-0"></div>
       <button @click="applyFormat('# ')" class="px-2.5 py-2 sm:py-1.5 hover:bg-gray-200 hover:text-gray-900 rounded font-bold transition-colors focus:outline-none touch-manipulation shrink-0" title="Título 1">H1</button>
       <button @click="applyFormat('## ')" class="px-2.5 py-2 sm:py-1.5 hover:bg-gray-200 hover:text-gray-900 rounded font-bold transition-colors focus:outline-none touch-manipulation shrink-0" title="Título 2">H2</button>
@@ -185,7 +186,7 @@ import { spellcheckPlugin } from '../cm-plugins/spellcheck'
 import { editorKeymaps } from '../cm-plugins/keymaps'
 
 // Commands and Extensions
-import { applyFormat as applyFormatCommand, insertLink as insertLinkCommand, insertImage as insertImageCommand } from '../cm-commands'
+import { applyFormat as applyFormatCommand, insertLink as insertLinkCommand, insertImage as insertImageCommand, transformCase } from '../cm-commands'
 import { editorTheme } from '../cm-extensions'
 import * as persistence from '../services/persistence'
 import * as exportService from '../services/export'
@@ -206,6 +207,7 @@ const editorContainer = ref<HTMLElement | null>(null)
 const pdfContainer = ref<HTMLElement | null>(null) // Ref for PDF rendering
 const status = ref('disconnected')
 const isSpellcheckEnabled = ref(persistence.get('spellcheck', true))
+const caseTransformIndex = ref(0) // 0: upper, 1: lower, 2: camel
 
 // Dialog states
 const showLinkDialog = ref(false)
@@ -356,6 +358,19 @@ const toggleSpellcheck = () => {
 const applyFormat = (prefix: string, suffix: string = '') => {
   if (!view) return
   applyFormatCommand(view, prefix, suffix)
+}
+
+// Text case transformation (cycles through upper, lower, camel)
+const transformCaseClick = () => {
+  if (!view) return
+  
+  const caseTypes: ('upper' | 'lower' | 'camel')[] = ['upper', 'lower', 'camel']
+  const currentCase = caseTypes[caseTransformIndex.value]
+  transformCase(view, currentCase)
+  
+  // Cycle to next case
+  caseTransformIndex.value = (caseTransformIndex.value + 1) % caseTypes.length
+  view.focus()
 }
 
 // Dialog functions

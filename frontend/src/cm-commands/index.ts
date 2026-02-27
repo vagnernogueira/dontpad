@@ -6,12 +6,12 @@
  */
 
 // Re-export all commands
-export { applyFormat, formatInline, formatLinePrefix } from './formatting'
+export { applyFormat, formatInline, formatLinePrefix, transformCase } from './formatting'
 export { insertLink, insertImage } from './insertions'
 export { createUndoCommand, createRedoCommand } from './history'
 
 // Import commands for registry
-import { formatInline, formatLinePrefix } from './formatting'
+import { formatInline, formatLinePrefix, transformCase } from './formatting'
 
 // Type definitions for the registry
 import type { EditorView } from '@codemirror/view'
@@ -42,4 +42,9 @@ export const commands = {
   numberedList: (view: EditorView) => formatLinePrefix(view, '1. '),
   checklist: (view: EditorView) => formatLinePrefix(view, '- [ ] '),
   quote: (view: EditorView) => formatLinePrefix(view, '> '),
-} as CommandRegistry
+
+  // Text case transformation
+  transformToUpperCase: (view: EditorView) => transformCase(view, 'upper'),
+  transformToLowerCase: (view: EditorView) => transformCase(view, 'lower'),
+  transformToCamelCase: (view: EditorView) => transformCase(view, 'camel'),
+}
