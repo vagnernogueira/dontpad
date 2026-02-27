@@ -5,15 +5,65 @@
  * - Inserir 4 espaços ao invés de tabs
  * - Indentar múltiplas linhas quando há seleção
  * - Inserir indentação antes de palavras quando apropriado
+ * - Permitir expansão de snippets quando aplicável
+ * 
+ * Prioridades (em ordem):
+ * 1. Tab com seleção: indenta as linhas selecionadas
+ * 2. Tab com snippet válido: deixa o snippetKeymap processar
+ * 3. Tab sem snippet: insere indentação normal
  * 
  * Funcionalidades:
  * - Tab com seleção: indenta todas as linhas selecionadas
- * - Tab sem seleção: insere 4 espaços
+ * - Tab sem seleção: verifica por snippet antes de indentar
  * - Detecção de palavras: insere antes da palavra se cursor está adjacente
  */
 
 import { keymap } from "@codemirror/view"
 import { EditorView } from "@codemirror/view"
+
+/**
+ * Extract word before cursor
+ * Duplicated from snippet.ts to avoid circular dependency
+ */
+function getWordBeforeCursor(view: EditorView): { word: string; from: number; to: number } | null {
+  const { state } = view
+  const pos = state.selection.main.head
+  const line = state.doc.lineAt(pos)
+  const lineText = line.text
+  const posInLine = pos - line.from
+  
+  if (posInLine === 0) {
+    return null
+  }
+  
+  const wordCharRegex = /\w/
+  let wordStart = posInLine
+  
+  while (wordStart > 0 && wordCharRegex.test(lineText[wordStart - 1])) {
+    wordStart--
+  }
+  
+  const word = lineText.substring(wordStart, posInLine)
+  
+  if (word.length === 0) {
+    return null
+  }
+  
+  return {
+    word,
+    from: line.from + wordStart,
+    to: pos
+  }
+}
+
+/**
+ * Check if a snippet with given prefix exists
+ * Duplicated from snippet.ts to avoid circular dependency
+ */
+function hasSnippetForPrefix(prefix: string): boolean {
+  const snippetPrefixes = ['dt', 'hr', 'lorem', 'table', 'code', 'link', 'img', 'task', 'snippets']
+  return snippetPrefixes.includes(prefix)
+}
 
 export const tabIndentKeymap = keymap.of([
     {
@@ -45,7 +95,14 @@ export const tabIndentKeymap = keymap.of([
                 return true
             }
 
-            // No selection: insert 4 spaces at cursor or before word
+            // ETAPA 8 FIX: Check if there's a snippet to expand before applying indentation
+            // If snippet exists, return false to let snippetKeymap handle it
+            const wordInfo = getWordBeforeCursor(editorView)
+            if (wordInfo && hasSnippetForPrefix(wordInfo.word)) {
+                return false // Let snippetKeymap process the Tab event
+            }
+
+            // No snippet found: apply indentation as normal
             const pos = selection.from
             const line = state.doc.lineAt(pos)
             const lineText = line.text
