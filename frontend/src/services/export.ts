@@ -5,6 +5,8 @@
  * Decoupled from UI to enable reuse and testing.
  */
 
+import { markdownStyles } from './pdf-styles'
+
 /**
  * Export document content as Markdown file
  * @param content - The markdown content to export
@@ -41,7 +43,7 @@ export async function markdownToHtml(content: string): Promise<string> {
 export async function downloadPDF(
   content: string,
   filename: string,
-  htmlStyles: string = ''
+  htmlStyles: string = markdownStyles
 ): Promise<void> {
   const [{ default: html2pdf }, htmlContent] = await Promise.all([
     import('html2pdf.js'),

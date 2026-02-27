@@ -140,13 +140,13 @@ frontend/
 │   ├── services/            # Business Logic & Infrastructure
 │   │   ├── persistence.ts      # localStorage abstraction
 │   │   ├── export.ts           # Markdown/PDF export
+│   │   ├── pdf-styles.ts        # CSS styles for PDF export
 │   │   ├── document-api.ts     # Document lock/unlock API client
 │   │   └── config.ts           # Environment config (API/WS URLs)
 │   │
 │   ├── App.vue              # Root component
 │   ├── main.ts              # Application entry point
 │   ├── index.css            # Global styles (Tailwind)
-│   ├── pdf-styles.ts        # Inline CSS for PDF export
 │   └── vite-env.d.ts        # Vite type definitions
 │
 ├── public/                  # Static assets
@@ -382,13 +382,18 @@ persistence.set('spellcheck', false)
 
 #### `export.ts`
 **Padrão:** Async module com lazy loading  
-**Responsabilidade:** Download de documentos
+**Responsabilidade:** Download de documentos (Markdown/PDF)
 
 **API:**
 ```typescript
 downloadMarkdown(content: string, filename: string): void
 markdownToHtml(content: string): Promise<string>
-downloadPDF(content: string, filename: string, htmlStyles: string): Promise<void>
+downloadPDF(content: string, filename: string, htmlStyles?: string): Promise<void>
+**Integração com pdf-styles.ts:**
+- Importa `markdownStyles` de `pdf-styles.ts` como default
+- Parâmetro `htmlStyles` é opcional (usa estilos GitHub-like por padrão)
+- Permite override de estilos quando necessário
+
 ```
 
 **Lazy Loading:**

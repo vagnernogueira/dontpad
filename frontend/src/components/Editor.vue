@@ -194,9 +194,6 @@ import { createDocumentAPI } from '../services/document-api'
 import { getApiBaseUrl, getWsBaseUrl } from '../services/config'
 import { getRandomCursorColor, getRandomCursorName, getCursorAwarenessState } from '../cm-utils/cursor'
 
-// PDF & Markdown Exports
-import { markdownStyles } from '../pdf-styles'
-
 // Initialize services
 const apiBaseUrl = getApiBaseUrl()
 const wsBaseUrl = getWsBaseUrl()
@@ -495,7 +492,7 @@ const downloadMarkdown = () => {
 const downloadPDF = async () => {
   if (!view) return
   const text = view.state.doc.toString()
-  await exportService.downloadPDF(text, documentId.value, markdownStyles)
+  await exportService.downloadPDF(text, documentId.value)
 }
 
 const cleanup = () => {
