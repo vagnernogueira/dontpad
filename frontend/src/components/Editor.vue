@@ -173,7 +173,6 @@ import { Compartment, EditorState } from '@codemirror/state'
 import { EditorView, basicSetup } from 'codemirror'
 import { drawSelection } from '@codemirror/view'
 import { markdown } from '@codemirror/lang-markdown'
-import { defaultHighlightStyle, syntaxHighlighting } from '@codemirror/language'
 import { Strikethrough } from '@lezer/markdown'
 import { yCollab } from 'y-codemirror.next'
 import { markdownPreviewPlugin } from '../cm-plugins/markdown-preview'
@@ -279,7 +278,6 @@ const initEditor = () => {
       spellcheckCompartment.of(spellcheckPlugin(isSpellcheckEnabled.value)),
       EditorView.lineWrapping,
       markdown({ extensions: [Strikethrough, { remove: ['IndentedCode', 'SetextHeading'] }] }),
-      syntaxHighlighting(defaultHighlightStyle),
       ...editorTheme,
       listCustomPlugin,
       codeBlockPlugin,
