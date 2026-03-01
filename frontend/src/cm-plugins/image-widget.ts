@@ -13,6 +13,7 @@
 
 import { ViewPlugin, Decoration, WidgetType, EditorView, DecorationSet, ViewUpdate } from "@codemirror/view"
 import { RangeSetBuilder } from "@codemirror/state"
+import { syntaxTree } from "@codemirror/language"
 
 /**
  * Widget customizado que renderiza uma imagem no editor
@@ -49,7 +50,26 @@ class ImageWidget extends WidgetType {
 }
 
 /**
- * Constrói decorações para todas as imagens no documento visível
+ * Verifica se uma posição está dentro de um nó de código (inline ou bloco)
+ * usando a árvore sintática do CodeMirror.
+ */
+function isInsideCode(view: EditorView, pos: number): boolean {
+    const tree = syntaxTree(view.state)
+    let node = tree.resolveInner(pos, -1)
+    while (node) {
+        const name = node.type.name
+        if (name === 'InlineCode' || name === 'FencedCode' || name === 'CodeBlock') {
+            return true
+        }
+        if (!node.parent) break
+        node = node.parent
+    }
+    return false
+}
+
+/**
+ * Constrói decorações para todas as imagens no documento visível,
+ * ignorando ocorrências dentro de código inline ou bloco de código.
  */
 function buildImageDecorations(view: EditorView) {
     const builder = new RangeSetBuilder<Decoration>()
@@ -58,7 +78,9 @@ function buildImageDecorations(view: EditorView) {
         const regex = /!\[.*?\]\(([^)]+)\)/g
         let match
         while ((match = regex.exec(text))) {
-            const pos = from + match.index + match[0].length
+            const matchStart = from + match.index
+            if (isInsideCode(view, matchStart)) continue
+            const pos = matchStart + match[0].length
             builder.add(pos, pos, Decoration.widget({
                 widget: new ImageWidget(match[1]),
                 side: 1
