@@ -25,6 +25,8 @@ participantes.
 - Suporte a texto simples e Markdown.
 - Salvamento automático e persistência local.
 - Bloqueio de documento por senha com bypass administrativo por senha mestre.
+- Explorer administrativo em `/explorer`, protegido por senha mestra.
+- Gestão centralizada de documentos com ordenação, filtro e ações por item.
 
 ## Convenções de Frontend
 
@@ -55,6 +57,7 @@ cp .env.example .env
 Defina no `.env` ao menos:
 
 - `VITE_HOME_DOCS_PASSWORD` com uma senha forte.
+- `DOCUMENTS_MASTER_PASSWORD` com uma senha forte para APIs administrativas e acesso ao Explorer.
 
 ### Como Compilar
 
@@ -90,10 +93,20 @@ Crie um `.env` na raiz (mesmo nível de `docker-compose.yml`) com:
 
 ```bash
 VITE_HOME_DOCS_PASSWORD=defina-uma-senha-forte
+DOCUMENTS_MASTER_PASSWORD=defina-uma-senha-mestra-forte
 VITE_HOME_DOCS_SHORTCUT=Alt+R
 VITE_BACKEND_HTTP_URL=https://dontpad.vagnernogueira.com
 VITE_BACKEND_WS_URL=wss://dontpad.vagnernogueira.com/api
 ```
+
+## Explorer de Documentos
+
+- Rota: `/explorer`.
+- Acesso: exige senha mestra válida (`DOCUMENTS_MASTER_PASSWORD`).
+- A rota não cria documento automaticamente.
+- A tela lista documentos com: seleção, nome, data de criação, data de alteração, travado (S/N), vazio (S/N), aberto (S/N).
+- Suporta ordenação por coluna, busca por nome e seleção única.
+- Ações disponíveis para o documento selecionado: renomear, remover, download markdown, download PDF e travar.
 
 Suba o ambiente:
 
@@ -129,6 +142,7 @@ Histórico e evolução do projeto:
 
 - [Arquitetura do Sistema](./_docs/ARCHITETURE.md) — decisões técnicas, visão arquitetural e componentes.
 - [Plugins do CodeMirror](./_docs/ARCHITETURE-plugins.md) — estrutura, uso e implementação dos plugins customizados do editor.
+- [Explorer de Documentos](./_docs/EXPLORER.md) — fluxo funcional, regras e endpoints da gestão administrativa.
 - [Documentação do CodeMirror](./_docs/codemirror6-documentation.md) — Cópia da documentação oficial do CodeMirror 6, em formato Markdown.
 
 ---

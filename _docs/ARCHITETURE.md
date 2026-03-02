@@ -1,7 +1,7 @@
 # DontPad - Arquitetura de Software (Frontend + Backend)
 
-**Versão:** 2.0  
-**Data:** 01 de Março de 2026  
+**Versão:** 2.1  
+**Data:** 02 de Março de 2026  
 **Tipo:** Editor Colaborativo de Markdown em Tempo Real  
 **Arquitetura:** SPA + API/WS Backend com sincronização CRDT
 
@@ -32,6 +32,7 @@ O DontPad é uma aplicação full-stack para edição colaborativa de documentos
 - ✅ Edição colaborativa em tempo real (múltiplos usuários simultâneos)
 - ✅ Proteção por senha de documentos
 - ✅ API HTTP para lock/unlock, verificação de acesso e listagem de documentos
+- ✅ Explorer administrativo protegido por senha mestra em `/explorer`
 - ✅ Persistência de documentos colaborativos em LevelDB
 - ✅ Exportação para Markdown e PDF
 - ✅ Correção ortográfica integrada
@@ -79,6 +80,7 @@ O DontPad é uma aplicação full-stack para edição colaborativa de documentos
 | **y-leveldb**           | 0.1.2         | Persistência incremental dos updates CRDT    |
 | **LevelDB**             | via y-leveldb | Armazenamento de documentos no disco         |
 | **document-locks.json** | -             | Armazena hashes/salts de senha de documentos |
+| **document-metadata.json** | -          | Armazena metadados de criação/alteração dos documentos |
 
 ### UI & Styling
 
@@ -177,7 +179,8 @@ O DontPad é uma aplicação full-stack para edição colaborativa de documentos
         │
         ├── components/               # Componentes de tela
         │   ├── Home.vue              # Landing page
-        │   └── Editor.vue            # Editor principal colaborativo
+        │   ├── Editor.vue            # Editor principal colaborativo
+        │   └── Explorer.vue          # Gestão administrativa de documentos
         │
         ├── cm-commands/              # Commands stateless do CodeMirror
         │   ├── formatting.ts         # Formatação inline e de linha
@@ -254,6 +257,20 @@ O DontPad é uma aplicação full-stack para edição colaborativa de documentos
 - Fetch direto de APIs (delegado para `services/document-api`)
 - Manipulação de localStorage (delegado para `services/persistence`)
 - Export logic (delegado para `services/export`)
+
+#### `Explorer.vue`
+
+**Responsabilidades:**
+
+- Proteger acesso administrativo via senha mestra;
+- Listar documentos com metadados e status (travado, vazio, aberto);
+- Aplicar busca por nome, ordenação por coluna e seleção única;
+- Executar ações de item: renomear, remover, download markdown, download PDF e travar.
+
+**NÃO faz:**
+
+- Criação automática de documento ao acessar `/explorer`;
+- Ações em lote (multi-seleção).
 
 ---
 
@@ -913,13 +930,16 @@ export const formatInline = (
 | Arquivo                                 | Descrição                                                                                |
 | --------------------------------------- | ---------------------------------------------------------------------------------------- |
 | `frontend/src/components/Editor.vue`    | Componente principal do editor colaborativo (UI, integração com CodeMirror e Yjs).       |
-| `frontend/src/services/document-api.ts` | Cliente HTTP para lock, unlock e verificação de acesso de documentos.                    |
+| `frontend/src/components/Explorer.vue`  | Componente de gestão administrativa de documentos na rota protegida `/explorer`.         |
+| `frontend/src/services/document-api.ts` | Cliente HTTP para lock, unlock, acesso e operações administrativas de documentos.        |
 | `frontend/src/services/config.ts`       | Resolução de URLs HTTP/WS por ambiente (`VITE_BACKEND_HTTP_URL`, `VITE_BACKEND_WS_URL`). |
 | `backend/src/server.ts`                 | Bootstrap do backend (Express + WebSocket), rotas API e integração com sincronização.    |
-| `backend/src/sync.ts`                   | Persistência CRDT, autenticação de acesso de documento e controle de locks.              |
+| `backend/src/sync.ts`                   | Persistência CRDT, autenticação de acesso e operações administrativas de documentos.      |
 | `backend/db/document-locks.json`        | Persistência de metadados de lock por documento (hash/salt).                             |
+| `backend/db/document-metadata.json`     | Persistência de datas de criação e alteração de documentos.                              |
 | `_docs/ARCHITETURE.md`                  | Documento arquitetural principal (fonte de verdade da arquitetura atual).                |
 | `_docs/ARCHITETURE-plugins.md`          | Arquitetura e padrões dos plugins do CodeMirror.                                         |
+| `_docs/EXPLORER.md`                     | Documentação funcional e técnica da rota administrativa `/explorer`.                     |
 | `_docs/codemirror6-documentation.md`    | Referência técnica local do CodeMirror 6 para consulta do time.                          |
 | `docker-compose.yml`                    | Orquestração de serviços para execução em produção/on-premises.                          |
 | `Makefile`                              | Atalhos operacionais para ciclo de desenvolvimento e execução conteinerizada.            |
@@ -1669,7 +1689,10 @@ backend/
 | Método   | Rota                                | Objetivo                                                                                |
 | -------- | ----------------------------------- | --------------------------------------------------------------------------------------- |
 | `GET`    | `/api/health`                       | Health check do serviço                                                                 |
-| `GET`    | `/api/documents`                    | Lista documentos persistidos (protegido por senha mestre via header `x-docs-password`)  |
+| `GET`    | `/api/documents`                    | Lista documentos persistidos e seus summaries (protegido por `x-docs-password`)         |
+| `GET`    | `/api/document-content?documentId=...` | Retorna conteúdo markdown de um documento (protegido por `x-docs-password`)         |
+| `POST`   | `/api/documents/rename`             | Renomeia documento e rota associada (protegido por `x-docs-password`)                   |
+| `DELETE` | `/api/documents`                    | Remove documento permanentemente (protegido por `x-docs-password`)                       |
 | `GET`    | `/api/document-lock?documentId=...` | Consulta se documento está travado                                                      |
 | `POST`   | `/api/document-lock`                | Define/atualiza senha de lock de um documento                                           |
 | `DELETE` | `/api/document-lock`                | Remove lock (requer senha válida)                                                       |
@@ -1683,6 +1706,8 @@ backend/
 
 - Inicializa persistência de CRDT com `y-leveldb` em `backend/db/yjs-data`;
 - Gerencia lock de documentos em memória + disco (`backend/db/document-locks.json`);
+- Gerencia metadados de documentos em disco (`backend/db/document-metadata.json`);
+- Mantém status de documento aberto por sessões WebSocket ativas;
 - Faz hash de senha com `crypto.scryptSync` e comparação com `timingSafeEqual`;
 - Configura hooks de persistência via `setPersistence` do `y-websocket`;
 - Implementa wrapper de `setupWSConnection` para autenticar acesso WebSocket em documentos lockados.
@@ -1690,9 +1715,13 @@ backend/
 **Funções principais expostas:**
 
 - `listDocumentNames()`
+- `listDocumentSummaries()`
+- `getDocumentContent(docName)`
 - `isDocumentLocked(docName)`
 - `setDocumentPassword(docName, password)`
 - `removeDocumentPassword(docName)`
+- `renameDocument(fromDocName, toDocName)`
+- `deleteDocument(docName)`
 - `verifyDocumentAccess(docName, password)`
 - `verifyDocumentsMasterPassword(password)`
 
