@@ -1,0 +1,10 @@
+{
+  "default": true,
+  "MD033": false,
+  "MD013": false,
+  "MD041": true,
+  "MD060": {
+    "style": "aligned",
+    "aligned_delimiter": true
+  }
+}
