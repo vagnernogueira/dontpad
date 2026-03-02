@@ -1,6 +1,6 @@
 # CodeMirror Plugins
 
-Este diretório contém todos os plugins customizados do CodeMirror utilizados no editor de Markdown.
+Este documento detalha a estrutura, uso e implementação dos plugins customizados do CodeMirror utilizados no editor de Markdown do projeto. O diretório `../frontend/src/cm-plugins/` contém todos os plugins customizados do CodeMirror utilizados no editor de Markdown.
 
 ## Estrutura dos Plugins
 
@@ -14,7 +14,7 @@ Este diretório contém todos os plugins customizados do CodeMirror utilizados n
 ### Estilização de Elementos
 
 - **list.ts** - Aplica estilização especial para listas (ordenadas e não ordenadas)
-- **code-block.ts** - Detecta e estiliza blocos de código delimitados por ``` 
+- **code-block.ts** - Detecta e estiliza blocos de código delimitados por ```
 - **plain-url.ts** - Detecta e estiliza URLs avulsas (não em sintaxe Markdown)
 
 ### Keymaps (Atalhos de Teclado)
@@ -86,16 +86,16 @@ Cada arquivo de plugin segue esta estrutura básica:
 
 O plugin **snippet.ts** fornece os seguintes snippets prontos para uso:
 
-| Gatilho | TAB | Resultado |
-|---------|-----|-----------|
-| `dt` | TAB | Data atual (DD/MM/YYYY) |
-| `hr` | TAB | Hora atual (HH:MM) |
-| `lorem` | TAB | Parágrafo lorem ipsum completo |
-| `table` | TAB | Tabela markdown básica |
-| `code` | TAB | Bloco de código com ``` |
-| `link` | TAB | Link markdown `[texto](url)` |
-| `img` | TAB | Imagem markdown `![alt](url)` |
-| `task` | TAB | Item de checklist `- [ ]` |
+| Gatilho    | TAB | Resultado                           |
+| ---------- | --- | ----------------------------------- |
+| `dt`       | TAB | Data atual (DD/MM/YYYY)             |
+| `hr`       | TAB | Hora atual (HH:MM)                  |
+| `lorem`    | TAB | Parágrafo lorem ipsum completo      |
+| `table`    | TAB | Tabela markdown básica              |
+| `code`     | TAB | Bloco de código com fences          |
+| `link`     | TAB | Link markdown `[texto](url)`        |
+| `img`      | TAB | Imagem markdown `![alt](url)`       |
+| `task`     | TAB | Item de checklist `- [ ]`           |
 | `snippets` | TAB | Lista todos os snippets disponíveis |
 
 ### Como adicionar novos snippets
@@ -152,3 +152,8 @@ O parser de math é propositalmente simples e seguro, com suporte apenas ao conj
 - Argumentos de funções separados por vírgula.
 
 Fora desse conjunto, a expressão é rejeitada (sem execução de código externo).
+
+## Documentação Adicional
+
+- [Documentação do CodeMirror](./codemirror6-documentation.md) — Cópia da documentação oficial do CodeMirror 6, em formato Markdown.
+- [Arquitetura do Sistema](../ARCHITETURE.md) — visão geral da arquitetura do sistema, incluindo stack tecnológico, estrutura de diretórios e decisões arquiteturais.

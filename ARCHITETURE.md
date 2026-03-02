@@ -1467,10 +1467,8 @@ TS2769: No overload matches this call
 
 ### 9.3 Internal Docs
 
-- `REFACTORING-MEMORIAL.md` - História das refatorações
-- `REFACTORING-PLAN.md` - Plano original de refatoração
-- `REFACTORING-ANALYSIS.md` - Análise de oportunidades futuras
-- `cm-plugins/README.md` - Documentação de plugins
+- [Plugins do CodeMirror](./_docs/ARCHITETURE-plugins.md) — estrutura, uso e implementação dos plugins customizados do editor.
+- [Documentação do CodeMirror](./codemirror6-documentation.md) — Cópia da documentação oficial do CodeMirror 6, em formato Markdown.
 
 ### 9.4 Community
 

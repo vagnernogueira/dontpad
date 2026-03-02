@@ -130,5 +130,7 @@ Histórico e evolução do projeto:
 ## Documentação Adicional
 
 - [Arquitetura do Sistema](./ARCHITETURE.md) — decisões técnicas, visão arquitetural e componentes.
+- [Plugins do CodeMirror](./_docs/ARCHITETURE-plugins.md) — estrutura, uso e implementação dos plugins customizados do editor.
+- [Documentação do CodeMirror](./codemirror6-documentation.md) — Cópia da documentação oficial do CodeMirror 6, em formato Markdown.
 
 ---
