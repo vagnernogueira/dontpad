@@ -2,7 +2,7 @@ import express from 'express';
 import http from 'http';
 import { WebSocketServer } from 'ws';
 import setupWSConnection from './sync';
-import { listDocumentNames } from './sync';
+import { listDocumentNames, listDocumentSummaries, getDocumentContent, renameDocument, deleteDocument } from './sync';
 import { isDocumentLocked, setDocumentPassword, verifyDocumentAccess, verifyDocumentsMasterPassword } from './sync';
 import { removeDocumentPassword } from './sync';
 import cors from 'cors';
@@ -26,10 +26,81 @@ app.get('/api/documents', async (req, res) => {
         }
 
         const documents = await listDocumentNames();
-        res.json({ documents });
+        const summaries = await listDocumentSummaries();
+        res.json({ documents, summaries });
     } catch (error) {
         console.error('Failed to list documents', error);
         res.status(500).json({ error: 'failed_to_list_documents' });
+    }
+});
+
+app.get('/api/document-content', async (req, res) => {
+    try {
+        const providedPassword = typeof req.headers['x-docs-password'] === 'string' ? req.headers['x-docs-password'] : '';
+        if (!verifyDocumentsMasterPassword(providedPassword)) {
+            res.status(403).json({ error: 'invalid_password' });
+            return;
+        }
+
+        const documentId = typeof req.query.documentId === 'string' ? req.query.documentId : '';
+        if (!documentId.trim()) {
+            res.status(400).json({ error: 'document_id_required' });
+            return;
+        }
+
+        const content = await getDocumentContent(documentId);
+        res.json({ documentId, content });
+    } catch (error) {
+        console.error('Failed to load document content', error);
+        res.status(500).json({ error: 'failed_to_load_document_content' });
+    }
+});
+
+app.post('/api/documents/rename', async (req, res) => {
+    try {
+        const providedPassword = typeof req.headers['x-docs-password'] === 'string' ? req.headers['x-docs-password'] : '';
+        if (!verifyDocumentsMasterPassword(providedPassword)) {
+            res.status(403).json({ error: 'invalid_password' });
+            return;
+        }
+
+        const from = typeof req.body?.from === 'string' ? req.body.from : '';
+        const to = typeof req.body?.to === 'string' ? req.body.to : '';
+        const result = await renameDocument(from, to);
+
+        if (!result.ok) {
+            const status = result.error === 'source_document_not_found' ? 404 : 400;
+            res.status(status).json({ error: result.error });
+            return;
+        }
+
+        res.json({ ok: true });
+    } catch (error) {
+        console.error('Failed to rename document', error);
+        res.status(500).json({ error: 'failed_to_rename_document' });
+    }
+});
+
+app.delete('/api/documents', async (req, res) => {
+    try {
+        const providedPassword = typeof req.headers['x-docs-password'] === 'string' ? req.headers['x-docs-password'] : '';
+        if (!verifyDocumentsMasterPassword(providedPassword)) {
+            res.status(403).json({ error: 'invalid_password' });
+            return;
+        }
+
+        const documentId = typeof req.body?.documentId === 'string' ? req.body.documentId : '';
+        const result = await deleteDocument(documentId);
+        if (!result.ok) {
+            const status = result.error === 'document_not_found' ? 404 : 400;
+            res.status(status).json({ error: result.error });
+            return;
+        }
+
+        res.json({ ok: true });
+    } catch (error) {
+        console.error('Failed to delete document', error);
+        res.status(500).json({ error: 'failed_to_delete_document' });
     }
 });
 

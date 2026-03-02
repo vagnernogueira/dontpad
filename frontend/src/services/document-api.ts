@@ -14,6 +14,15 @@ export interface DocumentAccessPayload {
   password: string
 }
 
+export interface DocumentSummary {
+  name: string
+  createdAt: string
+  updatedAt: string
+  locked: boolean
+  empty: boolean
+  open: boolean
+}
+
 /**
  * API client for document operations
  */
@@ -118,6 +127,110 @@ class DocumentAPI {
       return response.ok
     } catch (error) {
       console.error('Failed to unlock document:', error)
+      return false
+    }
+  }
+
+  /**
+   * List document summaries (requires master password)
+   */
+  async listSummaries(masterPassword: string): Promise<DocumentSummary[] | null> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/documents`, {
+        headers: {
+          'x-docs-password': masterPassword
+        }
+      })
+
+      if (!response.ok) {
+        return null
+      }
+
+      const payload = await response.json() as { summaries?: unknown }
+      if (!Array.isArray(payload.summaries)) {
+        return []
+      }
+
+      return payload.summaries.filter((item): item is DocumentSummary => {
+        if (!item || typeof item !== 'object') return false
+        const candidate = item as Partial<DocumentSummary>
+        return typeof candidate.name === 'string'
+          && typeof candidate.createdAt === 'string'
+          && typeof candidate.updatedAt === 'string'
+          && typeof candidate.locked === 'boolean'
+          && typeof candidate.empty === 'boolean'
+          && typeof candidate.open === 'boolean'
+      })
+    } catch (error) {
+      console.error('Failed to list document summaries:', error)
+      return null
+    }
+  }
+
+  /**
+   * Load raw markdown content for a document (requires master password)
+   */
+  async getDocumentContent(documentId: string, masterPassword: string): Promise<string | null> {
+    try {
+      const response = await fetch(
+        `${this.baseUrl}/api/document-content?documentId=${encodeURIComponent(documentId)}`,
+        {
+          headers: {
+            'x-docs-password': masterPassword
+          }
+        }
+      )
+
+      if (!response.ok) {
+        return null
+      }
+
+      const payload = await response.json() as { content?: unknown }
+      return typeof payload.content === 'string' ? payload.content : null
+    } catch (error) {
+      console.error('Failed to load document content:', error)
+      return null
+    }
+  }
+
+  /**
+   * Rename a document (requires master password)
+   */
+  async renameDocument(from: string, to: string, masterPassword: string): Promise<boolean> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/documents/rename`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-docs-password': masterPassword
+        },
+        body: JSON.stringify({ from, to })
+      })
+
+      return response.ok
+    } catch (error) {
+      console.error('Failed to rename document:', error)
+      return false
+    }
+  }
+
+  /**
+   * Remove a document (requires master password)
+   */
+  async removeDocument(documentId: string, masterPassword: string): Promise<boolean> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/documents`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-docs-password': masterPassword
+        },
+        body: JSON.stringify({ documentId })
+      })
+
+      return response.ok
+    } catch (error) {
+      console.error('Failed to remove document:', error)
       return false
     }
   }

@@ -5,6 +5,7 @@ import App from './App.vue'
 
 const routes = [
     { path: '/', component: () => import('./components/Home.vue') },
+    { path: '/explorer', component: () => import('./components/Explorer.vue') },
     { path: '/:documentId(.*)', component: () => import('./components/Editor.vue') } // Catch-all for subdocuments like /a/b/c
 ]
 
