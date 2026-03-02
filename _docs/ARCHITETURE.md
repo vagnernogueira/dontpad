@@ -75,12 +75,12 @@ O DontPad é uma aplicação full-stack para edição colaborativa de documentos
 
 ### Persistência & Estado
 
-| Tecnologia              | Versão        | Propósito                                    |
-| ----------------------- | ------------- | -------------------------------------------- |
-| **y-leveldb**           | 0.1.2         | Persistência incremental dos updates CRDT    |
-| **LevelDB**             | via y-leveldb | Armazenamento de documentos no disco         |
-| **document-locks.json** | -             | Armazena hashes/salts de senha de documentos |
-| **document-metadata.json** | -          | Armazena metadados de criação/alteração dos documentos |
+| Tecnologia                 | Versão        | Propósito                                              |
+| -------------------------- | ------------- | ------------------------------------------------------ |
+| **y-leveldb**              | 0.1.2         | Persistência incremental dos updates CRDT              |
+| **LevelDB**                | via y-leveldb | Armazenamento de documentos no disco                   |
+| **document-locks.json**    | -             | Armazena hashes/salts de senha de documentos           |
+| **document-metadata.json** | -             | Armazena metadados de criação/alteração dos documentos |
 
 ### UI & Styling
 
@@ -934,7 +934,7 @@ export const formatInline = (
 | `frontend/src/services/document-api.ts` | Cliente HTTP para lock, unlock, acesso e operações administrativas de documentos.        |
 | `frontend/src/services/config.ts`       | Resolução de URLs HTTP/WS por ambiente (`VITE_BACKEND_HTTP_URL`, `VITE_BACKEND_WS_URL`). |
 | `backend/src/server.ts`                 | Bootstrap do backend (Express + WebSocket), rotas API e integração com sincronização.    |
-| `backend/src/sync.ts`                   | Persistência CRDT, autenticação de acesso e operações administrativas de documentos.      |
+| `backend/src/sync.ts`                   | Persistência CRDT, autenticação de acesso e operações administrativas de documentos.     |
 | `backend/db/document-locks.json`        | Persistência de metadados de lock por documento (hash/salt).                             |
 | `backend/db/document-metadata.json`     | Persistência de datas de criação e alteração de documentos.                              |
 | `_docs/ARCHITETURE.md`                  | Documento arquitetural principal (fonte de verdade da arquitetura atual).                |
@@ -1686,17 +1686,17 @@ backend/
 
 **Rotas expostas:**
 
-| Método   | Rota                                | Objetivo                                                                                |
-| -------- | ----------------------------------- | --------------------------------------------------------------------------------------- |
-| `GET`    | `/api/health`                       | Health check do serviço                                                                 |
-| `GET`    | `/api/documents`                    | Lista documentos persistidos e seus summaries (protegido por `x-docs-password`)         |
-| `GET`    | `/api/document-content?documentId=...` | Retorna conteúdo markdown de um documento (protegido por `x-docs-password`)         |
-| `POST`   | `/api/documents/rename`             | Renomeia documento e rota associada (protegido por `x-docs-password`)                   |
-| `DELETE` | `/api/documents`                    | Remove documento permanentemente (protegido por `x-docs-password`)                       |
-| `GET`    | `/api/document-lock?documentId=...` | Consulta se documento está travado                                                      |
-| `POST`   | `/api/document-lock`                | Define/atualiza senha de lock de um documento                                           |
-| `DELETE` | `/api/document-lock`                | Remove lock (requer senha válida)                                                       |
-| `POST`   | `/api/document-access`              | Verifica permissão de acesso ao documento                                               |
+| Método   | Rota                                   | Objetivo                                                                                |
+| -------- | -------------------------------------- | --------------------------------------------------------------------------------------- |
+| `GET`    | `/api/health`                          | Health check do serviço                                                                 |
+| `GET`    | `/api/documents`                       | Lista documentos persistidos e seus summaries (protegido por `x-docs-password`)         |
+| `GET`    | `/api/document-content?documentId=...` | Retorna conteúdo markdown de um documento (protegido por `x-docs-password`)             |
+| `POST`   | `/api/documents/rename`                | Renomeia documento e rota associada (protegido por `x-docs-password`)                   |
+| `DELETE` | `/api/documents`                       | Remove documento permanentemente (protegido por `x-docs-password`)                      |
+| `GET`    | `/api/document-lock?documentId=...`    | Consulta se documento está travado                                                      |
+| `POST`   | `/api/document-lock`                   | Define/atualiza senha de lock de um documento                                           |
+| `DELETE` | `/api/document-lock`                   | Remove lock (requer senha válida)                                                       |
+| `POST`   | `/api/document-access`                 | Verifica permissão de acesso ao documento                                               |
 
 ---
 
