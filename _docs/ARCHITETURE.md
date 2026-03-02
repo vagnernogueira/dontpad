@@ -135,64 +135,92 @@ O DontPad é uma aplicação full-stack para edição colaborativa de documentos
 ## 4. Estrutura de Pastas
 
 ```filesystem
-frontend/
-├── src/
-│   ├── components/           # Vue Components
-│   │   ├── Home.vue         # Landing page
-│   │   └── Editor.vue       # Main editor component (533 linhas)
-│   │
-│   ├── cm-commands/         # CodeMirror Commands (Stateless Actions)
-│   │   ├── formatting.ts    # Inline & line-level formatting
-│   │   ├── insertions.ts    # Link & image insertion
-│   │   ├── history.ts       # Undo/Redo commands
-│   │   └── index.ts         # Command registry & exports
-│   │
-│   ├── cm-extensions/       # CodeMirror Extensions (Continuous Behavior)
-│   │   ├── editor-theme.ts  # Theme & syntax highlighting
-│   │   └── index.ts         # Extension bundle
-│   │
-│   ├── cm-plugins/          # CodeMirror ViewPlugins (Decorations & DOM)
-│   │   ├── code-block.ts            # Code block decoration
-│   │   ├── ctrl-click-navigation.ts # Ctrl+click to open links
-│   │   ├── delete-line-keymap.ts    # Ctrl+D delete line
-│   │   ├── enter-keymap.ts          # Smart Enter key
-│   │   ├── horizontal-rule-widget.ts # HR visual widget
-│   │   ├── image-widget.ts          # Image preview widgets
-│   │   ├── link-widget.ts           # Link decoration
-│   │   ├── list.ts                  # List continuation
-│   │   ├── markdown-preview.ts      # Inline MD preview
-│   │   ├── math.ts                  # Math calculation (e.g., 2+2=)
-│   │   ├── multi-click.ts           # Multi-click selection
-│   │   ├── plain-url.ts             # Auto-link URLs
-│   │   ├── snippet.ts               # Code snippets expansion
-│   │   ├── spellcheck.ts            # Spellcheck integration
-│   │   ├── tab-keymap.ts            # Tab handling
-│   │   └── README.md                # Plugin documentation
-│   │
-│   ├── cm-utils/            # CodeMirror Utilities (Shared Helpers)
-│   │   ├── word-boundaries.ts  # Word detection for smart selection
-│   │   └── cursor.ts           # Collaborative cursor utilities
-│   │
-│   ├── services/            # Business Logic & Infrastructure
-│   │   ├── persistence.ts      # localStorage abstraction
-│   │   ├── export.ts           # Markdown/PDF export
-│   │   ├── pdf-styles.ts        # CSS styles for PDF export
-│   │   ├── document-api.ts     # Document lock/unlock API client
-│   │   └── config.ts           # Environment config (API/WS URLs)
-│   │
-│   ├── App.vue              # Root component
-│   ├── main.ts              # Application entry point
-│   ├── index.css            # Global styles (Tailwind)
-│   └── vite-env.d.ts        # Vite type definitions
+.
+├── .env                              # Variáveis locais de execução
+├── .env.example                      # Template de variáveis de ambiente
+├── .gitignore                        # Regras de versionamento
+├── .markdownlint.json                # Configuração de lint para Markdown
+├── docker-compose.yml                # Orquestração de serviços
+├── Makefile                          # Atalhos de desenvolvimento/operação
+├── README.md                         # Documentação de entrada do projeto
 │
-├── public/                  # Static assets
-├── index.html               # HTML entry point
-├── package.json             # Dependencies & scripts
-├── tsconfig.json            # TypeScript config
-├── vite.config.ts           # Vite configuration
-├── tailwind.config.js       # Tailwind configuration
-└── postcss.config.js        # PostCSS configuration
+├── _docs/                            # Documentação Markdown versionada (centralizada)
+│   ├── ARCHITETURE.md                # Arquitetura unificada frontend + backend
+│   ├── ARCHITETURE-plugins.md        # Arquitetura dos plugins CodeMirror
+│   └── codemirror6-documentation.md  # Referência técnica do CodeMirror 6
+│
+├── backend/
+│   ├── Dockerfile                    # Build/runtime do backend
+│   ├── package.json                  # Scripts e dependências do backend
+│   ├── package-lock.json             # Lockfile npm do backend
+│   ├── tsconfig.json                 # TypeScript config do backend
+│   └── src/
+│       ├── server.ts                 # Bootstrap HTTP + WS + rotas API
+│       └── sync.ts                   # Sync Yjs, persistência e locks
+│
+└── frontend/
+    ├── Dockerfile                    # Build/runtime do frontend
+    ├── index.html                    # Entry HTML da SPA
+    ├── package.json                  # Scripts e dependências do frontend
+    ├── package-lock.json             # Lockfile npm do frontend
+    ├── postcss.config.js             # Config PostCSS
+    ├── tailwind.config.js            # Config Tailwind CSS
+    ├── tsconfig.json                 # TypeScript config da app
+    ├── tsconfig.node.json            # TypeScript config para Vite/Node tooling
+    ├── vite.config.ts                # Configuração do Vite
+    ├── public/                       # Assets estáticos públicos
+    └── src/
+        ├── App.vue                   # Componente raiz da aplicação
+        ├── index.css                 # Estilos globais
+        ├── main.ts                   # Entry point Vue
+        ├── vite-env.d.ts             # Tipos de ambiente do Vite
+        │
+        ├── components/               # Componentes de tela
+        │   ├── Home.vue              # Landing page
+        │   └── Editor.vue            # Editor principal colaborativo
+        │
+        ├── cm-commands/              # Commands stateless do CodeMirror
+        │   ├── formatting.ts         # Formatação inline e de linha
+        │   ├── history.ts            # Undo/Redo com Yjs UndoManager
+        │   ├── index.ts              # Registry/re-export de comandos
+        │   └── insertions.ts         # Inserções (link/imagem)
+        │
+        ├── cm-extensions/            # Extensions contínuas do editor
+        │   ├── editor-theme.ts       # Tema visual e highlighting
+        │   └── index.ts              # Bundle de extensões
+        │
+        ├── cm-plugins/               # ViewPlugins e keymaps do editor
+        │   ├── checkbox-widget.ts
+        │   ├── code-block.ts
+        │   ├── delete-line-keymap.ts
+        │   ├── enter-keymap.ts
+        │   ├── horizontal-rule-widget.ts
+        │   ├── image-widget.ts
+        │   ├── keymaps.ts
+        │   ├── link-widget.ts
+        │   ├── list.ts
+        │   ├── markdown-preview.ts
+        │   ├── math.ts
+        │   ├── multi-click.ts
+        │   ├── plain-url.ts
+        │   ├── snippet.ts
+        │   ├── spellcheck.ts
+        │   └── tab-keymap.ts
+        │
+        ├── cm-utils/                 # Utilitários compartilhados do editor
+        │   ├── cursor.ts             # Helpers de cursores colaborativos
+        │   ├── markdown-parsing.ts   # Helpers de parsing Markdown
+        │   └── word-boundaries.ts    # Detecção de fronteiras de palavra
+        │
+        └── services/                 # Serviços de infraestrutura/regra de negócio
+            ├── config.ts             # Resolução de URLs API/WS
+            ├── document-api.ts       # Cliente HTTP de lock/access
+            ├── export.ts             # Exportação Markdown/PDF
+            ├── pdf-styles.ts         # Estilos de export PDF
+            └── persistence.ts        # Abstração localStorage
 ```
+
+**Escopo desta árvore:** apenas arquivos e pastas versionados no repositório.
 
 ---
 
@@ -890,6 +918,9 @@ export const formatInline = (
 | `backend/src/server.ts`                 | Bootstrap do backend (Express + WebSocket), rotas API e integração com sincronização.    |
 | `backend/src/sync.ts`                   | Persistência CRDT, autenticação de acesso de documento e controle de locks.              |
 | `backend/db/document-locks.json`        | Persistência de metadados de lock por documento (hash/salt).                             |
+| `_docs/ARCHITETURE.md`                  | Documento arquitetural principal (fonte de verdade da arquitetura atual).                |
+| `_docs/ARCHITETURE-plugins.md`          | Arquitetura e padrões dos plugins do CodeMirror.                                         |
+| `_docs/codemirror6-documentation.md`    | Referência técnica local do CodeMirror 6 para consulta do time.                          |
 | `docker-compose.yml`                    | Orquestração de serviços para execução em produção/on-premises.                          |
 | `Makefile`                              | Atalhos operacionais para ciclo de desenvolvimento e execução conteinerizada.            |
 | `.env` / `.env.example`                 | Variáveis de ambiente para build/frontend e parâmetros de execução backend.              |
@@ -1057,8 +1088,8 @@ npm run build
 
 #### Semana 1: Fundamentos
 
-- [ ] Dia 1-2: Ler este documento (FRONTEND-ARCHITECTURE.md)
-- [ ] Dia 2-3: Ler REFACTORING-MEMORIAL.md e REFACTORING-PLAN.md
+- [ ] Dia 1-2: Ler este documento (`_docs/ARCHITETURE.md`)
+- [ ] Dia 2-3: Ler `_docs/ARCHITETURE-plugins.md` e `_docs/codemirror6-documentation.md`
 - [ ] Dia 3-4: Explorar código:
   - `main.ts` → `App.vue` → `Home.vue` → `Editor.vue`
   - Criar documento de teste e editar
@@ -1467,8 +1498,10 @@ TS2769: No overload matches this call
 
 ### 9.3 Internal Docs
 
-- [Plugins do CodeMirror](./_docs/ARCHITETURE-plugins.md) — estrutura, uso e implementação dos plugins customizados do editor.
+- **Centralização:** toda a documentação Markdown versionada do projeto está em `_docs/`.
+- [Plugins do CodeMirror](./ARCHITETURE-plugins.md) — estrutura, uso e implementação dos plugins customizados do editor.
 - [Documentação do CodeMirror](./codemirror6-documentation.md) — Cópia da documentação oficial do CodeMirror 6, em formato Markdown.
+- [Arquitetura Unificada](./ARCHITETURE.md) — Documento principal de arquitetura do sistema.
 
 ### 9.4 Community
 

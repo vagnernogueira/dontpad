@@ -121,16 +121,14 @@ cd frontend && npm run lint
 
 Histórico e evolução do projeto:
 
-<!-- markdownlint-disable MD060 -->
 | Onda | Nome             | Status       | Período     | Pasta                                                       |
 | ---- | ---------------- | ------------ | ----------- | ----------------------------------------------------------- |
 | 1    | MVP colaborativo | Em andamento | 2026-02 / - | [agent-workspace/execucao/](./agent-workspace/execucao/)    |
-<!-- markdownlint-enable MD060 -->
 
 ## Documentação Adicional
 
-- [Arquitetura do Sistema](./ARCHITETURE.md) — decisões técnicas, visão arquitetural e componentes.
+- [Arquitetura do Sistema](./_docs/ARCHITETURE.md) — decisões técnicas, visão arquitetural e componentes.
 - [Plugins do CodeMirror](./_docs/ARCHITETURE-plugins.md) — estrutura, uso e implementação dos plugins customizados do editor.
-- [Documentação do CodeMirror](./codemirror6-documentation.md) — Cópia da documentação oficial do CodeMirror 6, em formato Markdown.
+- [Documentação do CodeMirror](./_docs/codemirror6-documentation.md) — Cópia da documentação oficial do CodeMirror 6, em formato Markdown.
 
 ---
