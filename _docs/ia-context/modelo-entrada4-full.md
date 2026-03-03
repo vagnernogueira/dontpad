@@ -48,6 +48,19 @@ Use este modelo para demandas complexas, multi-etapas, refatorações amplas ou 
 - [critério técnico 1]
 - [critério técnico 2]
 
+## Definition of Done (Passa/Falha)
+
+- [ ] Escopo solicitado concluído sem funcionalidades extras.
+- [ ] Critérios funcionais e técnicos validados com evidência objetiva.
+- [ ] Impactos e riscos documentados no retorno.
+- [ ] Compatibilidade com comportamento atual preservada (ou exceção justificada).
+
+## Assumptions log
+
+- Assunção: [premissa adotada]
+  Risco: [impacto se a premissa falhar]
+  Validação esperada: [teste/evidência para confirmar]
+
 ## Riscos conhecidos
 
 - [risco 1]

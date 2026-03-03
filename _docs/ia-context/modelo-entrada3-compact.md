@@ -34,6 +34,18 @@ Use este modelo para ajustes pontuais, bugfixes e evoluções pequenas.
 - [critério 1]
 - [critério 2]
 
+## Definition of Done (Passa/Falha)
+
+- [ ] Escopo solicitado concluído sem desvios.
+- [ ] Critérios de aceite comprovados com resultado objetivo.
+- [ ] Sem alteração de contrato público não autorizado.
+
+## Assumptions log
+
+- Assunção: [premissa adotada]
+  Risco: [impacto se incorreta]
+  Validação esperada: [teste/evidência para confirmação]
+
 ## Tipo de saída esperada
 
 [análise | implementação | revisão]
