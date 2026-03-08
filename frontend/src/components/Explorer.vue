@@ -1,20 +1,66 @@
 <template>
-  <div class="flex h-full w-full flex-col bg-gray-50 text-gray-900">
-    <header class="flex items-center justify-between border-b border-gray-200 bg-white px-4 py-3 shadow-sm sm:px-6">
-      <div class="flex items-center gap-3">
-        <router-link to="/" class="rounded bg-gray-100 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-200">Início</router-link>
-        <h1 class="text-lg font-semibold">Explorer</h1>
+  <div class="flex h-full w-full flex-col text-gray-900">
+    <header class="bg-gray-900 text-gray-100 px-3 sm:px-5 py-[7.2px] sm:py-[9px] flex items-center justify-between shadow-md z-20">
+      <div class="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
+        <router-link to="/" class="font-bold text-base sm:text-lg hover:text-white transition-colors flex items-center gap-1 shrink-0">
+          <ArrowLeft :size="18" />
+          <span class="hidden xs:inline">Início</span>
+        </router-link>
+        <div class="font-mono bg-gray-800 text-gray-300 px-2 sm:px-3 py-1 rounded-md text-xs sm:text-sm shrink-0 border border-gray-700">
+          /explorer
+        </div>
       </div>
       <button
         v-if="hasAccess"
         @click="refreshDocuments"
-        class="rounded bg-gray-800 px-3 py-1.5 text-sm text-white hover:bg-gray-900"
+        class="px-2 sm:px-3 py-[7.2px] sm:py-[5.4px] bg-gray-800 border border-gray-700 text-white hover:bg-gray-700 rounded-md font-medium text-xs transition-colors focus:outline-none flex items-center gap-1.5 shadow-sm touch-manipulation shrink-0"
       >
+        <RefreshCw :size="14" />
         Atualizar
       </button>
     </header>
 
-    <main class="flex-1 overflow-auto p-4 sm:p-6">
+    <div class="bg-[#f8f9fa] border-b border-gray-200 px-2 sm:px-4 py-[7.2px] flex items-center gap-1 sm:gap-1.5 shadow-sm text-gray-600 z-10 text-sm overflow-x-auto overflow-y-hidden">
+      <template v-if="hasAccess">
+        <input
+          v-model="search"
+          type="text"
+          class="w-full rounded border border-gray-300 px-3 py-[7.2px] sm:py-[5.4px] text-sm focus:outline-none focus:ring-2 focus:ring-gray-800 sm:max-w-sm bg-white shrink-0"
+          placeholder="Buscar por nome"
+        />
+
+        <div class="w-px h-5 bg-gray-300 mx-1.5 self-center shrink-0"></div>
+
+        <button
+          @click="renameSelected"
+          :disabled="!selectedDocumentName"
+          class="px-2.5 py-[7.2px] sm:py-[5.4px] bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 hover:text-gray-900 rounded-md font-medium text-xs transition-colors focus:outline-none touch-manipulation shrink-0 disabled:cursor-not-allowed disabled:opacity-40"
+        >Renomear</button>
+        <button
+          @click="removeSelected"
+          :disabled="!selectedDocumentName"
+          class="px-2.5 py-[7.2px] sm:py-[5.4px] bg-white border border-red-300 text-red-700 hover:bg-red-50 rounded-md font-medium text-xs transition-colors focus:outline-none touch-manipulation shrink-0 disabled:cursor-not-allowed disabled:opacity-40"
+        >Remover</button>
+        <button
+          @click="downloadSelectedMarkdown"
+          :disabled="!selectedDocumentName"
+          class="px-2.5 py-[7.2px] sm:py-[5.4px] bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 hover:text-gray-900 rounded-md font-medium text-xs transition-colors focus:outline-none touch-manipulation shrink-0 disabled:cursor-not-allowed disabled:opacity-40"
+        >Download markdown</button>
+        <button
+          @click="downloadSelectedPDF"
+          :disabled="!selectedDocumentName"
+          class="px-2.5 py-[7.2px] sm:py-[5.4px] bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 hover:text-gray-900 rounded-md font-medium text-xs transition-colors focus:outline-none touch-manipulation shrink-0 disabled:cursor-not-allowed disabled:opacity-40"
+        >Download PDF</button>
+        <button
+          @click="lockSelected"
+          :disabled="!selectedDocumentName"
+          class="px-2.5 py-[7.2px] sm:py-[5.4px] bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 hover:text-gray-900 rounded-md font-medium text-xs transition-colors focus:outline-none touch-manipulation shrink-0 disabled:cursor-not-allowed disabled:opacity-40"
+        >Travar</button>
+      </template>
+      <p v-else class="text-sm text-gray-500 px-1">Informe a senha mestra para habilitar ações do Explorer.</p>
+    </div>
+
+    <main class="flex-1 overflow-auto bg-gray-50 p-4 sm:p-6">
       <section v-if="!hasAccess" class="mx-auto mt-10 w-full max-w-sm rounded-lg bg-white p-5 shadow">
         <h2 class="mb-3 text-base font-medium text-gray-800">Acesso protegido</h2>
         <p class="mb-3 text-sm text-gray-600">Informe a senha mestra para entrar no Explorer.</p>
@@ -34,43 +80,6 @@
       </section>
 
       <section v-else class="space-y-4">
-        <div class="flex flex-col gap-3 rounded-lg bg-white p-4 shadow sm:flex-row sm:items-center sm:justify-between">
-          <input
-            v-model="search"
-            type="text"
-            class="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-800 sm:max-w-sm"
-            placeholder="Buscar por nome"
-          />
-
-          <div class="flex flex-wrap gap-2">
-            <button
-              @click="renameSelected"
-              :disabled="!selectedDocumentName"
-              class="rounded border border-gray-300 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
-            >Renomear</button>
-            <button
-              @click="removeSelected"
-              :disabled="!selectedDocumentName"
-              class="rounded border border-red-300 px-3 py-1.5 text-sm text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-40"
-            >Remover</button>
-            <button
-              @click="downloadSelectedMarkdown"
-              :disabled="!selectedDocumentName"
-              class="rounded border border-gray-300 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
-            >Download markdown</button>
-            <button
-              @click="downloadSelectedPDF"
-              :disabled="!selectedDocumentName"
-              class="rounded border border-gray-300 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
-            >Download PDF</button>
-            <button
-              @click="lockSelected"
-              :disabled="!selectedDocumentName"
-              class="rounded border border-gray-300 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
-            >Travar</button>
-          </div>
-        </div>
-
         <p v-if="errorMessage" class="text-sm text-red-600">{{ errorMessage }}</p>
         <p v-else-if="isLoading" class="text-sm text-gray-500">Carregando documentos...</p>
 
@@ -144,6 +153,7 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import { ArrowLeft, RefreshCw } from 'lucide-vue-next'
 import { createDocumentAPI, type DocumentSummary } from '../services/document-api'
 import { getApiBaseUrl } from '../services/config'
 import { downloadMarkdown, downloadPDF } from '../services/export'
