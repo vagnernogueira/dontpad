@@ -1,24 +1,43 @@
 # DontPad - Arquitetura de Software (Hub IA-First)
 
-**Versão:** 3.0  
-**Data:** 12 de Março de 2026  
-**Tipo:** Hub de Arquitetura (central + módulos)  
+**Tipo de documento:** Hub de Arquitetura (central + módulos)  
 **Arquitetura de produto:** SPA + API/WS Backend com sincronização CRDT
 
 ---
 
 ## Índice Navegável
 
+- [Guia de Uso da Documentação](#guia-de-uso-da-documentação)
 - [1. Visão Arquitetural](#1-visão-arquitetural)
 - [2. Stack de Tecnologias (Resumo)](#2-stack-de-tecnologias-resumo)
 - [3. Diagrama de Arquitetura](#3-diagrama-de-arquitetura)
 - [4. Estrutura IA-First de Documentação](#4-estrutura-ia-first-de-documentação)
-- [5. Mapa de Módulos](#5-mapa-de-módulos)
+- [5. Mapa de Módulos Arquiteturais](#5-mapa-de-módulos-arquiteturais)
 - [6. Contratos e Decisões Centrais](#6-contratos-e-decisões-centrais)
 - [7. Arquivos Importantes](#7-arquivos-importantes)
-- [8. Guia de Uso da Documentação](#8-guia-de-uso-da-documentação)
 - [9. Dependências Externas e Integrações](#9-dependências-externas-e-integrações)
 - [10. Histórico de Ondas e Changelog](#10-histórico-de-ondas-e-changelog)
+
+---
+
+## Guia de Uso da Documentação
+
+### Para leitura humana (onboarding)
+
+1. Ler este hub por completo;
+2. Navegar para os módulos conforme o tema da tarefa.
+
+### Para uso com IA (recuperação eficiente)
+
+1. Consultar primeiro este hub para contexto e contratos;
+2. Buscar o módulo específico do domínio afetado;
+3. Evitar carregar módulos não relacionados para reduzir ruído de contexto.
+
+### Regra de atualização
+
+- mudanças de contrato global devem atualizar o hub **e** o módulo afetado;
+- mudanças locais de implementação devem atualizar somente o módulo correspondente;
+- manter links bidirecionais entre hub e módulos.
 
 ---
 
@@ -42,15 +61,15 @@ Características principais:
 
 ## 2. Stack de Tecnologias (Resumo)
 
-| Camada | Tecnologias principais |
-| --- | --- |
-| Frontend | Vue 3, TypeScript, Vite, Vue Router |
-| Editor | CodeMirror 6, @lezer/markdown |
-| Colaboração | Yjs, y-websocket, y-codemirror.next |
-| Backend | Node.js, Express, ws, TypeScript |
-| Persistência | y-leveldb, LevelDB, metadados JSON |
-| UI/UX | Tailwind CSS, Lucide Vue Next |
-| Export | marked, html2pdf.js |
+| Camada       | Tecnologias principais              |
+| ------------ | ----------------------------------- |
+| Frontend     | Vue 3, TypeScript, Vite, Vue Router |
+| Editor       | CodeMirror 6, @lezer/markdown       |
+| Colaboração  | Yjs, y-websocket, y-codemirror.next |
+| Backend      | Node.js, Express, ws, TypeScript    |
+| Persistência | y-leveldb, LevelDB, metadados JSON  |
+| UI/UX        | Tailwind CSS, Lucide Vue Next       |
+| Export       | marked, html2pdf.js                 |
 
 Detalhes extensos de implementação por camada estão nos módulos listados na seção 5.
 
@@ -68,8 +87,8 @@ Detalhes extensos de implementação por camada estão nos módulos listados na 
 │  │  └─────┬──────┘  └──────┬─────┘  └──────┬─────┘      │   │
 │  │        │                │                 │          │   │
 │  │  ┌─────▼────────────────▼─────────────────▼──────┐   │   │
-│  │  │         CodeMirror 6 + Yjs                   │   │   │
-│  │  └───────────────────┬──────────────────────────┘   │   │
+│  │  │         CodeMirror 6 + Yjs                    │   │   │
+│  │  └───────────────────┬───────────────────────────┘   │   │
 │  └────────────────────┬─┴───────────────────────────────┘   │
 └───────────────────────┼─────────────────────────────────────┘
                         │ WebSocket + HTTP API
@@ -105,7 +124,7 @@ _docs/
 
 ---
 
-## 5. Mapa de Módulos
+## 5. Mapa de Módulos Arquiteturais
 
 - [Frontend Editor](./architecture/frontend-editor.md) — camada de UI/editor e fluxos no browser.
 - [Backend Runtime](./architecture/backend-runtime.md) — execução backend, contratos HTTP/WS e persistência.
@@ -142,47 +161,26 @@ _docs/
 
 ## 7. Arquivos Importantes
 
-| Arquivo | Descrição |
-| --- | --- |
-| `frontend/src/components/Editor.vue` | Componente principal do editor colaborativo. |
-| `frontend/src/components/Explorer.vue` | Gestão administrativa de documentos em `/explorer`. |
+| Arquivo                                 | Descrição                                              |
+| --------------------------------------- | ------------------------------------------------------ |
+| `frontend/src/components/Editor.vue`    | Componente principal do editor colaborativo.           |
+| `frontend/src/components/Explorer.vue`  | Gestão administrativa de documentos em `/explorer`.    |
 | `frontend/src/services/document-api.ts` | Cliente HTTP para lock/access e ações administrativas. |
-| `backend/src/server.ts` | Bootstrap backend (Express + WS + rotas API). |
-| `backend/src/sync.ts` | Persistência CRDT, lock e autenticação WS. |
-| `_docs/ARCHITECTURE.md` | Hub arquitetural (fonte de verdade central). |
-| `_docs/architecture/*.md` | Módulos especializados de arquitetura IA-first. |
-
----
-
-## 8. Guia de Uso da Documentação
-
-### Para leitura humana (onboarding)
-
-1. Ler este hub por completo;
-2. Navegar para os módulos conforme o tema da tarefa.
-
-### Para uso com IA (recuperação eficiente)
-
-1. Consultar primeiro este hub para contexto e contratos;
-2. Buscar o módulo específico do domínio afetado;
-3. Evitar carregar módulos não relacionados para reduzir ruído de contexto.
-
-### Regra de atualização
-
-- mudanças de contrato global devem atualizar o hub **e** o módulo afetado;
-- mudanças locais de implementação devem atualizar somente o módulo correspondente;
-- manter links bidirecionais entre hub e módulos.
+| `backend/src/server.ts`                 | Bootstrap backend (Express + WS + rotas API).          |
+| `backend/src/sync.ts`                   | Persistência CRDT, lock e autenticação WS.             |
+| `_docs/ARCHITECTURE.md`                 | Hub arquitetural (fonte de verdade central).           |
+| `_docs/architecture/*.md`               | Módulos especializados de arquitetura IA-first.        |
 
 ---
 
 ## 9. Dependências Externas e Integrações
 
-| Dependência | Tipo | Criticidade |
-| --- | --- | --- |
-| Yjs + y-websocket | Colaboração (CRDT) | Alta |
-| CodeMirror 6 | Editor extensível | Alta |
-| LevelDB via y-leveldb | Persistência colaborativa | Alta |
-| html2pdf.js | Export PDF frontend | Média |
+| Dependência           | Tipo                      | Criticidade |
+| --------------------- | ------------------------- | ----------- |
+| Yjs + y-websocket     | Colaboração (CRDT)        | Alta        |
+| CodeMirror 6          | Editor extensível         | Alta        |
+| LevelDB via y-leveldb | Persistência colaborativa | Alta        |
+| html2pdf.js           | Export PDF frontend       | Média       |
 
 Referências:
 
