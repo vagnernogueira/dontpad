@@ -149,7 +149,7 @@ O DontPad é uma aplicação full-stack para edição colaborativa de documentos
 ├── _docs/                            # Documentação Markdown versionada (centralizada)
 │   ├── ARCHITETURE.md                # Arquitetura unificada frontend + backend
 │   ├── ARCHITETURE-plugins.md        # Arquitetura dos plugins CodeMirror
-│   └── codemirror6-documentation.md  # Referência técnica do CodeMirror 6
+│   └── ia-context/                   # IA Context e Model Context Protocol (MCP) setup
 │
 ├── backend/
 │   ├── Dockerfile                    # Build/runtime do backend
@@ -940,7 +940,7 @@ export const formatInline = (
 | `_docs/ARCHITETURE.md`                  | Documento arquitetural principal (fonte de verdade da arquitetura atual).                |
 | `_docs/ARCHITETURE-plugins.md`          | Arquitetura e padrões dos plugins do CodeMirror.                                         |
 | `_docs/EXPLORER.md`                     | Documentação funcional e técnica da rota administrativa `/explorer`.                     |
-| `_docs/codemirror6-documentation.md`    | Referência técnica local do CodeMirror 6 para consulta do time.                          |
+| `_docs/ia-context/`                     | Configuração MCP e Context7 para documentação dinâmica (CodeMirror, etc).                |
 | `docker-compose.yml`                    | Orquestração de serviços para execução em produção/on-premises.                          |
 | `Makefile`                              | Atalhos operacionais para ciclo de desenvolvimento e execução conteinerizada.            |
 | `.env` / `.env.example`                 | Variáveis de ambiente para build/frontend e parâmetros de execução backend.              |
@@ -1109,7 +1109,7 @@ npm run build
 #### Semana 1: Fundamentos
 
 - [ ] Dia 1-2: Ler este documento (`_docs/ARCHITETURE.md`)
-- [ ] Dia 2-3: Ler `_docs/ARCHITETURE-plugins.md` e `_docs/codemirror6-documentation.md`
+- [ ] Dia 2-3: Ler `_docs/ARCHITETURE-plugins.md` e consultar CodeMirror via Context7 MCP
 - [ ] Dia 3-4: Explorar código:
   - `main.ts` → `App.vue` → `Home.vue` → `Editor.vue`
   - Criar documento de teste e editar
@@ -1520,7 +1520,7 @@ TS2769: No overload matches this call
 
 - **Centralização:** toda a documentação Markdown versionada do projeto está em `_docs/`.
 - [Plugins do CodeMirror](./ARCHITETURE-plugins.md) — estrutura, uso e implementação dos plugins customizados do editor.
-- [Documentação do CodeMirror](./codemirror6-documentation.md) — Cópia da documentação oficial do CodeMirror 6, em formato Markdown.
+- **CodeMirror 6:** Consulte via [Context7 MCP Server](./ia-context/) — documentação oficial dinâmica e atualizada.
 - [Arquitetura Unificada](./ARCHITETURE.md) — Documento principal de arquitetura do sistema.
 
 ### 9.4 Community

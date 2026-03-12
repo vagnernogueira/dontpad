@@ -143,6 +143,6 @@ Histórico e evolução do projeto:
 - [Arquitetura do Sistema](./_docs/ARCHITETURE.md) — decisões técnicas, visão arquitetural e componentes.
 - [Plugins do CodeMirror](./_docs/ARCHITETURE-plugins.md) — estrutura, uso e implementação dos plugins customizados do editor.
 - [Explorer de Documentos](./_docs/EXPLORER.md) — fluxo funcional, regras e endpoints da gestão administrativa.
-- [Documentação do CodeMirror](./_docs/codemirror6-documentation.md) — Cópia da documentação oficial do CodeMirror 6, em formato Markdown.
+- **CodeMirror 6:** documentação consultada via [Context7 MCP Server](https://github.com/context7/context7) — acesso dinâmico à documentação oficial e changelog.
 
 ---

@@ -155,5 +155,5 @@ Fora desse conjunto, a expressão é rejeitada (sem execução de código extern
 
 ## Documentação Adicional
 
-- [Documentação do CodeMirror](./codemirror6-documentation.md) — Cópia da documentação oficial do CodeMirror 6, em formato Markdown.
+- **CodeMirror 6:** Use o [Context7 MCP Server](https://github.com/context7/context7) para acessar documentação oficial completa e atualizada.
 - [Arquitetura do Sistema](../ARCHITETURE.md) — visão geral da arquitetura do sistema, incluindo stack tecnológico, estrutura de diretórios e decisões arquiteturais.
