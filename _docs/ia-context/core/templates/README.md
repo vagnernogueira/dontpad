@@ -13,12 +13,12 @@ Este diretório reúne os templates de entrada para demandas de desenvolvimento.
 
 ## Guia rápido de seleção
 
-| Template | Quando usar |
-| --- | --- |
-| `01-simple.md` | Ajustes rápidos, tarefas curtas e baixo risco. |
-| `02-ultra-compact.md` | Demandas diretas com escopo claro e poucos arquivos-alvo. |
-| `03-compact.md` | Bugfixes e melhorias pequenas com critérios de aceite explícitos. |
-| `04-full.md` | Demandas complexas, multi-etapas ou com maior risco de regressão. |
+| Template              | Quando usar                                                       |
+| --------------------- | ----------------------------------------------------------------- |
+| `01-simple.md`        | Ajustes rápidos, tarefas curtas e baixo risco.                    |
+| `02-ultra-compact.md` | Demandas diretas com escopo claro e poucos arquivos-alvo.         |
+| `03-compact.md`       | Bugfixes e melhorias pequenas com critérios de aceite explícitos. |
+| `04-full.md`          | Demandas complexas, multi-etapas ou com maior risco de regressão. |
 
 ## Regras de uso
 

@@ -6,7 +6,8 @@ Este diretório é reservado para playbooks operacionais reutilizáveis.
 
 ## Exemplos de skills
 
-- `generate-demand.md`
+- `generate-demand/SKILL.md` (padrão de mercado)
+- `generate-demand.md` (compatibilidade)
 - `implement-plugin.md`
 - `bugfix-api.md`
 - `review-pr.md`

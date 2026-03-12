@@ -5,9 +5,10 @@
 1. Entender demanda e extrair objetivo, escopo, restrições e critérios de aceite.
 2. Verificar fontes canônicas na ordem de precedência.
 3. Identificar lacunas críticas.
-4. Decidir: perguntar ou seguir com suposição segura.
-5. Executar solução mínima no escopo.
-6. Reportar decisão, impacto, riscos e próximos passos.
+4. Definir capacidades necessárias para execução (incluindo uso de ferramentas/MCP quando aplicável).
+5. Decidir: perguntar ou seguir com suposição segura.
+6. Executar solução mínima no escopo.
+7. Reportar decisão, impacto, riscos e próximos passos.
 
 ## 2) Quando perguntar vs quando seguir
 
@@ -26,3 +27,9 @@ O agente **MUST** bloquear implementação e solicitar clarificação quando:
 - houver interpretações mutuamente exclusivas com impacto funcional relevante;
 - faltar credencial/segredo/permissão operacional indispensável;
 - a mudança solicitada conflitar com regra mandatória sem autorização para exceção.
+
+## 4) Execução com MCP (quando aplicável)
+
+- Seguir `core/mcp/capability-routing.md` para seleção de ferramenta por capacidade.
+- Aplicar `project-overlay/mcp-policy.md` para decisões específicas do projeto.
+- Registrar fallback e evidências quando a execução primária por MCP não estiver disponível.
