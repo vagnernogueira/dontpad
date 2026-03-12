@@ -33,7 +33,7 @@ Este diretório define a estrutura oficial de contexto operacional da ferramenta
 ## Convenção de precedência (em caso de conflito)
 
 1. Código-fonte atual
-2. `_docs/ARCHITETURE.md`
+2. `_docs/ARCHITECTURE.md`
 3. `README.md`
 4. `_docs/ia-context/core/rules.md`
 5. `_docs/ia-context/project-overlay/rules.md`

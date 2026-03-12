@@ -3,7 +3,7 @@
 ## Fontes canônicas e precedência no projeto
 
 1. Código-fonte atual (verdade operacional)
-2. `_docs/ARCHITETURE.md`
+2. `_docs/ARCHITECTURE.md`
 3. `README.md`
 4. `_docs/ia-context/core/rules.md`
 5. `_docs/ia-context/project-overlay/rules.md`

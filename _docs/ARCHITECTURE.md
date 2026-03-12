@@ -1,7 +1,7 @@
 # DontPad - Arquitetura de Software (Frontend + Backend)
 
-**Versão:** 2.1  
-**Data:** 02 de Março de 2026  
+**Versão:** 2.3  
+**Data:** 12 de Março de 2026  
 **Tipo:** Editor Colaborativo de Markdown em Tempo Real  
 **Arquitetura:** SPA + API/WS Backend com sincronização CRDT
 
@@ -128,7 +128,7 @@ O DontPad é uma aplicação full-stack para edição colaborativa de documentos
         │     Backend Server (Node.js)   │
         │  - WebSocket Provider (Yjs)    │
         │  - Document Lock/Access API    │
-        │  - Redis Storage               │
+        │  - LevelDB Persistence         │
         └────────────────────────────────┘
 ```
 
@@ -147,8 +147,7 @@ O DontPad é uma aplicação full-stack para edição colaborativa de documentos
 ├── README.md                         # Documentação de entrada do projeto
 │
 ├── _docs/                            # Documentação Markdown versionada (centralizada)
-│   ├── ARCHITETURE.md                # Arquitetura unificada frontend + backend
-│   ├── ARCHITETURE-plugins.md        # Arquitetura dos plugins CodeMirror
+│   ├── ARCHITECTURE.md               # Arquitetura unificada frontend + backend
 │   └── ia-context/                   # IA Context e Model Context Protocol (MCP) setup
 │
 ├── backend/
@@ -299,8 +298,8 @@ applyFormat(view, '# ')        // Heading 1
 
 **Exporta:**
 
-- `insertLink(view, text, url)` - Insere `[text](url)`
-- `insertImage(view, alt, url)` - Insere `![alt](url)`
+- `insertLink(view, text, url)` - Insere `[text](https://exemplo.com)`
+- `insertImage(view, alt, url)` - Insere `![alt](https://exemplo.com/imagem.png)`
 
 #### `history.ts`
 
@@ -366,33 +365,50 @@ extensions: [
 ### 🔌 **CM-Plugins** (`src/cm-plugins/`)
 
 **Padrão:** ViewPlugin Pattern (CodeMirror)  
-**Responsabilidade:** Decorações DOM e interações complexas
+**Responsabilidade:** Decorações DOM, atalhos de teclado e interações ricas do editor
+
+**Observação arquitetural:** o conteúdo detalhado deste subsistema foi consolidado no **Apêndice M** deste documento, mantendo este capítulo como visão estrutural de alto nível.
 
 #### Categorias de Plugins
 
-**1. Decoração Visual:**
+**1. Widgets e Decorações:**
 
+- `checkbox-widget.ts` - Torna checklists clicáveis sem substituir o texto Markdown
 - `code-block.ts` - Background cinza em blocos de código
 - `horizontal-rule-widget.ts` - Renderiza `---` como linha visual
 - `image-widget.ts` - Preview inline de imagens
 - `link-widget.ts` - Decoração de links com hover
 
-**2. Comportamento de Input:**
+**2. Estilização e parsing visual:**
+
+- `list.ts` - Aplica estilização especial a listas ordenadas e não ordenadas
+- `plain-url.ts` - Detecta e estiliza URLs avulsas fora da sintaxe Markdown tradicional
+
+**3. Comportamento de input e keymaps:**
 
 - `enter-keymap.ts` - Continuação de listas ao pressionar Enter
 - `tab-keymap.ts` - Indentação inteligente com Tab
-- `delete-line-keymap.ts` - Ctrl+D deleta linha
-- `multi-click.ts` - Double/triple-click selection
+- `delete-line-keymap.ts` - `Ctrl+L` deleta a linha atual
+- `snippet.ts` - Expansão de snippets via Tab com variáveis dinâmicas
+- `math.ts` - Avalia expressões matemáticas seguras ao digitar `= `
+- `keymaps.ts` - Agrupa os keymaps com precedência explícita
 
-**3. Funcionalidades Avançadas:**
+**4. Interação e composição:**
 
 - `markdown-preview.ts` - Preview Markdown inline (hover)
-- `math.ts` - Cálculo matemático (e.g., digitar `2+2=` mostra `4`)
 - `spellcheck.ts` - Integração spellcheck do browser
-- `snippet.ts` - Expansão de snippets (e.g., `table` → tabela Markdown)
-- `list.ts` - Auto-continuação de listas numeradas/bullet
-- `plain-url.ts` - Auto-linkifica URLs `(https://example.com)`
-- `ctrl-click-navigation.ts` - Ctrl+Click em link para abrir
+- `multi-click.ts` - Seleção por múltiplos cliques com preservação de eventos `Ctrl/Cmd`
+
+#### Composição no `Editor.vue`
+
+Os plugins são aplicados em camadas no editor principal:
+
+1. **Plugins visuais base** (`listCustomPlugin`, `codeBlockPlugin`, `checkboxClickPlugin`, `horizontalRulePlugin`, `plainUrlPlugin`);
+2. **Plugins de interação** (`multiClickPlugin`, `spellcheckPlugin(...)`);
+3. **Keymaps agregados** via `editorKeymaps` com precedência explícita;
+4. **Preview composto** via `markdownPreviewPlugin`, que reúne `imagePreviewPlugin` e `linkPreviewPlugin`.
+
+Esse empilhamento reduz acoplamento no `Editor.vue` e centraliza comportamentos reutilizáveis em extensões pequenas e independentes.
 
 #### Estrutura de um Plugin Típico
 
@@ -424,6 +440,7 @@ export const myPlugin = ViewPlugin.fromClass(class {
 - Exportam função/constante nomeada
 - Mantêm decorações em estado interno
 - Atualizam apenas quando necessário (performance)
+- `keymaps.ts` e `markdown-preview.ts` atuam como módulos de composição, agrupando extensões menores
 
 ---
 
@@ -937,9 +954,7 @@ export const formatInline = (
 | `backend/src/sync.ts`                   | Persistência CRDT, autenticação de acesso e operações administrativas de documentos.     |
 | `backend/db/document-locks.json`        | Persistência de metadados de lock por documento (hash/salt).                             |
 | `backend/db/document-metadata.json`     | Persistência de datas de criação e alteração de documentos.                              |
-| `_docs/ARCHITETURE.md`                  | Documento arquitetural principal (fonte de verdade da arquitetura atual).                |
-| `_docs/ARCHITETURE-plugins.md`          | Arquitetura e padrões dos plugins do CodeMirror.                                         |
-| `_docs/EXPLORER.md`                     | Documentação funcional e técnica da rota administrativa `/explorer`.                     |
+| `_docs/ARCHITECTURE.md`                 | Documento arquitetural principal (fonte de verdade da arquitetura atual).                |
 | `_docs/ia-context/`                     | Configuração MCP e Context7 para documentação dinâmica (CodeMirror, etc).                |
 | `docker-compose.yml`                    | Orquestração de serviços para execução em produção/on-premises.                          |
 | `Makefile`                              | Atalhos operacionais para ciclo de desenvolvimento e execução conteinerizada.            |
@@ -1108,8 +1123,8 @@ npm run build
 
 #### Semana 1: Fundamentos
 
-- [ ] Dia 1-2: Ler este documento (`_docs/ARCHITETURE.md`)
-- [ ] Dia 2-3: Ler `_docs/ARCHITETURE-plugins.md` e consultar CodeMirror via Context7 MCP
+- [ ] Dia 1-2: Ler este documento (`_docs/ARCHITECTURE.md`)
+- [ ] Dia 2-3: Ler o Apêndice M deste documento
 - [ ] Dia 3-4: Explorar código:
   - `main.ts` → `App.vue` → `Home.vue` → `Editor.vue`
   - Criar documento de teste e editar
@@ -1519,9 +1534,9 @@ TS2769: No overload matches this call
 ### 9.3 Internal Docs
 
 - **Centralização:** toda a documentação Markdown versionada do projeto está em `_docs/`.
-- [Plugins do CodeMirror](./ARCHITETURE-plugins.md) — estrutura, uso e implementação dos plugins customizados do editor.
+- **Arquitetura de Plugins do CodeMirror:** consolidada neste documento no **Apêndice M**.
 - **CodeMirror 6:** Consulte via [Context7 MCP Server](./ia-context/) — documentação oficial dinâmica e atualizada.
-- [Arquitetura Unificada](./ARCHITETURE.md) — Documento principal de arquitetura do sistema.
+- [Arquitetura Unificada](./ARCHITECTURE.md) — Documento principal de arquitetura do sistema.
 
 ### 9.4 Community
 
@@ -1931,6 +1946,219 @@ Esse arranjo separa o tráfego HTTP da SPA e o tráfego WebSocket/API, simplific
 
 ---
 
+### M. Arquitetura dos Plugins do CodeMirror
+
+Esta seção consolida o conteúdo anteriormente mantido em um documento separado de plugins. O objetivo é preservar o detalhamento técnico sem perder a visão sistêmica do editor.
+
+### M.1 Avaliação do documento anterior
+
+O documento específico de plugins possuía boa qualidade como referência tática, principalmente em quatro pontos:
+
+- taxonomia clara entre widgets, keymaps e plugins compostos;
+- exemplos objetivos de importação e uso;
+- documentação útil da precedência de keymaps;
+- inventário prático de snippets e limites do parser matemático.
+
+Durante a revisão, também foram identificados pontos de ajuste para alinhamento arquitetural:
+
+- havia conteúdo importante isolado do documento principal, dificultando a leitura ponta a ponta da arquitetura;
+- existiam referências quebradas e caminhos relativos incorretos;
+- parte do inventário estava defasada em relação ao código real, como a menção a `ctrl-click-navigation.ts`, inexistente no workspace atual;
+- a descrição do atalho de deleção de linha divergira do código e foi corrigida para `Ctrl+L`.
+
+### M.2 Inventário atualizado dos plugins
+
+#### Widgets e decorações
+
+- `checkbox-widget.ts` — adiciona interação direta com task lists mantendo a sintaxe Markdown visível;
+- `image-widget.ts` — renderiza previews inline para imagens Markdown;
+- `link-widget.ts` — adiciona affordances visuais para links;
+- `horizontal-rule-widget.ts` — transforma marcadores de regra horizontal em `<hr>` visual.
+
+#### Estilização contextual
+
+- `list.ts` — aplica decoração específica para listas ordenadas e não ordenadas;
+- `code-block.ts` — destaca regiões delimitadas por fences;
+- `plain-url.ts` — identifica URLs cruas e melhora sua leitura visual.
+
+#### Keymaps e automações de entrada
+
+- `tab-keymap.ts` — preserva a indentação como comportamento prioritário;
+- `enter-keymap.ts` — continua listas, citações e encerra itens vazios de forma inteligente;
+- `delete-line-keymap.ts` — remove a linha atual com `Ctrl+L`;
+- `snippet.ts` — expande gatilhos curtos em estruturas Markdown reutilizáveis;
+- `math.ts` — avalia expressões suportadas sem executar código arbitrário;
+- `keymaps.ts` — organiza a precedência das extensões de teclado.
+
+#### Interação e composição
+
+- `multi-click.ts` — especializa seleção por múltiplos cliques sem capturar interações com `Ctrl/Cmd`;
+- `spellcheck.ts` — integra o corretor ortográfico nativo do navegador;
+- `markdown-preview.ts` — compõe preview de links e imagens em um bundle reutilizável.
+
+### M.3 Uso no editor principal
+
+No `Editor.vue`, os plugins são montados como extensões independentes e combináveis. A composição atual segue três objetivos:
+
+1. manter cada responsabilidade pequena e isolada;
+2. permitir ativação dinâmica quando necessário, como no caso do spellcheck com `Compartment`;
+3. reduzir conflitos de teclado ao concentrar precedência em `keymaps.ts`.
+
+Esse desenho favorece manutenção incremental: novos comportamentos podem ser adicionados como plugin isolado ou como composição de plugins existentes, sem crescimento excessivo do componente principal.
+
+### M.4 Estrutura padrão de implementação
+
+Cada plugin do editor segue um dos formatos abaixo:
+
+1. **ViewPlugin com `DecorationSet`** para widgets e marcações visuais;
+2. **Keymap dedicado** para atalhos e manipulação de entrada;
+3. **Módulo agregador** para reunir extensões relacionadas (`keymaps.ts`, `markdown-preview.ts`).
+
+Padrões recorrentes observados no código:
+
+- export nomeado;
+- documentação JSDoc;
+- lógica interna pequena e coesa;
+- atualização condicional baseada em `docChanged` e/ou `viewportChanged` quando há decoração;
+- foco em comportamento incremental, compatível com a abordagem reativa do CodeMirror 6.
+
+### M.5 Snippets disponíveis
+
+O arquivo `frontend/src/cm-plugins/snippet.ts` expõe atualmente os seguintes gatilhos padrão:
+
+| Gatilho    | Resultado principal                                      |
+| ---------- | -------------------------------------------------------- |
+| `dt`       | Data atual em formato `DD/MM/YYYY`                       |
+| `hr`       | Hora atual em formato `HH:MM`                            |
+| `lorem`    | Parágrafo lorem ipsum aleatório                          |
+| `table`    | Estrutura base de tabela Markdown                        |
+| `code`     | Bloco de código com placeholders                         |
+| `link`     | Link Markdown                                            |
+| `img`      | Imagem Markdown                                          |
+| `task`     | Item de checklist                                        |
+| `snippets` | Lista formatada dos snippets disponíveis                 |
+
+Variáveis suportadas no corpo dos snippets:
+
+- `${CURRENT_DATE}`
+- `${CURRENT_TIME}`
+- `${LOREM}`
+- `${SNIPPET_LIST}`
+- placeholders arbitrários no formato `${QUALQUER_TEXTO}` para posicionamento de cursor.
+
+### M.6 Precedência de keymaps
+
+O agrupamento em `keymaps.ts` define a ordem arquitetural de teclado:
+
+1. prioridade alta para indentação com Tab;
+2. prioridade alta para deleção de linha;
+3. prioridade normal para Enter contextual;
+4. prioridade normal para cálculo matemático;
+5. prioridade baixa para snippets.
+
+Essa ordenação evita que recursos auxiliares bloqueiem ações editoriais essenciais.
+
+### M.7 Limites do parser de math
+
+O parser matemático é intencionalmente restrito. Ele suporta:
+
+- operadores `+`, `-`, `*`, `/`, `%`, `^` e parênteses;
+- unário `+` e `-`;
+- funções como `sqrt`, `sin`, `cos`, `tan`, `asin`, `acos`, `atan`, `log`, `ln`, `log10`, `exp`, `abs`, `floor`, `ceil`, `round`, `min`, `max` e `pow`;
+- constantes `pi` e `e`.
+
+Qualquer expressão fora desse conjunto é rejeitada. Essa limitação é deliberada e reduz superfície de risco no editor.
+
+### M.8 Diretrizes de evolução
+
+Ao adicionar um novo plugin, manter as seguintes regras:
+
+- escolher entre plugin visual, keymap ou módulo agregador antes da implementação;
+- evitar acoplar lógica de UI de toolbar dentro do plugin;
+- preferir composição em `Editor.vue` a comportamentos monolíticos;
+- documentar o novo plugin neste apêndice quando ele alterar contratos, precedência ou ergonomia do editor.
+
+---
+
+### N. Arquitetura do Explorer de Documentos
+
+Esta seção consolida a documentação funcional e técnica da rota administrativa `/explorer` no documento principal de arquitetura.
+
+### N.1 Objetivo
+
+Documentar a gestão administrativa de documentos via Explorer, incluindo regras de acesso, listagem, ações por item e contratos de backend.
+
+### N.2 Acesso
+
+- rota: `/explorer`;
+- requisito: senha mestra válida;
+- fonte da senha mestra: variável de ambiente `DOCUMENTS_MASTER_PASSWORD` no backend;
+- comportamento obrigatório: acessar `/explorer` não cria documento automaticamente.
+
+### N.3 Conceitos
+
+- **Documento vazio:** conteúdo inexistente ou composto apenas por espaços/quebras de linha (`trim()` resulta em string vazia);
+- **Documento aberto:** existe ao menos uma sessão WebSocket ativa para a rota do documento.
+
+### N.4 Listagem
+
+A tela lista documentos com as colunas:
+
+- seleção (checkbox com seleção única);
+- nome;
+- data de criação;
+- data de alteração;
+- travado (S/N);
+- vazio (S/N);
+- aberto (S/N).
+
+Regras de listagem:
+
+- ordenação padrão por data de alteração (mais recentes primeiro);
+- ordenação por qualquer coluna;
+- busca por nome com filtro por `contains`;
+- clique no nome abre o documento em nova aba.
+
+### N.5 Funcionalidades de item
+
+As ações operam somente sobre o documento selecionado:
+
+- renomear;
+- remover;
+- download em Markdown;
+- download em PDF;
+- travar.
+
+### N.6 Backend e endpoints
+
+Todos os endpoints administrativos exigem header `x-docs-password` com senha mestra válida.
+
+- `GET /api/documents`
+  - retorna lista de documentos e summaries usados no Explorer;
+- `GET /api/document-content?documentId=...`
+  - retorna conteúdo Markdown para exportação;
+- `POST /api/documents/rename`
+  - renomeia documento;
+- `DELETE /api/documents`
+  - remove documento.
+
+Endpoints de lock e acesso continuam válidos:
+
+- `GET /api/document-lock?documentId=...`;
+- `POST /api/document-lock`;
+- `DELETE /api/document-lock`;
+- `POST /api/document-access`.
+
+### N.7 Arquivos principais
+
+- `frontend/src/components/Explorer.vue`;
+- `frontend/src/services/document-api.ts`;
+- `frontend/src/main.ts`;
+- `backend/src/server.ts`;
+- `backend/src/sync.ts`.
+
+---
+
 ## 10. Histórico de Ondas
 
 ### 10.1 Registro de Ondas
@@ -1940,6 +2168,16 @@ Esse arranjo separa o tráfego HTTP da SPA e o tráfego WebSocket/API, simplific
   - **ADRs relacionados:** N/A
 
 ### 10.2 Changelog do Documento
+
+- **Versão 2.3**
+  - **Data:** 2026-03-12
+  - **Autor:** GitHub Copilot
+  - **Mudanças:** Consolidação da documentação do Explorer no documento principal e remoção do documento dedicado.
+
+- **Versão 2.2**
+  - **Data:** 2026-03-12
+  - **Autor:** GitHub Copilot
+  - **Mudanças:** Consolidação da arquitetura de plugins no documento principal, correção de divergências documentais e revisão de referências internas.
 
 - **Versão 2.0**
   - **Data:** 2026-03-01

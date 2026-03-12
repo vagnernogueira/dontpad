@@ -140,9 +140,9 @@ Histórico e evolução do projeto:
 
 ## Documentação Adicional
 
-- [Arquitetura do Sistema](./_docs/ARCHITETURE.md) — decisões técnicas, visão arquitetural e componentes.
-- [Plugins do CodeMirror](./_docs/ARCHITETURE-plugins.md) — estrutura, uso e implementação dos plugins customizados do editor.
-- [Explorer de Documentos](./_docs/EXPLORER.md) — fluxo funcional, regras e endpoints da gestão administrativa.
+- [Arquitetura do Sistema](./_docs/ARCHITECTURE.md) — decisões técnicas, visão arquitetural e componentes.
+- [Arquitetura de Plugins do CodeMirror](./_docs/ARCHITECTURE.md) — detalhamento consolidado dos plugins do editor e suas decisões de composição.
+- [Explorer de Documentos](./_docs/ARCHITECTURE.md) — fluxo funcional, regras e endpoints da gestão administrativa, consolidados no apêndice do documento de arquitetura.
 - **CodeMirror 6:** documentação consultada via [Context7 MCP Server](https://github.com/context7/context7) — acesso dinâmico à documentação oficial e changelog.
 
 ---
