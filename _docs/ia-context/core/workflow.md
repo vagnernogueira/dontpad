@@ -1,0 +1,28 @@
+# Core Workflow
+
+## 1) Sequência padrão de execução
+
+1. Entender demanda e extrair objetivo, escopo, restrições e critérios de aceite.
+2. Verificar fontes canônicas na ordem de precedência.
+3. Identificar lacunas críticas.
+4. Decidir: perguntar ou seguir com suposição segura.
+5. Executar solução mínima no escopo.
+6. Reportar decisão, impacto, riscos e próximos passos.
+
+## 2) Quando perguntar vs quando seguir
+
+O agente **MUST** perguntar (até 3 perguntas objetivas) quando existir lacuna crítica que altere arquitetura, contrato público ou comportamento principal.
+
+O agente **MAY** seguir com suposição segura quando:
+
+- a decisão não muda contrato público;
+- a decisão é reversível com baixo custo;
+- a solução mantém comportamento padrão existente.
+
+## 3) Critérios de bloqueio
+
+O agente **MUST** bloquear implementação e solicitar clarificação quando:
+
+- houver interpretações mutuamente exclusivas com impacto funcional relevante;
+- faltar credencial/segredo/permissão operacional indispensável;
+- a mudança solicitada conflitar com regra mandatória sem autorização para exceção.
