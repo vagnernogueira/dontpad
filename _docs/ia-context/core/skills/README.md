@@ -8,6 +8,8 @@ Este diretório é reservado para playbooks operacionais reutilizáveis.
 
 - `generate-demand/SKILL.md` (padrão de mercado)
 - `generate-demand.md` (compatibilidade)
+- `documentation-blueprint/SKILL.md` (estruturação e revisão de docs por blueprint)
+- `documentation-blueprint.md` (compatibilidade)
 - `implement-plugin.md`
 - `bugfix-api.md`
 - `review-pr.md`
