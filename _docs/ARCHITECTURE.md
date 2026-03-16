@@ -15,8 +15,8 @@
 - [5. Mapa de Módulos Arquiteturais](#5-mapa-de-módulos-arquiteturais)
 - [6. Contratos e Decisões Centrais](#6-contratos-e-decisões-centrais)
 - [7. Arquivos Importantes](#7-arquivos-importantes)
-- [9. Dependências Externas e Integrações](#9-dependências-externas-e-integrações)
-- [10. Histórico de Ondas e Changelog](#10-histórico-de-ondas-e-changelog)
+- [8. Dependências Externas e Integrações](#8-dependências-externas-e-integrações)
+- [9. Histórico de Ondas e Changelog](#9-histórico-de-ondas-e-changelog)
 
 ---
 
@@ -173,7 +173,7 @@ _docs/
 
 ---
 
-## 9. Dependências Externas e Integrações
+## 8. Dependências Externas e Integrações
 
 | Dependência           | Tipo                      | Criticidade |
 | --------------------- | ------------------------- | ----------- |
@@ -182,25 +182,25 @@ _docs/
 | LevelDB via y-leveldb | Persistência colaborativa | Alta        |
 | html2pdf.js           | Export PDF frontend       | Média       |
 
-Referências:
+Referências externas:
 
-- Vue 3: `https://vuejs.org/guide/`
-- CodeMirror 6: `https://codemirror.net/docs/`
-- Yjs: `https://docs.yjs.dev/`
-- Tailwind CSS: `https://tailwindcss.com/docs`
-- Vite: `https://vitejs.dev/guide/`
-- Context7 setup interno: [ia-context](./ia-context/)
+- [Vue 3](https://vuejs.org/guide/)
+- [CodeMirror 6](https://codemirror.net/docs/)
+- [Yjs](https://docs.yjs.dev/)
+- [Tailwind CSS](https://tailwindcss.com/docs)
+- [Vite](https://vitejs.dev/guide/)
+- [Contexto IA interno](./ia-context/)
 
 ---
 
-## 10. Histórico de Ondas e Changelog
+## 9. Histórico de Ondas e Changelog
 
-### 10.1 Registro de Ondas
+### 9.1 Registro de Ondas
 
 - **Onda 1 — MVP colaborativo**
   - Principais alterações arquiteturais: base SPA + API/WS, adoção de Yjs/CodeMirror e persistência em LevelDB.
 
-### 10.2 Changelog do Documento
+### 9.2 Changelog do Documento
 
 - **Versão 3.0**
   - **Data:** 2026-03-12
