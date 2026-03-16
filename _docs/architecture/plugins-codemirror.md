@@ -25,6 +25,7 @@ Detalha arquitetura dos plugins do editor: taxonomia, composição, precedência
 - `frontend/src/cm-plugins/plain-url.ts`
 - `frontend/src/cm-plugins/snippet.ts`
 - `frontend/src/cm-plugins/spellcheck.ts`
+- `frontend/src/cm-plugins/table-normalize-keymap.ts`
 - `frontend/src/cm-plugins/tab-keymap.ts`
 
 ## Taxonomia
@@ -47,6 +48,7 @@ Detalha arquitetura dos plugins do editor: taxonomia, composição, precedência
 - `tab-keymap.ts`
 - `enter-keymap.ts`
 - `delete-line-keymap.ts`
+- `table-normalize-keymap.ts`
 - `snippet.ts`
 - `math.ts`
 - `keymaps.ts`
@@ -89,7 +91,13 @@ Ordem arquitetural:
 2. prioridade alta para deleção de linha;
 3. prioridade normal para Enter contextual;
 4. prioridade normal para cálculo matemático;
-5. prioridade baixa para snippets.
+5. prioridade normal para normalização de tabela (`Alt+Shift+T`);
+6. prioridade baixa para snippets.
+
+## Atalhos customizados relevantes
+
+- `Ctrl+L`: remove linha atual (`delete-line-keymap.ts`);
+- `Alt+Shift+T`: normaliza tabela Markdown selecionada ou sob cursor (`table-normalize-keymap.ts`).
 
 ## Snippets padrão
 
@@ -120,6 +128,7 @@ Expressões fora do conjunto são rejeitadas.
 Atualizar este módulo ao alterar:
 
 - ordem de precedência dos keymaps;
+- atalhos customizados e seus comandos;
 - contrato de snippets/variáveis;
 - lista de plugins disponíveis;
 - regras do parser matemático.

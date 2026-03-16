@@ -22,6 +22,7 @@ import { tabIndentKeymap } from './tab-keymap'
 import { deleteLineKeymap } from './delete-line-keymap'
 import { enterKeymap } from './enter-keymap'
 import { mathCalculationKeymap } from './math'
+import { tableNormalizeKeymap } from './table-normalize-keymap'
 import { snippetKeymap } from './snippet'
 
 /**
@@ -42,5 +43,6 @@ export const editorKeymaps = [
   Prec.high(deleteLineKeymap),     // Delete line tem prioridade
   enterKeymap,                      // Enter sem precedencia especial
   mathCalculationKeymap,            // Math calculation sem precedencia especial
+  tableNormalizeKeymap,             // Normalizacao de tabela (Alt+Shift+T)
   Prec.low(snippetKeymap)           // Snippets com baixa prioridade
 ]

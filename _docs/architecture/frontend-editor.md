@@ -63,6 +63,7 @@ Assinatura padrão: `(view: EditorView, ...args) => boolean`.
 - `formatting.ts`: inline/line format (`formatInline`, `formatLinePrefix`, `applyFormat`);
 - `insertions.ts`: inserção de links/imagens Markdown;
 - `history.ts`: undo/redo via `Yjs UndoManager`;
+- `table.ts`: normalização de tabelas Markdown selecionadas ou sob cursor;
 - `index.ts`: registry central de comandos.
 
 ## Extensions (`cm-extensions`)

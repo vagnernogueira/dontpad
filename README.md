@@ -23,6 +23,7 @@ participantes.
 - Criação instantânea de documentos via URL amigável.
 - Organização por subdocumentos com rotas hierárquicas.
 - Suporte a texto simples e Markdown.
+- Normalização de tabelas Markdown com atalho `Alt+Shift+T`.
 - Salvamento automático e persistência local.
 - Bloqueio de documento por senha com bypass administrativo por senha mestre.
 - Explorer administrativo em `/explorer`, protegido por senha mestra.

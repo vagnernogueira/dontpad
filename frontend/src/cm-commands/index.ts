@@ -9,9 +9,11 @@
 export { applyFormat, formatInline, formatLinePrefix, transformCase } from './formatting'
 export { insertLink, insertImage } from './insertions'
 export { createUndoCommand, createRedoCommand } from './history'
+export { normalizeMarkdownTable } from './table'
 
 // Import commands for registry
 import { formatInline, formatLinePrefix, transformCase } from './formatting'
+import { normalizeMarkdownTable } from './table'
 
 // Type definitions for the registry
 import type { EditorView } from '@codemirror/view'
@@ -47,4 +49,5 @@ export const commands = {
   transformToUpperCase: (view: EditorView) => transformCase(view, 'upper'),
   transformToLowerCase: (view: EditorView) => transformCase(view, 'lower'),
   transformToCamelCase: (view: EditorView) => transformCase(view, 'camel'),
+  normalizeTable: (view: EditorView) => normalizeMarkdownTable(view),
 }
