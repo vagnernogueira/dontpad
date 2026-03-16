@@ -152,14 +152,25 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { ArrowLeft, RefreshCw } from 'lucide-vue-next'
 import { createDocumentAPI, type DocumentSummary } from '../services/document-api'
 import { getApiBaseUrl } from '../services/config'
 import { downloadMarkdown, downloadPDF } from '../services/export'
 import { trimTrailingSlashes } from '../cm-utils/document-name'
+import persistence from '../services/persistence'
 
 const documentAPI = createDocumentAPI(getApiBaseUrl())
+
+const EXPLORER_UNLOCKED_KEY = 'explorer.unlocked'
+const EXPLORER_SEARCH_KEY = 'explorer.search'
+const EXPLORER_SORT_KEY = 'explorer.sortKey'
+const EXPLORER_SORT_DIRECTION_KEY = 'explorer.sortDirection'
+const EXPLORER_DOCUMENTS_CACHE_KEY = 'explorer.documentsCache'
+
+const explorerRuntimeSession = {
+  masterPassword: ''
+}
 
 const hasAccess = ref(false)
 const isLoading = ref(false)
@@ -172,6 +183,44 @@ const selectedDocumentName = ref<string | null>(null)
 const documents = ref<DocumentSummary[]>([])
 
 type SortKey = 'selected' | 'name' | 'createdAt' | 'updatedAt' | 'locked' | 'empty' | 'open'
+const SORT_KEYS: SortKey[] = ['selected', 'name', 'createdAt', 'updatedAt', 'locked', 'empty', 'open']
+
+const isSortKey = (value: string): value is SortKey => {
+  return SORT_KEYS.includes(value as SortKey)
+}
+
+const isSortDirection = (value: string): value is 'asc' | 'desc' => {
+  return value === 'asc' || value === 'desc'
+}
+
+const isDocumentSummary = (item: unknown): item is DocumentSummary => {
+  if (!item || typeof item !== 'object') return false
+  const candidate = item as Partial<DocumentSummary>
+  return typeof candidate.name === 'string'
+    && typeof candidate.createdAt === 'string'
+    && typeof candidate.updatedAt === 'string'
+    && typeof candidate.locked === 'boolean'
+    && typeof candidate.empty === 'boolean'
+    && typeof candidate.open === 'boolean'
+}
+
+const clearUnlockedState = () => {
+  hasAccess.value = false
+  masterPassword.value = ''
+  explorerRuntimeSession.masterPassword = ''
+  documents.value = []
+  selectedDocumentName.value = null
+  persistence.set(EXPLORER_UNLOCKED_KEY, false)
+  persistence.remove(EXPLORER_DOCUMENTS_CACHE_KEY)
+}
+
+const ensureMasterPassword = () => {
+  if (masterPassword.value) return true
+
+  authError.value = 'Informe a senha mestra para revalidar o acesso.'
+  clearUnlockedState()
+  return false
+}
 
 const sortKey = ref<SortKey>('updatedAt')
 const sortDirection = ref<'asc' | 'desc'>('desc')
@@ -196,14 +245,17 @@ const unlockExplorer = async () => {
   }
 
   masterPassword.value = candidate
+  explorerRuntimeSession.masterPassword = candidate
   hasAccess.value = true
   documents.value = summaries
   selectedDocumentName.value = null
   masterPasswordInput.value = ''
+  persistence.set(EXPLORER_UNLOCKED_KEY, true)
 }
 
 const refreshDocuments = async () => {
   if (!hasAccess.value) return
+  if (!ensureMasterPassword()) return
 
   isLoading.value = true
   errorMessage.value = ''
@@ -211,9 +263,7 @@ const refreshDocuments = async () => {
   isLoading.value = false
 
   if (summaries === null) {
-    hasAccess.value = false
-    documents.value = []
-    selectedDocumentName.value = null
+    clearUnlockedState()
     authError.value = 'Sua sessão de acesso expirou. Informe a senha mestra novamente.'
     return
   }
@@ -291,6 +341,7 @@ const getSelectedDocumentName = () => {
 
 const renameSelected = async () => {
   errorMessage.value = ''
+  if (!ensureMasterPassword()) return
   const selectedName = getSelectedDocumentName()
   if (!selectedName) return
 
@@ -317,6 +368,7 @@ const renameSelected = async () => {
 
 const removeSelected = async () => {
   errorMessage.value = ''
+  if (!ensureMasterPassword()) return
   const selectedName = getSelectedDocumentName()
   if (!selectedName) return
 
@@ -335,6 +387,7 @@ const removeSelected = async () => {
 
 const downloadSelectedMarkdown = async () => {
   errorMessage.value = ''
+  if (!ensureMasterPassword()) return
   const selectedName = getSelectedDocumentName()
   if (!selectedName) return
 
@@ -349,6 +402,7 @@ const downloadSelectedMarkdown = async () => {
 
 const downloadSelectedPDF = async () => {
   errorMessage.value = ''
+  if (!ensureMasterPassword()) return
   const selectedName = getSelectedDocumentName()
   if (!selectedName) return
 
@@ -363,6 +417,7 @@ const downloadSelectedPDF = async () => {
 
 const lockSelected = async () => {
   errorMessage.value = ''
+  if (!ensureMasterPassword()) return
   const selectedName = getSelectedDocumentName()
   if (!selectedName) return
 
@@ -386,4 +441,56 @@ const formatDate = (value: string) => {
   if (Number.isNaN(date.getTime())) return '-'
   return date.toLocaleString('pt-BR')
 }
+
+onMounted(() => {
+  search.value = persistence.get(EXPLORER_SEARCH_KEY, '')
+
+  const persistedSortKey = persistence.get(EXPLORER_SORT_KEY, 'updatedAt')
+  if (isSortKey(persistedSortKey)) {
+    sortKey.value = persistedSortKey
+  }
+
+  const persistedSortDirection = persistence.get(EXPLORER_SORT_DIRECTION_KEY, 'desc')
+  if (isSortDirection(persistedSortDirection)) {
+    sortDirection.value = persistedSortDirection
+  }
+
+  const cachedDocuments = persistence.get<unknown[]>(EXPLORER_DOCUMENTS_CACHE_KEY, [])
+  documents.value = cachedDocuments.filter(isDocumentSummary)
+
+  const isUnlocked = persistence.get(EXPLORER_UNLOCKED_KEY, false)
+  const hasRuntimePassword = !!explorerRuntimeSession.masterPassword
+
+  if (hasRuntimePassword) {
+    masterPassword.value = explorerRuntimeSession.masterPassword
+    hasAccess.value = true
+    void refreshDocuments()
+    return
+  }
+
+  if (isUnlocked) {
+    hasAccess.value = true
+    errorMessage.value = 'Estado do Explorer restaurado. Refaça a autenticação ao atualizar ou executar ações de gestão.'
+  }
+})
+
+watch(search, value => {
+  persistence.set(EXPLORER_SEARCH_KEY, value)
+})
+
+watch(sortKey, value => {
+  persistence.set(EXPLORER_SORT_KEY, value)
+})
+
+watch(sortDirection, value => {
+  persistence.set(EXPLORER_SORT_DIRECTION_KEY, value)
+})
+
+watch(documents, value => {
+  persistence.set(EXPLORER_DOCUMENTS_CACHE_KEY, value)
+}, { deep: true })
+
+watch(hasAccess, value => {
+  persistence.set(EXPLORER_UNLOCKED_KEY, value)
+})
 </script>
