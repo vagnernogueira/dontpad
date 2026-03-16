@@ -27,6 +27,7 @@ participantes.
 - Bloqueio de documento por senha com bypass administrativo por senha mestre.
 - Explorer administrativo em `/explorer`, protegido por senha mestra.
 - Gestão centralizada de documentos com ordenação, filtro e ações por item.
+- Acesso por URL com query params para modos `pdf`, `view` e `raw` sem abrir a interface de edição nesses modos.
 
 ## Convenções de Frontend
 
@@ -104,6 +105,20 @@ VITE_BACKEND_WS_URL=wss://dontpad.vagnernogueira.com/api
 - A tela lista documentos com: seleção, nome, data de criação, data de alteração, travado (S/N), vazio (S/N), aberto (S/N).
 - Suporta ordenação por coluna, busca por nome e seleção única.
 - Ações disponíveis para o documento selecionado: renomear, remover, download markdown, download PDF e travar.
+
+## Acesso por URL (query params)
+
+A rota de documento aceita parâmetros para entregar formatos alternativos do mesmo conteúdo:
+
+- `/<documento>?pdf`: gera e inicia download do PDF automaticamente.
+- `/<documento>?view`: renderiza preview HTML estilizado do Markdown.
+- `/<documento>?raw`: exibe Markdown bruto no navegador.
+
+Regras:
+
+- A resolução desses modos é feita por um componente dedicado de rota no frontend, sem abrir a interface de edição nesses cenários.
+- Sem query params especiais, `/<documento>` continua no modo padrão de edição colaborativa.
+- Se o documento estiver travado por senha, qualquer modo especial (`pdf`, `view`, `raw`) exige autenticação válida antes de liberar conteúdo.
 
 Suba o ambiente:
 

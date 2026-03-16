@@ -1,0 +1,150 @@
+<template>
+  <Editor v-if="!activeMode" />
+
+  <div v-else class="flex flex-col h-full w-full">
+    <main class="flex-1 overflow-auto bg-gray-50">
+      <div v-if="loading" class="h-full flex items-center justify-center text-sm text-gray-500 px-4 text-center">
+        Carregando documento...
+      </div>
+
+      <div v-else-if="requiresPassword" class="h-full flex items-center justify-center px-4">
+        <div class="bg-white rounded-lg shadow-xl p-4 sm:p-5 w-full max-w-[calc(100vw-2rem)] sm:max-w-md">
+          <h3 class="font-bold text-gray-800 mb-4 text-lg">Documento Protegido</h3>
+          <div class="mb-3">
+            <label class="block text-sm text-gray-600 mb-1">Senha para continuar</label>
+            <input
+              ref="accessPasswordInput"
+              v-model="accessPassword"
+              type="password"
+              class="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+              placeholder="Digite a senha"
+              @keyup.enter="retryWithPassword"
+            >
+          </div>
+          <p v-if="errorMessage" class="mb-3 text-xs text-red-600">{{ errorMessage }}</p>
+          <div class="flex justify-end gap-2 text-sm">
+            <button @click="retryWithPassword" class="px-3 py-1.5 bg-emerald-600 text-white hover:bg-emerald-700 rounded shadow-sm focus:outline-none" :disabled="!accessPassword.trim()">
+              Validar
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div v-else-if="errorMessage" class="h-full flex items-center justify-center text-sm text-red-600 px-4 text-center">
+        {{ errorMessage }}
+      </div>
+
+      <div v-else-if="activeMode === 'view'" class="max-w-4xl mx-auto py-3 px-4" v-html="viewHtml"></div>
+
+      <div v-else-if="activeMode === 'raw'" class="max-w-4xl mx-auto py-3 px-4">
+        <pre class="whitespace-pre-wrap break-words text-sm text-gray-800 font-mono">{{ rawContent }}</pre>
+      </div>
+
+      <div v-else-if="activeMode === 'pdf'" class="h-full flex items-center justify-center text-sm text-gray-500 px-4 text-center">
+        Download do PDF iniciado.
+      </div>
+    </main>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { computed, nextTick, ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
+import Editor from './Editor.vue'
+import * as exportService from '../services/export'
+import { markdownStyles } from '../services/pdf-styles'
+import { createDocumentAPI } from '../services/document-api'
+import { getApiBaseUrl } from '../services/config'
+
+type SpecialMode = 'pdf' | 'view' | 'raw'
+
+const route = useRoute()
+const documentAPI = createDocumentAPI(getApiBaseUrl())
+
+const loading = ref(false)
+const requiresPassword = ref(false)
+const errorMessage = ref('')
+const viewHtml = ref('')
+const rawContent = ref('')
+const accessPassword = ref('')
+const accessPasswordInput = ref<HTMLInputElement | null>(null)
+
+const documentId = computed(() => {
+  const value = route.params.documentId
+  return typeof value === 'string' && value.trim() ? value : 'default'
+})
+
+const activeMode = computed<SpecialMode | null>(() => {
+  if (Object.prototype.hasOwnProperty.call(route.query, 'pdf')) return 'pdf'
+  if (Object.prototype.hasOwnProperty.call(route.query, 'view')) return 'view'
+  if (Object.prototype.hasOwnProperty.call(route.query, 'raw')) return 'raw'
+  return null
+})
+
+const clearState = () => {
+  loading.value = false
+  requiresPassword.value = false
+  errorMessage.value = ''
+  viewHtml.value = ''
+  rawContent.value = ''
+}
+
+const loadSpecialMode = async () => {
+  const mode = activeMode.value
+  if (!mode) {
+    clearState()
+    return
+  }
+
+  loading.value = true
+  requiresPassword.value = false
+  errorMessage.value = ''
+  viewHtml.value = ''
+  rawContent.value = ''
+
+  const result = await documentAPI.getPublicDocumentContent(documentId.value, accessPassword.value)
+  if (!result.ok) {
+    loading.value = false
+
+    if (result.requiresPassword) {
+      requiresPassword.value = true
+      errorMessage.value = 'Senha necessária para acessar este documento.'
+      await nextTick()
+      accessPasswordInput.value?.focus()
+      return
+    }
+
+    errorMessage.value = 'Não foi possível carregar o documento.'
+    return
+  }
+
+  if (mode === 'raw') {
+    rawContent.value = result.content
+    loading.value = false
+    return
+  }
+
+  if (mode === 'view') {
+    const html = await exportService.markdownToHtml(result.content)
+    viewHtml.value = `${markdownStyles}<div class="markdown-body">${html}</div>`
+    loading.value = false
+    return
+  }
+
+  await exportService.downloadPDF(result.content, documentId.value)
+  loading.value = false
+}
+
+const retryWithPassword = async () => {
+  if (!accessPassword.value.trim()) return
+  await loadSpecialMode()
+}
+
+watch(
+  () => route.fullPath,
+  () => {
+    void loadSpecialMode()
+  },
+  { immediate: true }
+)
+</script>

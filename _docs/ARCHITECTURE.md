@@ -55,6 +55,7 @@ Características principais:
 - proteção por senha de documentos;
 - Explorer administrativo em `/explorer` com senha mestra;
 - exportação para Markdown e PDF;
+- acesso por URL parametrizada para formatos `pdf`, `view` e `raw`;
 - arquitetura modular com separação clara de responsabilidades.
 
 ---
@@ -141,6 +142,7 @@ _docs/
 
 - colaboração em tempo real usa Yjs (CRDT) como fonte de consistência;
 - acesso administrativo exige `x-docs-password` válido;
+- acesso por URL parametrizada (`pdf/view/raw`) usa endpoint dedicado de conteúdo e respeita lock por documento;
 - documentos lockados exigem senha para acesso e handshake WS.
 
 ### 6.2 Decisões arquiteturais centrais
@@ -163,6 +165,7 @@ _docs/
 
 | Arquivo                                 | Descrição                                              |
 | --------------------------------------- | ------------------------------------------------------ |
+| `frontend/src/components/DocumentRoute.vue` | Resolução de modos por query params e fallback para edição. |
 | `frontend/src/components/Editor.vue`    | Componente principal do editor colaborativo.           |
 | `frontend/src/components/Explorer.vue`  | Gestão administrativa de documentos em `/explorer`.    |
 | `frontend/src/services/document-api.ts` | Cliente HTTP para lock/access e ações administrativas. |

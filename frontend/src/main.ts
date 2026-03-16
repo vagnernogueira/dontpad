@@ -7,7 +7,7 @@ import { trimTrailingSlashes } from './cm-utils/document-name'
 const routes = [
     { path: '/', component: () => import('./components/Home.vue') },
     { path: '/explorer', component: () => import('./components/Explorer.vue') },
-    { path: '/:documentId(.*)', name: 'document', component: () => import('./components/Editor.vue') } // Catch-all for subdocuments like /a/b/c
+    { path: '/:documentId(.*)', name: 'document', component: () => import('./components/DocumentRoute.vue') } // Catch-all for subdocuments like /a/b/c
 ]
 
 const router = createRouter({

@@ -10,6 +10,7 @@ Este módulo documenta a arquitetura do frontend focada no editor colaborativo: 
 
 ## Arquivos-fonte principais
 
+- `frontend/src/components/DocumentRoute.vue`
 - `frontend/src/components/Editor.vue`
 - `frontend/src/components/Home.vue`
 - `frontend/src/components/Explorer.vue`
@@ -21,7 +22,8 @@ Este módulo documenta a arquitetura do frontend focada no editor colaborativo: 
 
 ## Visão da camada
 
-- `Editor.vue` orquestra lifecycle, estado reativo e integrações (CodeMirror + Yjs + APIs);
+- `DocumentRoute.vue` resolve modos de acesso por query params e delega fallback para edição padrão;
+- `Editor.vue` orquestra lifecycle, estado reativo e integrações (CodeMirror + Yjs + APIs) no modo de edição;
 - `cm-commands` concentra ações stateless sobre o editor;
 - `cm-extensions` aplica comportamento contínuo (tema, highlight);
 - `cm-plugins` encapsula decorações DOM, keymaps e interações;
@@ -41,6 +43,13 @@ Este módulo documenta a arquitetura do frontend focada no editor colaborativo: 
 - Integra provider Yjs/WebSocket e awareness;
 - Reage a mudança de rota para troca de documento;
 - Delega regras para comandos/plugins/services.
+
+### `DocumentRoute.vue`
+
+- Resolve parâmetros de URL para formatos alternativos (`pdf`, `view`, `raw`);
+- Centraliza regra de prioridade quando há conflito de params (`pdf` > `view` > `raw`);
+- Centraliza fluxo de autenticação para documento travado em modos especiais;
+- Faz fallback explícito para `Editor.vue` quando não há modo especial.
 
 ### `Explorer.vue`
 
@@ -73,7 +82,7 @@ Detalhamento completo no módulo [plugins-codemirror.md](./plugins-codemirror.md
 
 ## Services (`src/services`)
 
-- `document-api.ts`: lock/unlock/access e operações administrativas;
+- `document-api.ts`: lock/unlock/access, operações administrativas e leitura pública para modos parametrizados (`getPublicDocumentContent`);
 - `config.ts`: resolução de URLs HTTP/WS por ambiente;
 - `export.ts`: download Markdown/PDF com lazy loading;
 - `persistence.ts`: wrapper type-safe para `localStorage`;
@@ -84,9 +93,24 @@ Detalhamento completo no módulo [plugins-codemirror.md](./plugins-codemirror.md
 ### Acesso ao documento
 
 1. Router resolve `/:documentId`;
-2. `Editor.vue` valida lock/acesso;
-3. Em sucesso, inicializa editor + provider Yjs;
-4. Renderiza sessão colaborativa.
+2. `DocumentRoute.vue` avalia query params para detectar modo especial;
+3. Em modo especial, carrega conteúdo por API e aplica `pdf`, `view` ou `raw`;
+4. Se o documento estiver travado, exige senha antes de liberar conteúdo;
+5. Sem modo especial, delega para `Editor.vue`, que mantém o fluxo padrão de edição colaborativa.
+
+### Acesso por URL parametrizada
+
+Formatos suportados:
+
+- `/<documento>?pdf`
+- `/<documento>?view`
+- `/<documento>?raw`
+
+Regras:
+
+- Sem parâmetro especial, o comportamento padrão continua sendo edição colaborativa.
+- Em conflito de parâmetros, a prioridade é `pdf` > `view` > `raw`.
+- Em documento travado, o frontend solicita senha e só libera modo especial após validação bem-sucedida.
 
 ### Edição colaborativa
 

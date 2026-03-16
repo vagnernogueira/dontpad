@@ -56,6 +56,28 @@ app.get('/api/document-content', async (req, res) => {
     }
 });
 
+app.get('/api/public-document-content', async (req, res) => {
+    try {
+        const documentId = typeof req.query.documentId === 'string' ? req.query.documentId : '';
+        if (!documentId.trim()) {
+            res.status(400).json({ error: 'document_id_required' });
+            return;
+        }
+
+        const password = typeof req.query.password === 'string' ? req.query.password : '';
+        if (isDocumentLocked(documentId) && !verifyDocumentAccess(documentId, password)) {
+            res.status(403).json({ error: 'invalid_password' });
+            return;
+        }
+
+        const content = await getDocumentContent(documentId);
+        res.json({ documentId, content });
+    } catch (error) {
+        console.error('Failed to load public document content', error);
+        res.status(500).json({ error: 'failed_to_load_document_content' });
+    }
+});
+
 app.post('/api/documents/rename', async (req, res) => {
     try {
         const providedPassword = typeof req.headers['x-docs-password'] === 'string' ? req.headers['x-docs-password'] : '';

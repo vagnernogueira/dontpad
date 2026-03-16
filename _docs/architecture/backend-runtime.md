@@ -28,7 +28,7 @@ Este módulo cobre execução backend, contratos HTTP/WS, persistência CRDT, lo
 
 - Boot de `Express` com `cors()` e `express.json()`;
 - Criação de servidor HTTP e acoplamento WebSocket;
-- Exposição das rotas de saúde, listagem, conteúdo, rename, delete, lock e access;
+- Exposição das rotas de saúde, listagem, conteúdo administrativo, conteúdo público por URL parametrizada, rename, delete, lock e access;
 - Delegação da validação de acesso e persistência para `sync.ts`.
 
 ### `sync.ts`
@@ -48,6 +48,13 @@ Endpoints administrativos exigem header `x-docs-password` (senha mestra válida)
 - `GET /api/document-content?documentId=...`
 - `POST /api/documents/rename`
 - `DELETE /api/documents`
+
+Endpoint de conteúdo para modos por URL parametrizada (sem `x-docs-password`):
+
+- `GET /api/public-document-content?documentId=...&password=...`
+	- se documento não estiver travado: retorna conteúdo;
+	- se documento estiver travado: exige senha válida do documento;
+	- senha inválida: `403` com `invalid_password`.
 
 Endpoints de lock/acesso:
 

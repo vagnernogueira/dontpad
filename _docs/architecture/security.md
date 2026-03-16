@@ -42,6 +42,13 @@ Consolida decisões e práticas de segurança aplicáveis ao editor colaborativo
   - `403` acesso negado;
   - `500` erro interno.
 
+## Acesso parametrizado por URL
+
+- modos `pdf`, `view` e `raw` usam endpoint de leitura pública do conteúdo (`/api/public-document-content`);
+- esse endpoint não usa senha mestra, mas respeita lock por documento;
+- documento travado exige senha válida do próprio documento (`password` na query);
+- senha inválida retorna `403` com `invalid_password`.
+
 ## Rendering e XSS
 
 - evitar injeção direta de HTML não confiável;

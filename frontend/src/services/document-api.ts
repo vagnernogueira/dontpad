@@ -23,6 +23,13 @@ export interface DocumentSummary {
   open: boolean
 }
 
+export interface PublicDocumentContentResult {
+  ok: boolean
+  content: string
+  requiresPassword: boolean
+  error?: string
+}
+
 /**
  * API client for document operations
  */
@@ -190,6 +197,54 @@ class DocumentAPI {
     } catch (error) {
       console.error('Failed to load document content:', error)
       return null
+    }
+  }
+
+  /**
+   * Load raw markdown content by document id for public URL modes.
+   * If the document is locked, a valid document password is required.
+   */
+  async getPublicDocumentContent(documentId: string, password = ''): Promise<PublicDocumentContentResult> {
+    try {
+      const params = new URLSearchParams({ documentId })
+      if (password.trim()) {
+        params.set('password', password.trim())
+      }
+
+      const response = await fetch(`${this.baseUrl}/api/public-document-content?${params.toString()}`)
+      if (!response.ok) {
+        let error = 'failed_to_load_document_content'
+        try {
+          const payload = await response.json() as { error?: unknown }
+          if (typeof payload.error === 'string' && payload.error.trim()) {
+            error = payload.error
+          }
+        } catch {
+          // Ignore parse failures and keep fallback error code
+        }
+
+        return {
+          ok: false,
+          content: '',
+          requiresPassword: response.status === 403 && error === 'invalid_password',
+          error
+        }
+      }
+
+      const payload = await response.json() as { content?: unknown }
+      return {
+        ok: true,
+        content: typeof payload.content === 'string' ? payload.content : '',
+        requiresPassword: false
+      }
+    } catch (error) {
+      console.error('Failed to load public document content:', error)
+      return {
+        ok: false,
+        content: '',
+        requiresPassword: false,
+        error: 'failed_to_load_document_content'
+      }
     }
   }
 
