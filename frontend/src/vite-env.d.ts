@@ -1,8 +1,8 @@
 /// <reference types="vite/client" />
 
 interface ImportMetaEnv {
-	readonly VITE_HOME_DOCS_PASSWORD?: string
-	readonly VITE_HOME_DOCS_SHORTCUT?: string
+	readonly VITE_BACKEND_HTTP_URL?: string
+	readonly VITE_BACKEND_WS_URL?: string
 }
 
 interface ImportMeta {

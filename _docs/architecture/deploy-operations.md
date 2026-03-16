@@ -23,16 +23,14 @@ Serviços principais:
 
 ## Variáveis de ambiente críticas
 
-- `VITE_HOME_DOCS_PASSWORD`
 - `DOCUMENTS_MASTER_PASSWORD`
 - `VITE_BACKEND_HTTP_URL`
 - `VITE_BACKEND_WS_URL`
-- `VITE_HOME_DOCS_SHORTCUT`
 
 Notas:
 
-- sem `VITE_HOME_DOCS_PASSWORD` o build deve falhar;
-- recomendado manter consistência entre senha master frontend/backend em deploy.
+- `DOCUMENTS_MASTER_PASSWORD` é usada apenas pelo backend; o frontend não embute senha de acesso no build;
+- recomendado usar senhas fortes e não reutilizar entre ambientes.
 
 ## Build backend
 

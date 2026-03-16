@@ -56,7 +56,6 @@ cp .env.example .env
 
 Defina no `.env` ao menos:
 
-- `VITE_HOME_DOCS_PASSWORD` com uma senha forte.
 - `DOCUMENTS_MASTER_PASSWORD` com uma senha forte para APIs administrativas e acesso ao Explorer.
 
 ### Como Compilar
@@ -92,9 +91,7 @@ npm run dev
 Crie um `.env` na raiz (mesmo nível de `docker-compose.yml`) com:
 
 ```bash
-VITE_HOME_DOCS_PASSWORD=defina-uma-senha-forte
-DOCUMENTS_MASTER_PASSWORD=defina-uma-senha-mestra-forte
-VITE_HOME_DOCS_SHORTCUT=Alt+R
+DOCUMENTS_MASTER_PASSWORD=defina-uma-senha-forte
 VITE_BACKEND_HTTP_URL=https://dontpad.vagnernogueira.com
 VITE_BACKEND_WS_URL=wss://dontpad.vagnernogueira.com/api
 ```
