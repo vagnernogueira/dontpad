@@ -157,6 +157,7 @@ import { ArrowLeft, RefreshCw } from 'lucide-vue-next'
 import { createDocumentAPI, type DocumentSummary } from '../services/document-api'
 import { getApiBaseUrl } from '../services/config'
 import { downloadMarkdown, downloadPDF } from '../services/export'
+import { trimTrailingSlashes } from '../cm-utils/document-name'
 
 const documentAPI = createDocumentAPI(getApiBaseUrl())
 
@@ -296,9 +297,9 @@ const renameSelected = async () => {
   const nextNameRaw = window.prompt('Novo nome do documento:', selectedName)
   if (!nextNameRaw) return
 
-  const nextName = nextNameRaw.trim()
+  const nextName = trimTrailingSlashes(nextNameRaw.trim())
   if (!nextName) {
-    errorMessage.value = 'Nome inválido.'
+    errorMessage.value = 'Nome inválido. Remova a barra no final do nome e tente novamente.'
     return
   }
 

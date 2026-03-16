@@ -72,6 +72,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
+import { trimTrailingSlashes } from '../cm-utils/document-name'
 
 type ShortcutConfig = {
   altKey: boolean
@@ -148,9 +149,10 @@ const baseUrl = computed(() => {
 })
 
 const goToDocument = () => {
-  if (docName.value) {
-    router.push(`/${docName.value}`)
-  }
+  const nextDocumentName = trimTrailingSlashes(docName.value.trim())
+  if (!nextDocumentName) return
+
+  router.push(`/${nextDocumentName}`)
 }
 
 const apiBaseUrl = computed(() => {
