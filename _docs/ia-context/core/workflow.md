@@ -8,7 +8,8 @@
 4. Definir capacidades necessárias para execução (incluindo uso de ferramentas/MCP quando aplicável).
 5. Decidir: perguntar ou seguir com suposição segura.
 6. Executar solução mínima no escopo.
-7. Reportar decisão, impacto, riscos e próximos passos.
+7. Executar code review nos arquivos modificados, garantindo aderência a contratos públicos, regras e boas práticas.
+8. Reportar decisão, impacto, riscos e próximos passos.
 
 ## 2) Quando perguntar vs quando seguir
 
