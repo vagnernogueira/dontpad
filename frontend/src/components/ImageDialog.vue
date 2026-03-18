@@ -1,36 +1,50 @@
 <template>
-  <BaseDialog title="Inserir Imagem" @close="$emit('close')">
-    <div class="mb-3">
-      <label class="input-label">Texto Alternativo (Alt)</label>
-      <input
-        ref="altInput"
-        v-model="alt"
-        type="text"
-        class="input-field"
-        placeholder="Descrição da imagem"
-        @keyup.enter="insert"
-      />
-    </div>
-    <div class="mb-4">
-      <label class="input-label">URL da Imagem</label>
-      <input
-        v-model="url"
-        type="text"
-        class="input-field"
-        placeholder="https://..."
-        @keyup.enter="insert"
-      />
-    </div>
-    <template #actions>
-      <button @click="$emit('close')" class="btn-dialog-cancel">Cancelar</button>
-      <button @click="insert" class="btn-dialog-confirm" :disabled="!url">Inserir</button>
-    </template>
-  </BaseDialog>
+  <Dialog :open="true" @update:open="(v) => !v && $emit('close')">
+    <DialogContent
+      class="sm:max-w-md"
+      @open-auto-focus.prevent="altInput?.select()"
+    >
+      <DialogHeader>
+        <DialogTitle>Inserir Imagem</DialogTitle>
+      </DialogHeader>
+      <div class="mb-3">
+        <label class="input-label">Texto Alternativo (Alt)</label>
+        <input
+          ref="altInput"
+          v-model="alt"
+          type="text"
+          class="input-field"
+          placeholder="Descrição da imagem"
+          @keyup.enter="insert"
+        />
+      </div>
+      <div class="mb-4">
+        <label class="input-label">URL da Imagem</label>
+        <input
+          v-model="url"
+          type="text"
+          class="input-field"
+          placeholder="https://..."
+          @keyup.enter="insert"
+        />
+      </div>
+      <DialogFooter>
+        <button @click="$emit('close')" class="btn-dialog-cancel">Cancelar</button>
+        <button @click="insert" class="btn-dialog-confirm" :disabled="!url">Inserir</button>
+      </DialogFooter>
+    </DialogContent>
+  </Dialog>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, nextTick } from 'vue'
-import BaseDialog from './BaseDialog.vue'
+import { ref } from 'vue'
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 
 const props = defineProps<{
   initialAlt?: string
@@ -49,9 +63,4 @@ function insert() {
   if (!url.value) return
   emit('insert', alt.value, url.value)
 }
-
-onMounted(async () => {
-  await nextTick()
-  altInput.value?.select()
-})
 </script>

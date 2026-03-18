@@ -1,16 +1,27 @@
 <template>
-  <div class="dialog-overlay" @click.self="$emit('close')">
-    <div :class="['dialog-card', cardClass]">
-      <h3 v-if="title" class="dialog-title">{{ title }}</h3>
+  <Dialog :open="true" @update:open="(v) => !v && $emit('close')">
+    <DialogContent :class="cn('sm:max-w-md', cardClass)">
+      <DialogHeader v-if="title">
+        <DialogTitle>{{ title }}</DialogTitle>
+      </DialogHeader>
       <slot />
-      <div class="dialog-footer">
+      <DialogFooter>
         <slot name="actions" />
-      </div>
-    </div>
-  </div>
+      </DialogFooter>
+    </DialogContent>
+  </Dialog>
 </template>
 
 <script setup lang="ts">
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { cn } from '@/lib/utils'
+
 defineProps<{
   title?: string
   cardClass?: string
