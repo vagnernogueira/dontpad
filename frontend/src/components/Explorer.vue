@@ -1,60 +1,60 @@
 <template>
   <div class="flex h-full w-full flex-col text-gray-900">
-    <header class="bg-gray-900 text-gray-100 px-3 sm:px-5 py-btn sm:py-header flex items-center justify-between shadow-md z-20">
+    <header class="page-header">
       <div class="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
-        <router-link to="/" class="font-bold text-base sm:text-lg hover:text-white transition-colors flex items-center gap-1 shrink-0">
+        <router-link to="/" class="page-header-link">
           <ArrowLeft :size="18" />
           <span class="hidden xs:inline">Início</span>
         </router-link>
-        <div class="font-mono bg-gray-800 text-gray-300 px-2 sm:px-3 py-1 rounded-md text-xs sm:text-sm shrink-0 border border-gray-700">
+        <div class="page-header-badge">
           /explorer
         </div>
       </div>
       <button
         v-if="session.hasAccess.value"
         @click="refreshDocuments"
-        class="px-2 sm:px-3 py-btn sm:py-btn-sm bg-gray-800 border border-gray-700 text-white hover:bg-gray-700 rounded-md font-medium text-xs transition-colors focus:outline-none flex items-center gap-1.5 shadow-sm touch-manipulation shrink-0"
+        class="btn-primary flex items-center gap-1.5 border-gray-700 hover:bg-gray-700"
       >
         <RefreshCw :size="14" />
         Atualizar
       </button>
     </header>
 
-    <div class="bg-[#f8f9fa] border-b border-gray-200 px-2 sm:px-4 py-btn flex items-center gap-1 sm:gap-1.5 shadow-sm text-gray-600 z-10 text-sm overflow-x-auto overflow-y-hidden">
+    <div class="toolbar">
       <template v-if="session.hasAccess.value">
         <input
           v-model="list.search.value"
           type="text"
-          class="w-full rounded border border-gray-300 px-3 py-btn sm:py-btn-sm text-sm focus:outline-none focus:ring-2 focus:ring-gray-800 sm:max-w-sm bg-white shrink-0"
+          class="input-field py-btn sm:py-btn-sm focus:ring-gray-800 focus:border-gray-800 sm:max-w-sm bg-white shrink-0"
           placeholder="Buscar por nome"
         />
 
-        <div class="w-px h-5 bg-gray-300 mx-1.5 self-center shrink-0"></div>
+        <div class="toolbar-divider"></div>
 
         <button
           @click="renameSelected"
           :disabled="!list.selectedDocumentName.value"
-          class="px-2.5 py-btn sm:py-btn-sm bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 hover:text-gray-900 rounded-md font-medium text-xs transition-colors focus:outline-none touch-manipulation shrink-0 disabled:cursor-not-allowed disabled:opacity-40"
+          class="btn-secondary"
         >Renomear</button>
         <button
           @click="removeSelected"
           :disabled="!list.selectedDocumentName.value"
-          class="px-2.5 py-btn sm:py-btn-sm bg-white border border-red-300 text-red-700 hover:bg-red-50 rounded-md font-medium text-xs transition-colors focus:outline-none touch-manipulation shrink-0 disabled:cursor-not-allowed disabled:opacity-40"
+          class="btn-danger"
         >Remover</button>
         <button
           @click="downloadSelectedMarkdown"
           :disabled="!list.selectedDocumentName.value"
-          class="px-2.5 py-btn sm:py-btn-sm bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 hover:text-gray-900 rounded-md font-medium text-xs transition-colors focus:outline-none touch-manipulation shrink-0 disabled:cursor-not-allowed disabled:opacity-40"
+          class="btn-secondary"
         >Download markdown</button>
         <button
           @click="downloadSelectedPDF"
           :disabled="!list.selectedDocumentName.value"
-          class="px-2.5 py-btn sm:py-btn-sm bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 hover:text-gray-900 rounded-md font-medium text-xs transition-colors focus:outline-none touch-manipulation shrink-0 disabled:cursor-not-allowed disabled:opacity-40"
+          class="btn-secondary"
         >Download PDF</button>
         <button
           @click="lockSelected"
           :disabled="!list.selectedDocumentName.value"
-          class="px-2.5 py-btn sm:py-btn-sm bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 hover:text-gray-900 rounded-md font-medium text-xs transition-colors focus:outline-none touch-manipulation shrink-0 disabled:cursor-not-allowed disabled:opacity-40"
+          class="btn-secondary"
         >Travar</button>
       </template>
       <p v-else class="text-sm text-gray-500 px-1">Informe a senha mestra para habilitar ações do Explorer.</p>
@@ -68,12 +68,12 @@
           <input
             v-model="session.masterPasswordInput.value"
             type="password"
-            class="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-800"
+            class="input-field py-2 focus:ring-gray-800 focus:border-gray-800"
             placeholder="Senha mestra"
             autocomplete="off"
           />
           <p v-if="session.authError.value" class="text-xs text-red-600">{{ session.authError.value }}</p>
-          <button type="submit" class="w-full rounded bg-gray-800 px-3 py-2 text-sm text-white hover:bg-gray-900">
+          <button type="submit" class="w-full rounded bg-gray-800 px-3 py-2 text-sm text-white hover:bg-gray-900 transition-colors">
             Entrar
           </button>
         </form>

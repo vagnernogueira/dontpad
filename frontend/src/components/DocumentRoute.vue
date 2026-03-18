@@ -8,22 +8,22 @@
       </div>
 
       <div v-else-if="requiresPassword" class="h-full flex items-center justify-center px-4">
-        <div class="bg-white rounded-lg shadow-xl p-4 sm:p-5 w-full max-w-[calc(100vw-2rem)] sm:max-w-md">
-          <h3 class="font-bold text-gray-800 mb-4 text-lg">Documento Protegido</h3>
+        <div class="dialog-card">
+          <h3 class="dialog-title">Documento Protegido</h3>
           <div class="mb-3">
-            <label class="block text-sm text-gray-600 mb-1">Senha para continuar</label>
+            <label class="input-label">Senha para continuar</label>
             <input
               ref="accessPasswordInput"
               v-model="accessPassword"
               type="password"
-              class="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+              class="input-field"
               placeholder="Digite a senha"
               @keyup.enter="retryWithPassword"
             >
           </div>
           <p v-if="errorMessage" class="mb-3 text-xs text-red-600">{{ errorMessage }}</p>
-          <div class="flex justify-end gap-2 text-sm">
-            <button @click="retryWithPassword" class="px-3 py-1.5 bg-emerald-600 text-white hover:bg-emerald-700 rounded shadow-sm focus:outline-none" :disabled="!accessPassword.trim()">
+          <div class="dialog-footer">
+            <button @click="retryWithPassword" class="btn-dialog-confirm" :disabled="!accessPassword.trim()">
               Validar
             </button>
           </div>
