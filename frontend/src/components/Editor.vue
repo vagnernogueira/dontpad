@@ -1,23 +1,12 @@
 <template>
   <div class="flex flex-col h-full w-full">
     <!-- Header -->
-    <header class="page-header">
-      <div class="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
-        <router-link to="/" class="page-header-link">
-          <ArrowLeft :size="18" />
-          <span class="hidden xs:inline">Início</span>
-        </router-link>
-        <div class="page-header-badge truncate max-w-[120px] sm:max-w-none">
-          /{{ documentId }}
-        </div>
-      </div>
-      <div class="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm text-gray-300 shrink-0">
-        <CollaboratorAvatars :collaborators="collaborators" @edit-profile="showProfileDialog = true" />
-        <div class="toolbar-divider !bg-gray-700 !mx-1"></div>
-        <span :class="['w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full shadow-sm', yjsEditor.status.value === 'connected' ? 'bg-emerald-400' : 'bg-red-400']"></span>
-        <span class="hidden sm:inline">{{ yjsEditor.status.value === 'connected' ? 'Sincronizado' : 'Offline' }}</span>
-      </div>
-    </header>
+    <EditorHeader
+      :document-id="documentId"
+      :collaborators="collaborators"
+      :status="yjsEditor.status.value"
+      @edit-profile="showProfileDialog = true"
+    />
 
     <!-- Toolbar -->
     <EditorToolbar
@@ -88,8 +77,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
-import { ArrowLeft } from 'lucide-vue-next'
-import CollaboratorAvatars from './CollaboratorAvatars.vue'
+import EditorHeader from './EditorHeader.vue'
 import ProfileDialog from './ProfileDialog.vue'
 import EditorToolbar from './EditorToolbar.vue'
 import LinkDialog from './LinkDialog.vue'
