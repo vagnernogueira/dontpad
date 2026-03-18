@@ -6,11 +6,12 @@ Fornecer ao agente de IA o contexto necessário para trabalhar com componentes s
 neste projeto: padrões de instalação via CLI, API de componentes, convenções de estilo,
 integração com Tailwind e arquitetura Vue 3 do Dontpad.
 
-> **Status de adoção:** Esta skill documenta a integração planejada (avaliada em
-> `agent-workspace/execucao/avaliacao-vue-tailwind-arquitetura-20260318.md`, seção 8).
-> O `components.json` ainda não existe no projeto. Ao iniciar a adoção, executar:
-> `npx shadcn-vue@latest init` e então instalar a skill via
-> `npx skills add shadcn/ui` (ver seção [shadcn/skills](#shadcnskills)).
+> **Status de adoção:** **ATIVO** — integração concluída em 2026-03-18 (Fase 1 + Fase 2).
+> `components.json` configurado, CSS variables aplicadas em `base.css`, `tailwind.config.js`
+> estendido com tokens shadcn. Componentes instalados: `dialog`, `button`.
+> Todos os 6 dialogs migrados para primitivos shadcn-vue (`Dialog`, `DialogContent`,
+> `DialogHeader`, `DialogTitle`, `DialogFooter`). `BaseDialog.vue` refatorado como
+> thin wrapper shadcn (sem usos diretos de UI — todos os dialogs usam shadcn diretamente).
 
 ---
 
@@ -22,12 +23,28 @@ A dependência real é `reka-ui` (primitivos headless — foco, aria, keyboard, 
 
 ```
 frontend/src/components/
-├── ui/             ← componentes shadcn-vue (copiados via CLI, modificáveis)
-│   ├── button.vue
-│   ├── dialog.vue
-│   └── ...
-├── BaseDialog.vue  ← componentes domain (continuam existindo durante migração)
-└── Editor.vue
+├── ui/                     ← componentes shadcn-vue (copiados via CLI, modificáveis)
+│   ├── button/
+│   │   ├── Button.vue
+│   │   └── index.ts
+│   └── dialog/
+│       ├── Dialog.vue
+│       ├── DialogClose.vue
+│       ├── DialogContent.vue
+│       ├── DialogDescription.vue
+│       ├── DialogFooter.vue
+│       ├── DialogHeader.vue
+│       ├── DialogScrollContent.vue
+│       ├── DialogTitle.vue
+│       ├── DialogTrigger.vue
+│       └── index.ts
+├── BaseDialog.vue           ← thin wrapper shadcn (sem usos diretos — todos os dialogs migrados)
+├── AccessDialog.vue         ← usa Dialog shadcn diretamente ✓
+├── LockDialog.vue           ← usa Dialog shadcn diretamente ✓
+├── ImageDialog.vue          ← usa Dialog shadcn diretamente ✓
+├── LinkDialog.vue           ← usa Dialog shadcn diretamente ✓
+├── ProfileDialog.vue        ← usa Dialog shadcn diretamente ✓
+└── Editor.vue               ← usa os dialogs acima (sem mudanças)
 ```
 
 ---
@@ -106,15 +123,15 @@ export function cn(...inputs: ClassValue[]) {
 
 ## 4. Mapeamento de componentes do projeto → shadcn-vue
 
-| Componente atual (Dontpad)          | Equivalente shadcn-vue         | Prioridade de migração |
-|-------------------------------------|--------------------------------|------------------------|
-| `BaseDialog.vue`                    | `Dialog` + `DialogContent`     | Alta — a11y gap        |
-| `ToolbarButton.vue` (active state)  | `Toggle`                       | Média                  |
-| Botões `.btn-primary/secondary`     | `Button variant="default/outline"` | Baixa (funcional)  |
-| Confirmação de remoção (Explorer)   | `AlertDialog`                  | Média — UX             |
-| Tooltips (itens de toolbar)         | `Tooltip`                      | Média                  |
-| Feedback de ação (download, lock)   | `Sonner` (toast)               | Média                  |
-| Select de tipo (futuras features)   | `Select`                       | Baixa (não existe ainda) |
+| Componente atual (Dontpad)          | Equivalente shadcn-vue             | Status                         |
+|-------------------------------------|-------------------------------------|--------------------------------|
+| `BaseDialog.vue` (+ 5 dialogs filhos) | `Dialog` + `DialogContent`        | ✅ Migrado (Fase 2, 2026-03-18) |
+| `ToolbarButton.vue` (active state)  | `Toggle`                           | Pendente (demanda futura)      |
+| Botões `.btn-primary/secondary`     | `Button variant="default/outline"` | Pendente (demanda futura)      |
+| Confirmação de remoção (Explorer)   | `AlertDialog`                      | Pendente (demanda futura)      |
+| Tooltips (itens de toolbar)         | `Tooltip`                          | Pendente (demanda futura)      |
+| Feedback de ação (download, lock)   | `Sonner` (toast)                   | Pendente (demanda futura)      |
+| Select de tipo (futuras features)   | `Select`                           | Pendente (não existe ainda)    |
 
 ### Exemplo de migração: BaseDialog → Dialog
 
