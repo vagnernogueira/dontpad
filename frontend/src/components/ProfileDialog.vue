@@ -37,6 +37,8 @@
       <div v-if="profile" class="mb-4 text-xs text-gray-400 space-y-0.5">
         <p>ID: <span class="font-mono">{{ profile.id.slice(0, 8) }}…</span></p>
         <p>Primeira sessão: {{ formatDate(profile.joinedAt) }}</p>
+        <p>Dispositivo: {{ profile.deviceType === 'mobile' ? '📱 Mobile' : '🖥️ Desktop' }}</p>
+        <p v-if="profile.ip">IP: <span class="font-mono">{{ profile.ip }}</span></p>
       </div>
 
       <div class="flex justify-end gap-2 text-sm">

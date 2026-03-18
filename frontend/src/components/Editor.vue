@@ -205,7 +205,7 @@ import * as persistence from '../services/persistence'
 import * as exportService from '../services/export'
 import { createDocumentAPI } from '../services/document-api'
 import { getApiBaseUrl, getWsBaseUrl } from '../services/config'
-import { getOrCreateProfile, updateProfile, getProfileAwarenessState, type CollaboratorProfile } from '../cm-utils/cursor'
+import { getOrCreateProfile, updateProfile, updateProfileIp, fetchClientIp, getProfileAwarenessState, type CollaboratorProfile } from '../cm-utils/cursor'
 
 // Initialize services
 const apiBaseUrl = getApiBaseUrl()
@@ -280,6 +280,14 @@ const initEditor = () => {
   // 3. Set Awareness (Cursor Info)
   provider.awareness.setLocalStateField('user', getProfileAwarenessState(myProfile.value))
 
+  // 3b. Fetch client IP and update awareness
+  fetchClientIp(apiBaseUrl).then(ip => {
+    if (ip) {
+      myProfile.value = updateProfileIp(ip)
+      provider.awareness.setLocalStateField('user', getProfileAwarenessState(myProfile.value))
+    }
+  })
+
   // 4. Track collaborators from awareness
   const updateCollaborators = () => {
     const states = provider.awareness.getStates()
@@ -293,6 +301,8 @@ const initEditor = () => {
         name: state.user.name || 'Anônimo',
         emoji: state.user.emoji,
         color: state.user.color || '#999',
+        deviceType: state.user.deviceType,
+        ip: state.user.ip,
         isSelf: clientId === localClientId
       })
     })

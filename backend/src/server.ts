@@ -195,6 +195,14 @@ app.post('/api/document-access', (req, res) => {
     res.json({ allowed: true });
 });
 
+app.get('/api/client-info', (req, res) => {
+    const forwarded = req.headers['x-forwarded-for'];
+    const ip = typeof forwarded === 'string'
+        ? forwarded.split(',')[0].trim()
+        : req.socket.remoteAddress || '';
+    res.json({ ip });
+});
+
 // Setup WebSocket Server
 const wss = new WebSocketServer({ server });
 

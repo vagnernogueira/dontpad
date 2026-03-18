@@ -33,6 +33,8 @@ export interface CollaboratorProfile {
   emoji: string
   color: string
   joinedAt: string
+  deviceType: 'mobile' | 'desktop'
+  ip: string
 }
 
 const PROFILE_KEY = 'collaborator.profile'
@@ -69,12 +71,42 @@ export function getRandomCursorName(): string {
 }
 
 /**
+ * Detect device type based on user agent
+ */
+export function detectDeviceType(): 'mobile' | 'desktop' {
+  if (typeof navigator === 'undefined') return 'desktop'
+  return /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+    ? 'mobile'
+    : 'desktop'
+}
+
+/**
+ * Fetch the client's IP from the backend
+ */
+export async function fetchClientIp(apiBaseUrl: string): Promise<string> {
+  try {
+    const res = await fetch(`${apiBaseUrl}/api/client-info`)
+    if (!res.ok) return ''
+    const data = await res.json()
+    return data.ip || ''
+  } catch {
+    return ''
+  }
+}
+
+/**
  * Load or create a collaborator profile.
  * Persists to localStorage so identity survives reloads.
  */
 export function getOrCreateProfile(): CollaboratorProfile {
   const stored = persistence.get<CollaboratorProfile | null>(PROFILE_KEY, null)
   if (stored && stored.id && stored.emoji && stored.name && stored.color) {
+    // Always refresh device type on load
+    const deviceType = detectDeviceType()
+    if (stored.deviceType !== deviceType) {
+      stored.deviceType = deviceType
+      persistence.set(PROFILE_KEY, stored)
+    }
     return stored
   }
 
@@ -83,7 +115,9 @@ export function getOrCreateProfile(): CollaboratorProfile {
     name: getRandomCursorName(),
     emoji: getRandomAnimalEmoji(),
     color: getRandomCursorColor(),
-    joinedAt: new Date().toISOString()
+    joinedAt: new Date().toISOString(),
+    deviceType: detectDeviceType(),
+    ip: ''
   }
   persistence.set(PROFILE_KEY, profile)
   return profile
@@ -103,17 +137,30 @@ export function updateProfile(patch: Partial<Pick<CollaboratorProfile, 'name' | 
 }
 
 /**
+ * Update the IP in the profile and persist.
+ */
+export function updateProfileIp(ip: string): CollaboratorProfile {
+  const current = getOrCreateProfile()
+  if (current.ip !== ip) {
+    current.ip = ip
+    persistence.set(PROFILE_KEY, current)
+  }
+  return current
+}
+
+/**
  * Get cursor awareness state
- * @param profile - Collaborator profile
  * @returns Awareness state object for Yjs
  */
-export function getCursorAwarenessState(name: string, color: string, emoji?: string, profileId?: string) {
+export function getCursorAwarenessState(name: string, color: string, emoji?: string, profileId?: string, deviceType?: string, ip?: string) {
   return {
     name,
     color,
     colorLight: `${color}33`,
     ...(emoji ? { emoji } : {}),
-    ...(profileId ? { profileId } : {})
+    ...(profileId ? { profileId } : {}),
+    ...(deviceType ? { deviceType } : {}),
+    ...(ip ? { ip } : {})
   }
 }
 
@@ -121,7 +168,7 @@ export function getCursorAwarenessState(name: string, color: string, emoji?: str
  * Build awareness state from a full profile
  */
 export function getProfileAwarenessState(profile: CollaboratorProfile) {
-  return getCursorAwarenessState(profile.name, profile.color, profile.emoji, profile.id)
+  return getCursorAwarenessState(profile.name, profile.color, profile.emoji, profile.id, profile.deviceType, profile.ip)
 }
 
 export default {
@@ -132,6 +179,9 @@ export default {
   getRandomCursorName,
   getOrCreateProfile,
   updateProfile,
+  updateProfileIp,
+  detectDeviceType,
+  fetchClientIp,
   getCursorAwarenessState,
   getProfileAwarenessState
 }
