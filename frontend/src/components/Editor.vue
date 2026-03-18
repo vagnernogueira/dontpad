@@ -14,8 +14,8 @@
       <div class="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm text-gray-300 shrink-0">
         <CollaboratorAvatars :collaborators="collaborators" @edit-profile="showProfileDialog = true" />
         <div class="w-px h-5 bg-gray-700 mx-1 self-center shrink-0"></div>
-        <span :class="['w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full shadow-sm', status === 'connected' ? 'bg-emerald-400' : 'bg-red-400']"></span>
-        <span class="hidden sm:inline">{{ status === 'connected' ? 'Sincronizado' : 'Offline' }}</span>
+        <span :class="['w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full shadow-sm', yjsEditor.status.value === 'connected' ? 'bg-emerald-400' : 'bg-red-400']"></span>
+        <span class="hidden sm:inline">{{ yjsEditor.status.value === 'connected' ? 'Sincronizado' : 'Offline' }}</span>
       </div>
     </header>
 
@@ -28,44 +28,41 @@
         <Redo2 :size="16" />
       </button>
       <div class="w-px h-5 bg-gray-300 mx-1.5 self-center shrink-0"></div>
-      <button @click="applyFormat('**', '**')" class="px-2.5 py-[7.2px] sm:py-[5.4px] hover:bg-gray-200 hover:text-gray-900 rounded font-bold transition-colors focus:outline-none touch-manipulation shrink-0" title="Negrito">B</button>
-      <button @click="applyFormat('*', '*')" class="px-2.5 py-[7.2px] sm:py-[5.4px] hover:bg-gray-200 hover:text-gray-900 rounded italic transition-colors focus:outline-none touch-manipulation shrink-0" title="Itálico">I</button>
-      <button @click="applyFormat('~~', '~~')" class="px-2.5 py-[7.2px] sm:py-[5.4px] hover:bg-gray-200 hover:text-gray-900 rounded line-through transition-colors focus:outline-none touch-manipulation shrink-0" title="Tachado">S</button>
-      <button @click="transformCaseClick" class="px-2.5 py-[7.2px] sm:py-[5.4px] hover:bg-gray-200 hover:text-gray-900 rounded transition-colors focus:outline-none touch-manipulation shrink-0 font-medium text-sm" title="Transformar caixa (UPPER / lower / camelCase)">Aa</button>
+      <ToolbarButton @click="applyFormat('**', '**')" title="Negrito" class="font-bold">B</ToolbarButton>
+      <ToolbarButton @click="applyFormat('*', '*')" title="Itálico" class="italic">I</ToolbarButton>
+      <ToolbarButton @click="applyFormat('~~', '~~')" title="Tachado" class="line-through">S</ToolbarButton>
+      <ToolbarButton @click="transformCaseClick" title="Transformar caixa (UPPER / lower / camelCase)" class="font-medium text-sm">Aa</ToolbarButton>
       <div class="w-px h-5 bg-gray-300 mx-1.5 self-center shrink-0"></div>
-      <button @click="applyFormat('# ')" class="px-2.5 py-[7.2px] sm:py-[5.4px] hover:bg-gray-200 hover:text-gray-900 rounded font-bold transition-colors focus:outline-none touch-manipulation shrink-0" title="Título 1">H1</button>
-      <button @click="applyFormat('## ')" class="px-2.5 py-[7.2px] sm:py-[5.4px] hover:bg-gray-200 hover:text-gray-900 rounded font-bold transition-colors focus:outline-none touch-manipulation shrink-0" title="Título 2">H2</button>
-      <button @click="applyFormat('### ')" class="px-2.5 py-[7.2px] sm:py-[5.4px] hover:bg-gray-200 hover:text-gray-900 rounded font-bold transition-colors focus:outline-none touch-manipulation shrink-0" title="Título 3">H3</button>
+      <ToolbarButton @click="applyFormat('# ')" title="Título 1" class="font-bold">H1</ToolbarButton>
+      <ToolbarButton @click="applyFormat('## ')" title="Título 2" class="font-bold">H2</ToolbarButton>
+      <ToolbarButton @click="applyFormat('### ')" title="Título 3" class="font-bold">H3</ToolbarButton>
       <div class="w-px h-5 bg-gray-300 mx-1.5 self-center shrink-0"></div>
-      <button @click="applyFormat('- ')" class="px-2.5 py-[7.2px] sm:py-[5.4px] hover:bg-gray-200 hover:text-gray-900 rounded transition-colors focus:outline-none touch-manipulation shrink-0" title="Lista Bullet">&#8226; Lista</button>
-      <button @click="applyFormat('1. ')" class="px-2.5 py-[7.2px] sm:py-[5.4px] hover:bg-gray-200 hover:text-gray-900 rounded transition-colors focus:outline-none touch-manipulation shrink-0" title="Lista Numérica">1. Lista</button>
-      <button @click="applyFormat('- [ ] ')" class="px-2.5 py-[7.2px] sm:py-[5.4px] hover:bg-gray-200 hover:text-gray-900 rounded transition-colors focus:outline-none touch-manipulation shrink-0" title="Checklist">&#9745; Checklist</button>
+      <ToolbarButton @click="applyFormat('- ')" title="Lista Bullet">&#8226; Lista</ToolbarButton>
+      <ToolbarButton @click="applyFormat('1. ')" title="Lista Numérica">1. Lista</ToolbarButton>
+      <ToolbarButton @click="applyFormat('- [ ] ')" title="Checklist">&#9745; Checklist</ToolbarButton>
       <div class="w-px h-5 bg-gray-300 mx-1.5 self-center shrink-0"></div>
-      <button @click="applyFormat('> ')" class="px-2.5 py-[7.2px] sm:py-[5.4px] hover:bg-gray-200 hover:text-gray-900 rounded font-serif italic transition-colors focus:outline-none touch-manipulation shrink-0" title="Citação">" "</button>
-      <button @click="applyFormat('`', '`')" class="px-2.5 py-[7.2px] sm:py-[5.4px] hover:bg-gray-200 hover:text-gray-900 rounded font-mono text-xs transition-colors focus:outline-none touch-manipulation shrink-0" title="Código Inline">` `</button>
-      <button @click="applyFormat('```\n', '\n```')" class="px-2.5 py-[7.2px] sm:py-[5.4px] hover:bg-gray-200 hover:text-gray-900 rounded font-mono text-xs transition-colors focus:outline-none touch-manipulation shrink-0" title="Bloco de Código">{ }</button>
+      <ToolbarButton @click="applyFormat('> ')" title="Citação" class="font-serif italic">" "</ToolbarButton>
+      <ToolbarButton @click="applyFormat('`', '`')" title="Código Inline" class="font-mono text-xs">` `</ToolbarButton>
+      <ToolbarButton @click="applyFormat('```\n', '\n```')" title="Bloco de Código" class="font-mono text-xs">{ }</ToolbarButton>
       <div class="w-px h-5 bg-gray-300 mx-1.5 self-center shrink-0"></div>
-      <button @click="applyFormat('\n|  |  |\n|--|--|\n|  |  |\n')" class="px-2.5 py-[7.2px] sm:py-[5.4px] hover:bg-gray-200 hover:text-gray-900 rounded transition-colors focus:outline-none flex items-center gap-1 touch-manipulation shrink-0" title="Tabela">
+      <ToolbarButton @click="applyFormat('\n|  |  |\n|--|--|\n|  |  |\n')" title="Tabela" class="flex items-center gap-1">
         <Table2 :size="14" />
         <span class="hidden sm:inline">Tabela</span>
-      </button>
+      </ToolbarButton>
       <div class="w-px h-5 bg-gray-300 mx-1.5 self-center shrink-0"></div>
-      <button @click="openLinkDialog" class="px-2.5 py-[7.2px] sm:py-[5.4px] hover:bg-gray-200 hover:text-gray-900 rounded transition-colors focus:outline-none touch-manipulation shrink-0" title="Link">Link</button>
-      <button @click="openImageDialog" class="px-2.5 py-[7.2px] sm:py-[5.4px] hover:bg-gray-200 hover:text-gray-900 rounded transition-colors focus:outline-none touch-manipulation shrink-0" title="Imagem">Img</button>
-      <button @click="openLockDialog" class="px-2.5 py-[7.2px] sm:py-[5.4px] hover:bg-gray-200 hover:text-gray-900 rounded transition-colors focus:outline-none touch-manipulation shrink-0" title="Travar com senha">
+      <ToolbarButton @click="openLinkDialog" title="Link">Link</ToolbarButton>
+      <ToolbarButton @click="openImageDialog" title="Imagem">Img</ToolbarButton>
+      <ToolbarButton @click="openLockDialog" title="Travar com senha">
         <Lock :size="14" />
-      </button>
-      <button
+      </ToolbarButton>
+      <ToolbarButton
         @click="toggleSpellcheck"
-        :class="[
-          'px-2.5 py-[7.2px] sm:py-[5.4px] rounded transition-colors focus:outline-none touch-manipulation shrink-0 font-mono text-xs',
-          isSpellcheckEnabled ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200' : 'hover:bg-gray-200 hover:text-gray-900'
-        ]"
+        :active="isSpellcheckEnabled"
         title="Correção ortográfica"
-        :aria-pressed="isSpellcheckEnabled"
+        class="font-mono text-xs"
       >
         ABC
-      </button>
+      </ToolbarButton>
       
       <div class="flex-1 min-w-[8px]"></div> <!-- Spacer -->
       
@@ -87,13 +84,13 @@
     </div>
 
     <!-- Editor Area -->
-    <main v-if="hasDocumentAccess" class="flex-1 overflow-hidden relative" ref="editorContainer"></main>
+    <main v-if="access.hasDocumentAccess.value" class="flex-1 overflow-hidden relative" ref="editorContainer"></main>
     <main v-else class="flex-1 flex items-center justify-center bg-gray-50 text-gray-500 text-sm px-4 text-center">
       Este documento está protegido por senha. Insira a senha para continuar.
     </main>
 
     <!-- Dialogs -->
-    <div v-if="showLinkDialog || showImageDialog || showLockDialog || showAccessDialog || showProfileDialog" class="absolute inset-0 bg-black bg-opacity-30 z-50 flex items-center justify-center">
+    <div v-if="showLinkDialog || showImageDialog || access.showLockDialog.value || access.showAccessDialog.value || showProfileDialog" class="absolute inset-0 bg-black bg-opacity-30 z-50 flex items-center justify-center">
       
       <!-- Profile Dialog -->
       <ProfileDialog
@@ -138,31 +135,31 @@
       </div>
 
       <!-- Lock Dialog -->
-      <div v-if="showLockDialog" class="bg-white rounded-lg shadow-xl p-4 sm:p-5 w-full max-w-[calc(100vw-2rem)] sm:max-w-md mx-4">
+      <div v-if="access.showLockDialog.value" class="bg-white rounded-lg shadow-xl p-4 sm:p-5 w-full max-w-[calc(100vw-2rem)] sm:max-w-md mx-4">
         <h3 class="font-bold text-gray-800 mb-4 text-lg">Travar Documento</h3>
         <div class="mb-3">
           <label class="block text-sm text-gray-600 mb-1">Senha do Documento</label>
-          <input ref="lockPasswordInput" v-model="lockPassword" type="password" class="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" :placeholder="isDocumentLocked ? 'Senha atual ou senha mestre' : 'Digite a senha'" @keyup.enter="lockDocument">
+          <input ref="lockPasswordInput" v-model="access.lockPassword.value" type="password" class="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" :placeholder="access.isDocumentLocked.value ? 'Senha atual ou senha mestre' : 'Digite a senha'" @keyup.enter="lockDocument">
         </div>
-        <p v-if="lockError" class="mb-3 text-xs text-red-600">{{ lockError }}</p>
+        <p v-if="access.lockError.value" class="mb-3 text-xs text-red-600">{{ access.lockError.value }}</p>
         <div class="flex justify-end gap-2 text-sm">
           <button @click="closeDialogs" class="px-3 py-1.5 text-gray-600 hover:bg-gray-100 rounded focus:outline-none">Cancelar</button>
-          <button v-if="isDocumentLocked" @click="removeDocumentLock" class="px-3 py-1.5 bg-red-600 text-white hover:bg-red-700 rounded shadow-sm focus:outline-none">Remover senha</button>
-          <button @click="lockDocument" class="px-3 py-1.5 bg-emerald-600 text-white hover:bg-emerald-700 rounded shadow-sm focus:outline-none" :disabled="!lockPassword.trim()">Travar</button>
+          <button v-if="access.isDocumentLocked.value" @click="removeDocumentLock" class="px-3 py-1.5 bg-red-600 text-white hover:bg-red-700 rounded shadow-sm focus:outline-none">Remover senha</button>
+          <button @click="lockDocument" class="px-3 py-1.5 bg-emerald-600 text-white hover:bg-emerald-700 rounded shadow-sm focus:outline-none" :disabled="!access.lockPassword.value.trim()">Travar</button>
         </div>
       </div>
 
       <!-- Access Dialog -->
-      <div v-if="showAccessDialog" class="bg-white rounded-lg shadow-xl p-4 sm:p-5 w-full max-w-[calc(100vw-2rem)] sm:max-w-md mx-4">
+      <div v-if="access.showAccessDialog.value" class="bg-white rounded-lg shadow-xl p-4 sm:p-5 w-full max-w-[calc(100vw-2rem)] sm:max-w-md mx-4">
         <h3 class="font-bold text-gray-800 mb-4 text-lg">Documento Protegido</h3>
         <div class="mb-3">
           <label class="block text-sm text-gray-600 mb-1">Senha para abrir</label>
-          <input ref="accessPasswordInput" v-model="accessPassword" type="password" class="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" placeholder="Digite a senha" @keyup.enter="unlockDocument">
+          <input ref="accessPasswordInput" v-model="access.accessPassword.value" type="password" class="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" placeholder="Digite a senha" @keyup.enter="unlockDocument">
         </div>
-        <p v-if="accessError" class="mb-3 text-xs text-red-600">{{ accessError }}</p>
+        <p v-if="access.accessError.value" class="mb-3 text-xs text-red-600">{{ access.accessError.value }}</p>
         <div class="flex justify-end gap-2 text-sm">
           <button @click="closeAccessDialog" class="px-3 py-1.5 text-gray-600 hover:bg-gray-100 rounded focus:outline-none">Cancelar</button>
-          <button @click="unlockDocument" class="px-3 py-1.5 bg-emerald-600 text-white hover:bg-emerald-700 rounded shadow-sm focus:outline-none" :disabled="!accessPassword.trim()">Abrir</button>
+          <button @click="unlockDocument" class="px-3 py-1.5 bg-emerald-600 text-white hover:bg-emerald-700 rounded shadow-sm focus:outline-none" :disabled="!access.accessPassword.value.trim()">Abrir</button>
         </div>
       </div>
 
@@ -174,54 +171,43 @@
 import { ref, reactive, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 import { ArrowLeft, Download, Lock, Redo2, Table2, Undo2 } from 'lucide-vue-next'
-import CollaboratorAvatars, { type CollaboratorInfo } from './CollaboratorAvatars.vue'
+import CollaboratorAvatars from './CollaboratorAvatars.vue'
 import ProfileDialog from './ProfileDialog.vue'
+import ToolbarButton from './ToolbarButton.vue'
 
-// Yjs
-import * as Y from 'yjs'
-import { WebsocketProvider } from 'y-websocket'
+// Composables
+import { useYjsEditor } from '../composables/useYjsEditor'
+import { useDocumentAccess } from '../composables/useDocumentAccess'
+import { useCollaborators } from '../composables/useCollaborators'
 
-// CodeMirror
-import { Compartment, EditorState } from '@codemirror/state'
-import { EditorView, basicSetup } from 'codemirror'
-import { drawSelection } from '@codemirror/view'
-import { markdown } from '@codemirror/lang-markdown'
-import { Strikethrough } from '@lezer/markdown'
-import { yCollab } from 'y-codemirror.next'
-import { markdownPreviewPlugin } from '../cm-plugins/markdown-preview'
-import { listCustomPlugin } from '../cm-plugins/list'
-import { codeBlockPlugin } from '../cm-plugins/code-block'
-import { checkboxClickPlugin } from '../cm-plugins/checkbox-widget'
-import { horizontalRulePlugin } from '../cm-plugins/horizontal-rule-widget'
-import { multiClickPlugin } from '../cm-plugins/multi-click'
-import { plainUrlPlugin } from '../cm-plugins/plain-url'
-import { spellcheckPlugin } from '../cm-plugins/spellcheck'
-import { editorKeymaps } from '../cm-plugins/keymaps'
-
-// Commands and Extensions
+// Commands
 import { applyFormat as applyFormatCommand, insertLink as insertLinkCommand, insertImage as insertImageCommand, transformCase } from '../cm-commands'
-import { editorTheme } from '../cm-extensions'
+import { spellcheckPlugin } from '../cm-plugins/spellcheck'
+
 import * as persistence from '../services/persistence'
 import * as exportService from '../services/export'
 import { createDocumentAPI } from '../services/document-api'
 import { getApiBaseUrl, getWsBaseUrl } from '../services/config'
-import { getOrCreateProfile, updateProfile, updateProfileIp, fetchClientIp, getProfileAwarenessState, type CollaboratorProfile } from '../cm-utils/cursor'
 
-// Initialize services
+// ── Services ───────────────────────────────────────────────────────
 const apiBaseUrl = getApiBaseUrl()
 const wsBaseUrl = getWsBaseUrl()
 const documentAPI = createDocumentAPI(apiBaseUrl)
-const myProfile = ref<CollaboratorProfile>(getOrCreateProfile())
 
+// ── Composables ────────────────────────────────────────────────────
+const yjsEditor = useYjsEditor()
+const access = useDocumentAccess(documentAPI)
+const { myProfile, collaborators, bind: bindCollaborators, saveProfile } = useCollaborators(apiBaseUrl)
+
+// ── Local state ────────────────────────────────────────────────────
 const route = useRoute()
 const documentId = ref(route.params.documentId as string || 'default')
 const editorContainer = ref<HTMLElement | null>(null)
-const pdfContainer = ref<HTMLElement | null>(null) // Ref for PDF rendering
-const status = ref('disconnected')
+const pdfContainer = ref<HTMLElement | null>(null)
 const isSpellcheckEnabled = ref(persistence.get('spellcheck', true))
-const caseTransformIndex = ref(0) // 0: upper, 1: lower, 2: camel
+const caseTransformIndex = ref(0)
 
-// Dialog states
+// Dialog refs (link, image)
 const showLinkDialog = ref(false)
 const showImageDialog = ref(false)
 const linkData = reactive({ text: '', url: 'https://' })
@@ -230,357 +216,169 @@ const linkTextInput = ref<HTMLInputElement | null>(null)
 const imageAltInput = ref<HTMLInputElement | null>(null)
 const lockPasswordInput = ref<HTMLInputElement | null>(null)
 const accessPasswordInput = ref<HTMLInputElement | null>(null)
-const showLockDialog = ref(false)
-const showAccessDialog = ref(false)
-const lockPassword = ref('')
-const accessPassword = ref('')
-const lockError = ref('')
-const accessError = ref('')
-const hasDocumentAccess = ref(false)
-const documentAccessPassword = ref('')
-const isDocumentLocked = ref(false)
 const showProfileDialog = ref(false)
-const collaborators = ref<CollaboratorInfo[]>([])
 
-let ydoc: Y.Doc
-let provider: WebsocketProvider
-let view: EditorView
-let undoManager: Y.UndoManager
-
-const spellcheckCompartment = new Compartment()
+// ── Editor lifecycle ───────────────────────────────────────────────
 
 const initEditor = () => {
   if (!editorContainer.value) return
 
-  // 1. Setup Yjs
-  ydoc = new Y.Doc()
-  
-  // 2. Connect to WebSocket
-  provider = documentAccessPassword.value
-    ? new WebsocketProvider(wsBaseUrl, documentId.value, ydoc, {
-      params: { password: documentAccessPassword.value }
-    })
-    : new WebsocketProvider(wsBaseUrl, documentId.value, ydoc)
-
-  provider.on('connection-close', (event: { code?: number }) => {
-    if (event?.code === 4403) {
-      hasDocumentAccess.value = false
-      accessError.value = 'Senha necessária para abrir este documento.'
-      showAccessDialog.value = true
-      nextTick(() => {
-        accessPasswordInput.value?.focus()
-      })
-    }
+  const inst = yjsEditor.init(editorContainer.value, {
+    wsBaseUrl,
+    documentId: documentId.value,
+    password: access.documentAccessPassword.value,
+    profile: myProfile.value,
+    spellcheckEnabled: isSpellcheckEnabled.value,
+  }, {
+    onAccessDenied: () => access.handleAccessDenied(accessPasswordInput),
   })
 
-  provider.on('status', (event: { status: string }) => {
-    status.value = event.status
-  })
-
-  // 3. Set Awareness (Cursor Info)
-  provider.awareness.setLocalStateField('user', getProfileAwarenessState(myProfile.value))
-
-  // 3b. Fetch client IP and update awareness
-  fetchClientIp(apiBaseUrl).then(ip => {
-    if (ip) {
-      myProfile.value = updateProfileIp(ip)
-      provider.awareness.setLocalStateField('user', getProfileAwarenessState(myProfile.value))
-    }
-  })
-
-  // 4. Track collaborators from awareness
-  const updateCollaborators = () => {
-    const states = provider.awareness.getStates()
-    const localClientId = provider.awareness.clientID
-    const result: CollaboratorInfo[] = []
-    states.forEach((state, clientId) => {
-      if (!state.user) return
-      result.push({
-        clientId,
-        profileId: state.user.profileId,
-        name: state.user.name || 'Anônimo',
-        emoji: state.user.emoji,
-        color: state.user.color || '#999',
-        deviceType: state.user.deviceType,
-        ip: state.user.ip,
-        isSelf: clientId === localClientId
-      })
-    })
-    // Self first, then others
-    result.sort((a, b) => (a.isSelf ? -1 : b.isSelf ? 1 : 0))
-    collaborators.value = result
-  }
-  provider.awareness.on('change', updateCollaborators)
-  updateCollaborators()
-
-  // 4. Bind CodeMirror to Yjs Document
-  const ytext = ydoc.getText('codemirror')
-  undoManager = new Y.UndoManager(ytext)
-  
-  const state = EditorState.create({
-    doc: ytext.toString(),
-    extensions: [
-      basicSetup,
-      drawSelection(),
-      spellcheckCompartment.of(spellcheckPlugin(isSpellcheckEnabled.value)),
-      EditorView.lineWrapping,
-      markdown({ extensions: [Strikethrough, { remove: ['IndentedCode', 'SetextHeading'] }] }),
-      ...editorTheme,
-      listCustomPlugin,
-      checkboxClickPlugin,
-      codeBlockPlugin,
-      horizontalRulePlugin,
-      plainUrlPlugin,
-      yCollab(ytext, provider.awareness, { undoManager }),
-      ...editorKeymaps,
-      markdownPreviewPlugin,
-      multiClickPlugin
-    ]
-  })
-
-  view = new EditorView({
-    state,
-    parent: editorContainer.value
-  })
+  bindCollaborators(inst.provider)
 }
 
-
-
 const openEditorAfterAccess = async () => {
-  hasDocumentAccess.value = true
+  access.hasDocumentAccess.value = true
   await nextTick()
   initEditor()
 }
 
-const ensureDocumentAccess = async () => {
-  hasDocumentAccess.value = false
-
-  try {
-    const lockStatus = await documentAPI.getLockStatus(documentId.value)
-    isDocumentLocked.value = lockStatus.locked
-
-    if (!lockStatus.locked) {
-      documentAccessPassword.value = ''
-      await openEditorAfterAccess()
-      return
-    }
-
-    showAccessDialog.value = true
-    await nextTick()
-    accessPasswordInput.value?.focus()
-  } catch {
-    documentAccessPassword.value = ''
-    isDocumentLocked.value = false
-    await openEditorAfterAccess()
-  }
+const ensureDocumentAccess = () => {
+  access.ensureAccess(documentId.value, openEditorAfterAccess, accessPasswordInput)
 }
 
-// Undo/Redo functions
-const undo = () => {
-  if (undoManager) undoManager.undo()
-  if (view) view.focus()
-}
+// ── Helpers that need the view ─────────────────────────────────────
 
-const redo = () => {
-  if (undoManager) undoManager.redo()
-  if (view) view.focus()
-}
+const getView = () => yjsEditor.getInstance()?.view ?? null
+const getUndoManager = () => yjsEditor.getInstance()?.undoManager ?? null
+
+// Undo/Redo
+const undo = () => { getUndoManager()?.undo(); getView()?.focus() }
+const redo = () => { getUndoManager()?.redo(); getView()?.focus() }
 
 const toggleSpellcheck = () => {
   isSpellcheckEnabled.value = !isSpellcheckEnabled.value
   persistence.set('spellcheck', isSpellcheckEnabled.value)
 
-  if (view) {
-    view.dispatch({
-      effects: spellcheckCompartment.reconfigure(
+  const inst = yjsEditor.getInstance()
+  if (inst) {
+    inst.view.dispatch({
+      effects: inst.spellcheckCompartment.reconfigure(
         spellcheckPlugin(isSpellcheckEnabled.value)
-      )
+      ),
     })
-    view.focus()
+    inst.view.focus()
   }
 }
 
-// Formatting wrapper (calls imported command from cm-commands)
+// Formatting
 const applyFormat = (prefix: string, suffix: string = '') => {
-  if (!view) return
-  applyFormatCommand(view, prefix, suffix)
+  const v = getView()
+  if (v) applyFormatCommand(v, prefix, suffix)
 }
 
-// Text case transformation (cycles through upper, lower, camel)
 const transformCaseClick = () => {
-  if (!view) return
-  
+  const v = getView()
+  if (!v) return
   const caseTypes: ('upper' | 'lower' | 'camel')[] = ['upper', 'lower', 'camel']
-  const currentCase = caseTypes[caseTransformIndex.value]
-  transformCase(view, currentCase)
-  
-  // Cycle to next case
+  transformCase(v, caseTypes[caseTransformIndex.value])
   caseTransformIndex.value = (caseTransformIndex.value + 1) % caseTypes.length
-  view.focus()
+  v.focus()
 }
 
-// Dialog functions
+// ── Link / Image dialogs ───────────────────────────────────────────
+
 const openLinkDialog = async () => {
-  if (!view) return
-  
-  // Try to grab selected text for the link text
-  const { state } = view
-  const selection = state.selection.main
-  const selectedText = state.sliceDoc(selection.from, selection.to)
-  
-  linkData.text = selectedText || ''
+  const v = getView()
+  if (!v) return
+  const sel = v.state.selection.main
+  linkData.text = v.state.sliceDoc(sel.from, sel.to) || ''
   linkData.url = 'https://'
   showLinkDialog.value = true
-  
   await nextTick()
-  if (linkTextInput.value) linkTextInput.value.select()
+  linkTextInput.value?.select()
 }
 
 const insertLink = () => {
-  if (!linkData.url) return
-  insertLinkCommand(view, linkData.text, linkData.url)
+  const v = getView()
+  if (!linkData.url || !v) return
+  insertLinkCommand(v, linkData.text, linkData.url)
   closeDialogs()
 }
 
 const openImageDialog = async () => {
-  if (!view) return
-  
-  // Try to grab selected text for alt 
-  const { state } = view
-  const selection = state.selection.main
-  const selectedText = state.sliceDoc(selection.from, selection.to)
-
+  const v = getView()
+  if (!v) return
+  const sel = v.state.selection.main
+  imageData.alt = v.state.sliceDoc(sel.from, sel.to) || ''
   imageData.url = 'https://'
-  imageData.alt = selectedText || ''
   showImageDialog.value = true
-  
   await nextTick()
-  if (imageAltInput.value) imageAltInput.value.select()
+  imageAltInput.value?.select()
 }
 
+const insertImage = () => {
+  const v = getView()
+  if (!imageData.url || !v) return
+  insertImageCommand(v, imageData.alt, imageData.url)
+  closeDialogs()
+}
+
+// ── Lock dialog (delegates to access composable) ───────────────────
+
 const openLockDialog = async () => {
-  lockError.value = ''
-  showLockDialog.value = true
+  access.lockError.value = ''
+  access.showLockDialog.value = true
   await nextTick()
   lockPasswordInput.value?.focus()
 }
 
-const lockDocument = async () => {
-  lockError.value = ''
-  const password = lockPassword.value.trim()
-
-  if (!password) {
-    lockError.value = 'Informe uma senha para travar este documento.'
-    return
-  }
-
-  const success = await documentAPI.lock(documentId.value, password)
-  if (!success) {
-    lockError.value = 'Não foi possível travar este documento.'
-    return
-  }
-
-  isDocumentLocked.value = true
-  documentAccessPassword.value = password
-  closeDialogs()
-}
-
-const removeDocumentLock = async () => {
-  lockError.value = ''
-  const password = lockPassword.value.trim() || documentAccessPassword.value
-
-  if (!password) {
-    lockError.value = 'Informe a senha atual do documento ou a senha mestre.'
-    return
-  }
-
-  const success = await documentAPI.unlock(documentId.value, password)
-  if (!success) {
-    lockError.value = 'Senha inválida para remover a proteção.'
-    return
-  }
-
-  isDocumentLocked.value = false
-  documentAccessPassword.value = ''
-  closeDialogs()
-}
-
-const closeAccessDialog = () => {
-  showAccessDialog.value = false
-  accessPassword.value = ''
-  accessError.value = ''
-}
-
+const lockDocument = () => access.lockDocument(documentId.value)
+const removeDocumentLock = () => access.removeLock(documentId.value)
 const unlockDocument = async () => {
-  const password = accessPassword.value.trim()
-  if (!password) return
-
-  const canAccess = await documentAPI.verifyAccess(documentId.value, password)
-  if (!canAccess) {
-    accessError.value = 'Senha inválida.'
-    return
-  }
-
-  documentAccessPassword.value = password
-  closeAccessDialog()
-  await openEditorAfterAccess()
+  await access.unlock(documentId.value, openEditorAfterAccess)
 }
 
-const insertImage = () => {
-  if (!imageData.url) return
-  insertImageCommand(view, imageData.alt, imageData.url)
-  closeDialogs()
-}
+const closeAccessDialog = () => access.closeAccessDialog()
 
 const closeDialogs = () => {
   showLinkDialog.value = false
   showImageDialog.value = false
-  showLockDialog.value = false
-  lockPassword.value = ''
-  lockError.value = ''
-  if (view) view.focus()
+  access.closeLockDialog()
+  getView()?.focus()
 }
+
+// ── Profile ────────────────────────────────────────────────────────
 
 const onProfileSave = (data: { name: string; emoji: string }) => {
-  myProfile.value = updateProfile(data)
-  if (provider) {
-    provider.awareness.setLocalStateField('user', getProfileAwarenessState(myProfile.value))
-  }
+  saveProfile(data)
   showProfileDialog.value = false
-  if (view) view.focus()
+  getView()?.focus()
 }
 
-// Download methods
+// ── Downloads ──────────────────────────────────────────────────────
+
 const downloadMarkdown = () => {
-  if (!view) return
-  const text = view.state.doc.toString()
-  exportService.downloadMarkdown(text, documentId.value)
+  const v = getView()
+  if (!v) return
+  exportService.downloadMarkdown(v.state.doc.toString(), documentId.value)
 }
 
 const downloadPDF = async () => {
-  if (!view) return
-  const text = view.state.doc.toString()
-  await exportService.downloadPDF(text, documentId.value)
+  const v = getView()
+  if (!v) return
+  await exportService.downloadPDF(v.state.doc.toString(), documentId.value)
 }
 
-const cleanup = () => {
-  if (provider) provider.destroy()
-  if (ydoc) ydoc.destroy()
-  if (view) view.destroy()
-}
+// ── Lifecycle ──────────────────────────────────────────────────────
 
-onMounted(() => {
-  ensureDocumentAccess()
-})
+onMounted(() => ensureDocumentAccess())
 
-onBeforeUnmount(() => {
-  cleanup()
-})
+onBeforeUnmount(() => yjsEditor.destroy())
 
 watch(() => route.params.documentId, (newId) => {
   if (newId && typeof newId === 'string' && newId !== documentId.value) {
     documentId.value = newId
-    cleanup()
+    yjsEditor.destroy()
     ensureDocumentAccess()
   }
 })

@@ -1,0 +1,23 @@
+/* Mobile responsiveness */
+@media (max-width: 640px) {
+  .cm-content {
+    padding: 12px 12px !important;
+  }
+  
+  /* Ensure proper touch targets on mobile */
+  button {
+    min-height: 44px;
+  }
+  
+  /* Slightly smaller font on very small screens */
+  .cm-editor {
+    font-size: 15px;
+  }
+}
+
+/* Tablet optimizations */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .cm-content {
+    padding: 16px 16px !important;
+  }
+}

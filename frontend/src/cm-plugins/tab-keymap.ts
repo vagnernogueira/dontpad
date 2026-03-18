@@ -20,50 +20,7 @@
 
 import { keymap } from "@codemirror/view"
 import { EditorView } from "@codemirror/view"
-
-/**
- * Extract word before cursor
- * Duplicated from snippet.ts to avoid circular dependency
- */
-function getWordBeforeCursor(view: EditorView): { word: string; from: number; to: number } | null {
-  const { state } = view
-  const pos = state.selection.main.head
-  const line = state.doc.lineAt(pos)
-  const lineText = line.text
-  const posInLine = pos - line.from
-  
-  if (posInLine === 0) {
-    return null
-  }
-  
-  const wordCharRegex = /\w/
-  let wordStart = posInLine
-  
-  while (wordStart > 0 && wordCharRegex.test(lineText[wordStart - 1])) {
-    wordStart--
-  }
-  
-  const word = lineText.substring(wordStart, posInLine)
-  
-  if (word.length === 0) {
-    return null
-  }
-  
-  return {
-    word,
-    from: line.from + wordStart,
-    to: pos
-  }
-}
-
-/**
- * Check if a snippet with given prefix exists
- * Duplicated from snippet.ts to avoid circular dependency
- */
-function hasSnippetForPrefix(prefix: string): boolean {
-  const snippetPrefixes = ['dt', 'hr', 'lorem', 'table', 'code', 'link', 'img', 'task', 'snippets']
-  return snippetPrefixes.includes(prefix)
-}
+import { getWordBeforeCursor, hasSnippetForPrefix } from '../cm-utils/snippet-registry'
 
 export const tabIndentKeymap = keymap.of([
     {

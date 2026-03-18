@@ -1,0 +1,22 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-ui: 'Fira Code', -apple-system, system-ui, sans-serif;
+  --font-code: 'Fira Code', 'Consolas', monospace;
+  --code-bg: #e8eef2;
+}
+
+html,
+body,
+#app {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-ui);
+  font-variant-ligatures: common-ligatures contextual discretionary-ligatures;
+  font-feature-settings: "liga" 1, "calt" 1;
+  background-color: #f7f9fa;
+  /* Light gray background imitating app wrap */
+}

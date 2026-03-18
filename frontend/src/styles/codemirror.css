@@ -1,0 +1,141 @@
+/* Base CodeMirror Tweaks */
+.cm-editor {
+  height: 100% !important;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+/* Force a classic clean reading font for the content */
+.cm-content {
+  font-family: var(--font-ui) !important;
+  font-variant-ligatures: common-ligatures contextual discretionary-ligatures;
+  font-feature-settings: "liga" 1, "calt" 1;
+  padding: 20px 20px !important;
+  width: 100%;
+  /* Center paper effect */
+  background-color: white;
+  /* Paper effect */
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  /* Subtle paper shadow */
+  min-height: 100%;
+}
+
+.cm-scroller {
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  background-color: #f7f9fa;
+  /* Scroller matches external bg */
+}
+
+/* Line numbers styling */
+.cm-lineNumbers {
+  font-size: 12px !important;
+  color: #999 !important;
+}
+
+.cm-gutterElement {
+  font-size: 12px !important;
+}
+
+.cm-selectionLayer {
+  z-index: 2 !important;
+}
+
+.cm-cursorLayer {
+  z-index: 3 !important;
+}
+
+/* Active line highlight (subtle) */
+.cm-activeLine {
+  background-color: #f8f9fa !important;
+}
+
+/* Fix text selection visibility */
+.cm-selectionLayer .cm-selectionBackground,
+.cm-selectionBackground {
+  background-color: rgba(59, 130, 246, 0.22) !important;
+}
+
+.cm-content::selection,
+.cm-line::selection {
+  background-color: rgba(59, 130, 246, 0.22) !important;
+}
+
+.cm-content::-moz-selection,
+.cm-line::-moz-selection {
+  background-color: rgba(59, 130, 246, 0.22) !important;
+}
+
+/* Ensure markdown formatting rules are globally applied if theme overrides them */
+.cmt-em {
+  font-style: italic !important;
+}
+
+.cm-em {
+  font-style: italic !important;
+}
+
+.cmt-strong {
+  font-weight: bold !important;
+}
+
+.cmt-strikethrough {
+  text-decoration: line-through !important;
+}
+
+.cm-strikethrough {
+  text-decoration: line-through !important;
+}
+
+/* Remove underline decoration from markdown headings */
+.cm-heading,
+.cm-header,
+.cmt-heading,
+.cmt-heading1,
+.cmt-heading2,
+.cmt-heading3,
+.cm-line.cm-heading,
+.cm-line.cm-header {
+  text-decoration: none !important;
+}
+
+/* Make ~~ markers less visually loud */
+.cm-line span.cm-formatting-strikethrough,
+.cm-line span.cmt-formatting-strikethrough,
+.cm-line span.cm-formatting.cm-strikethrough {
+  font-size: 0.8em !important;
+  opacity: 0.6;
+  color: #9aa0a6 !important;
+}
+
+.cmt-quote {
+  font-style: italic !important;
+  color: #6a737d !important;
+  border-left: 3px solid #dfe2e5 !important;
+  padding-left: 10px !important;
+}
+
+.cm-quote {
+  font-style: italic !important;
+  color: #6a737d !important;
+  border-left: 3px solid #dfe2e5 !important;
+  padding-left: 10px !important;
+}
+
+/* Code blocks and inline code should stand out with monospace */
+.cmt-inlineCode,
+.cmt-comment,
+.cm-comment {
+  font-family: var(--font-code) !important;
+  font-variant-ligatures: common-ligatures contextual discretionary-ligatures;
+  font-feature-settings: "liga" 1, "calt" 1, "clig" 1;
+  background-color: var(--code-bg) !important;
+  padding: 0.15em 0.35em !important;
+  border-radius: 3px !important;
+  font-size: 0.88em !important;
+}
+
+/* Focused outline removal */
+.cm-editor.cm-focused {
+  outline: none !important;
+}

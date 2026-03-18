@@ -21,66 +21,7 @@
 
 import { keymap } from "@codemirror/view"
 import { EditorView } from "@codemirror/view"
-
-/**
- * Snippet definition following VSCode pattern
- */
-interface Snippet {
-  prefix: string      // Trigger text (e.g., "dt", "hr", "lorem")
-  body: string        // Content to insert (supports variables)
-  description?: string // Optional description
-}
-
-/**
- * Default snippets collection
- */
-const defaultSnippets: Snippet[] = [
-  {
-    prefix: "dt",
-    body: "${CURRENT_DATE}",
-    description: "Insere a data atual"
-  },
-  {
-    prefix: "hr",
-    body: "${CURRENT_TIME}",
-    description: "Insere a hora atual"
-  },
-  {
-    prefix: "lorem",
-    body: "${LOREM}",
-    description: "Insere um parágrafo lorem ipsum"
-  },
-  {
-    prefix: "table",
-    body: "| Coluna 1 | Coluna 2 |\n|----------|----------|\n| Valor 1  | Valor 2  |",
-    description: "Insere uma tabela markdown básica"
-  },
-  {
-    prefix: "code",
-    body: "```${LANG}\n${CODE}\n```",
-    description: "Insere um bloco de código"
-  },
-  {
-    prefix: "link",
-    body: "[${TEXT}](${URL})",
-    description: "Insere um link markdown"
-  },
-  {
-    prefix: "img",
-    body: "![${ALT}](${URL})",
-    description: "Insere uma imagem markdown"
-  },
-  {
-    prefix: "task",
-    body: "- [ ] ${TASK}",
-    description: "Insere uma tarefa de checklist"
-  },
-  {
-    prefix: "snippets",
-    body: "${SNIPPET_LIST}",
-    description: "Lista todos os snippets disponíveis"
-  }
-]
+import { defaultSnippets, findSnippet, getWordBeforeCursor } from '../cm-utils/snippet-registry'
 
 /**
  * Lorem ipsum paragraphs (original text)
@@ -168,51 +109,6 @@ function resolveSnippetVariables(body: string): { text: string; cursorOffset: nu
   }
   
   return { text: result, cursorOffset }
-}
-
-/**
- * Find snippet by prefix
- */
-function findSnippet(prefix: string): Snippet | undefined {
-  return defaultSnippets.find(s => s.prefix === prefix)
-}
-
-/**
- * Extract word before cursor
- */
-function getWordBeforeCursor(view: EditorView): { word: string; from: number; to: number } | null {
-  const { state } = view
-  const pos = state.selection.main.head
-  const line = state.doc.lineAt(pos)
-  const lineText = line.text
-  const posInLine = pos - line.from
-  
-  // Check if cursor is not at start of line
-  if (posInLine === 0) {
-    return null
-  }
-  
-  // Find word boundary before cursor
-  const wordCharRegex = /\w/
-  let wordStart = posInLine
-  
-  // Move backwards until we hit a non-word character or start of line
-  while (wordStart > 0 && wordCharRegex.test(lineText[wordStart - 1])) {
-    wordStart--
-  }
-  
-  // Extract the word
-  const word = lineText.substring(wordStart, posInLine)
-  
-  if (word.length === 0) {
-    return null
-  }
-  
-  return {
-    word,
-    from: line.from + wordStart,
-    to: pos
-  }
 }
 
 /**

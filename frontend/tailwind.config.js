@@ -9,6 +9,13 @@ export default {
             screens: {
                 'xs': '480px',
             },
+            fontFamily: {
+                ui: ['Fira Code', '-apple-system', 'system-ui', 'sans-serif'],
+                code: ['Fira Code', 'Consolas', 'monospace'],
+            },
+            colors: {
+                'code-bg': '#e8eef2',
+            },
         },
     },
     plugins: [],

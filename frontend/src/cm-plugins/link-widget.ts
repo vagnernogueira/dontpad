@@ -56,27 +56,32 @@ function buildLinkDecorations(view: EditorView) {
     for (let { from, to } of view.visibleRanges) {
         const text = view.state.doc.sliceString(from, to)
         
-        // Adiciona widgets para links Markdown
+        // Coleta decorações de ambas as fontes para ordenar por posição
+        const decos: { pos: number; deco: Decoration }[] = []
+        
+        // Links Markdown
         const markdownLinks = findMarkdownLinks(text, from)
         for (const link of markdownLinks) {
-            // Skip images
             if (link.isImage) continue
-            
-            // Add widget at the end of the link
-            builder.add(link.to, link.to, Decoration.widget({
+            decos.push({ pos: link.to, deco: Decoration.widget({
                 widget: new LinkWidget(link.url),
                 side: 1
-            }))
+            })})
         }
         
-        // Adiciona widgets para URLs avulsas (plain URLs)
+        // URLs avulsas (plain URLs)
         const plainUrls = findPlainUrls(text, from)
         for (const url of plainUrls) {
-            // Add widget at the end da URL
-            builder.add(url.to, url.to, Decoration.widget({
+            decos.push({ pos: url.to, deco: Decoration.widget({
                 widget: new LinkWidget(url.url),
                 side: 1
-            }))
+            })})
+        }
+        
+        // RangeSetBuilder exige adição em ordem crescente de posição
+        decos.sort((a, b) => a.pos - b.pos)
+        for (const d of decos) {
+            builder.add(d.pos, d.pos, d.deco)
         }
     }
     
