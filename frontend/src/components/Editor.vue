@@ -12,6 +12,8 @@
         </div>
       </div>
       <div class="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm text-gray-300 shrink-0">
+        <CollaboratorAvatars :collaborators="collaborators" @edit-profile="showProfileDialog = true" />
+        <div class="w-px h-5 bg-gray-700 mx-1 self-center shrink-0"></div>
         <span :class="['w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full shadow-sm', status === 'connected' ? 'bg-emerald-400' : 'bg-red-400']"></span>
         <span class="hidden sm:inline">{{ status === 'connected' ? 'Sincronizado' : 'Offline' }}</span>
       </div>
@@ -91,7 +93,15 @@
     </main>
 
     <!-- Dialogs -->
-    <div v-if="showLinkDialog || showImageDialog || showLockDialog || showAccessDialog" class="absolute inset-0 bg-black bg-opacity-30 z-50 flex items-center justify-center">
+    <div v-if="showLinkDialog || showImageDialog || showLockDialog || showAccessDialog || showProfileDialog" class="absolute inset-0 bg-black bg-opacity-30 z-50 flex items-center justify-center">
+      
+      <!-- Profile Dialog -->
+      <ProfileDialog
+        v-if="showProfileDialog"
+        :profile="myProfile"
+        @close="showProfileDialog = false"
+        @save="onProfileSave"
+      />
       
       <!-- Link Dialog -->
       <div v-if="showLinkDialog" class="bg-white rounded-lg shadow-xl p-4 sm:p-5 w-full max-w-[calc(100vw-2rem)] sm:max-w-md mx-4">
@@ -164,6 +174,8 @@
 import { ref, reactive, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 import { ArrowLeft, Download, Lock, Redo2, Table2, Undo2 } from 'lucide-vue-next'
+import CollaboratorAvatars, { type CollaboratorInfo } from './CollaboratorAvatars.vue'
+import ProfileDialog from './ProfileDialog.vue'
 
 // Yjs
 import * as Y from 'yjs'
@@ -193,14 +205,13 @@ import * as persistence from '../services/persistence'
 import * as exportService from '../services/export'
 import { createDocumentAPI } from '../services/document-api'
 import { getApiBaseUrl, getWsBaseUrl } from '../services/config'
-import { getRandomCursorColor, getRandomCursorName, getCursorAwarenessState } from '../cm-utils/cursor'
+import { getOrCreateProfile, updateProfile, getProfileAwarenessState, type CollaboratorProfile } from '../cm-utils/cursor'
 
 // Initialize services
 const apiBaseUrl = getApiBaseUrl()
 const wsBaseUrl = getWsBaseUrl()
 const documentAPI = createDocumentAPI(apiBaseUrl)
-const randomColor = getRandomCursorColor()
-const randomName = getRandomCursorName()
+const myProfile = ref<CollaboratorProfile>(getOrCreateProfile())
 
 const route = useRoute()
 const documentId = ref(route.params.documentId as string || 'default')
@@ -228,8 +239,8 @@ const accessError = ref('')
 const hasDocumentAccess = ref(false)
 const documentAccessPassword = ref('')
 const isDocumentLocked = ref(false)
-
-
+const showProfileDialog = ref(false)
+const collaborators = ref<CollaboratorInfo[]>([])
 
 let ydoc: Y.Doc
 let provider: WebsocketProvider
@@ -267,7 +278,30 @@ const initEditor = () => {
   })
 
   // 3. Set Awareness (Cursor Info)
-  provider.awareness.setLocalStateField('user', getCursorAwarenessState(randomName, randomColor))
+  provider.awareness.setLocalStateField('user', getProfileAwarenessState(myProfile.value))
+
+  // 4. Track collaborators from awareness
+  const updateCollaborators = () => {
+    const states = provider.awareness.getStates()
+    const localClientId = provider.awareness.clientID
+    const result: CollaboratorInfo[] = []
+    states.forEach((state, clientId) => {
+      if (!state.user) return
+      result.push({
+        clientId,
+        profileId: state.user.profileId,
+        name: state.user.name || 'Anônimo',
+        emoji: state.user.emoji,
+        color: state.user.color || '#999',
+        isSelf: clientId === localClientId
+      })
+    })
+    // Self first, then others
+    result.sort((a, b) => (a.isSelf ? -1 : b.isSelf ? 1 : 0))
+    collaborators.value = result
+  }
+  provider.awareness.on('change', updateCollaborators)
+  updateCollaborators()
 
   // 4. Bind CodeMirror to Yjs Document
   const ytext = ydoc.getText('codemirror')
@@ -494,6 +528,15 @@ const closeDialogs = () => {
   showLockDialog.value = false
   lockPassword.value = ''
   lockError.value = ''
+  if (view) view.focus()
+}
+
+const onProfileSave = (data: { name: string; emoji: string }) => {
+  myProfile.value = updateProfile(data)
+  if (provider) {
+    provider.awareness.setLocalStateField('user', getProfileAwarenessState(myProfile.value))
+  }
+  showProfileDialog.value = false
   if (view) view.focus()
 }
 

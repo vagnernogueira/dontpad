@@ -289,6 +289,43 @@ body,
   z-index: 10;
 }
 
+/* Collaborator Avatars */
+.collaborator-avatars {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.collaborator-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  background: rgba(255, 255, 255, 0.1);
+  transition: background-color 0.15s, transform 0.15s;
+  cursor: default;
+  padding: 0;
+  line-height: 1;
+}
+
+.collaborator-avatar--self {
+  cursor: pointer;
+}
+
+.collaborator-avatar--self:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: scale(1.12);
+}
+
+.collaborator-avatar-emoji {
+  font-size: 16px;
+  line-height: 1;
+  pointer-events: none;
+}
+
 /* Mobile responsiveness */
 @media (max-width: 640px) {
   .cm-content {
