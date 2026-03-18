@@ -23,5 +23,5 @@ defineProps<{
 }>()
 
 const baseClasses =
-  'px-2.5 py-[7.2px] sm:py-[5.4px] rounded transition-colors focus:outline-none touch-manipulation shrink-0'
+  'px-2.5 py-btn sm:py-btn-sm rounded transition-colors focus:outline-none touch-manipulation shrink-0'
 </script>

@@ -1,6 +1,6 @@
 <template>
   <div class="flex h-full w-full flex-col text-gray-900">
-    <header class="bg-gray-900 text-gray-100 px-3 sm:px-5 py-[7.2px] sm:py-[9px] flex items-center justify-between shadow-md z-20">
+    <header class="bg-gray-900 text-gray-100 px-3 sm:px-5 py-btn sm:py-header flex items-center justify-between shadow-md z-20">
       <div class="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
         <router-link to="/" class="font-bold text-base sm:text-lg hover:text-white transition-colors flex items-center gap-1 shrink-0">
           <ArrowLeft :size="18" />
@@ -13,19 +13,19 @@
       <button
         v-if="session.hasAccess.value"
         @click="refreshDocuments"
-        class="px-2 sm:px-3 py-[7.2px] sm:py-[5.4px] bg-gray-800 border border-gray-700 text-white hover:bg-gray-700 rounded-md font-medium text-xs transition-colors focus:outline-none flex items-center gap-1.5 shadow-sm touch-manipulation shrink-0"
+        class="px-2 sm:px-3 py-btn sm:py-btn-sm bg-gray-800 border border-gray-700 text-white hover:bg-gray-700 rounded-md font-medium text-xs transition-colors focus:outline-none flex items-center gap-1.5 shadow-sm touch-manipulation shrink-0"
       >
         <RefreshCw :size="14" />
         Atualizar
       </button>
     </header>
 
-    <div class="bg-[#f8f9fa] border-b border-gray-200 px-2 sm:px-4 py-[7.2px] flex items-center gap-1 sm:gap-1.5 shadow-sm text-gray-600 z-10 text-sm overflow-x-auto overflow-y-hidden">
+    <div class="bg-[#f8f9fa] border-b border-gray-200 px-2 sm:px-4 py-btn flex items-center gap-1 sm:gap-1.5 shadow-sm text-gray-600 z-10 text-sm overflow-x-auto overflow-y-hidden">
       <template v-if="session.hasAccess.value">
         <input
           v-model="list.search.value"
           type="text"
-          class="w-full rounded border border-gray-300 px-3 py-[7.2px] sm:py-[5.4px] text-sm focus:outline-none focus:ring-2 focus:ring-gray-800 sm:max-w-sm bg-white shrink-0"
+          class="w-full rounded border border-gray-300 px-3 py-btn sm:py-btn-sm text-sm focus:outline-none focus:ring-2 focus:ring-gray-800 sm:max-w-sm bg-white shrink-0"
           placeholder="Buscar por nome"
         />
 
@@ -34,27 +34,27 @@
         <button
           @click="renameSelected"
           :disabled="!list.selectedDocumentName.value"
-          class="px-2.5 py-[7.2px] sm:py-[5.4px] bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 hover:text-gray-900 rounded-md font-medium text-xs transition-colors focus:outline-none touch-manipulation shrink-0 disabled:cursor-not-allowed disabled:opacity-40"
+          class="px-2.5 py-btn sm:py-btn-sm bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 hover:text-gray-900 rounded-md font-medium text-xs transition-colors focus:outline-none touch-manipulation shrink-0 disabled:cursor-not-allowed disabled:opacity-40"
         >Renomear</button>
         <button
           @click="removeSelected"
           :disabled="!list.selectedDocumentName.value"
-          class="px-2.5 py-[7.2px] sm:py-[5.4px] bg-white border border-red-300 text-red-700 hover:bg-red-50 rounded-md font-medium text-xs transition-colors focus:outline-none touch-manipulation shrink-0 disabled:cursor-not-allowed disabled:opacity-40"
+          class="px-2.5 py-btn sm:py-btn-sm bg-white border border-red-300 text-red-700 hover:bg-red-50 rounded-md font-medium text-xs transition-colors focus:outline-none touch-manipulation shrink-0 disabled:cursor-not-allowed disabled:opacity-40"
         >Remover</button>
         <button
           @click="downloadSelectedMarkdown"
           :disabled="!list.selectedDocumentName.value"
-          class="px-2.5 py-[7.2px] sm:py-[5.4px] bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 hover:text-gray-900 rounded-md font-medium text-xs transition-colors focus:outline-none touch-manipulation shrink-0 disabled:cursor-not-allowed disabled:opacity-40"
+          class="px-2.5 py-btn sm:py-btn-sm bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 hover:text-gray-900 rounded-md font-medium text-xs transition-colors focus:outline-none touch-manipulation shrink-0 disabled:cursor-not-allowed disabled:opacity-40"
         >Download markdown</button>
         <button
           @click="downloadSelectedPDF"
           :disabled="!list.selectedDocumentName.value"
-          class="px-2.5 py-[7.2px] sm:py-[5.4px] bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 hover:text-gray-900 rounded-md font-medium text-xs transition-colors focus:outline-none touch-manipulation shrink-0 disabled:cursor-not-allowed disabled:opacity-40"
+          class="px-2.5 py-btn sm:py-btn-sm bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 hover:text-gray-900 rounded-md font-medium text-xs transition-colors focus:outline-none touch-manipulation shrink-0 disabled:cursor-not-allowed disabled:opacity-40"
         >Download PDF</button>
         <button
           @click="lockSelected"
           :disabled="!list.selectedDocumentName.value"
-          class="px-2.5 py-[7.2px] sm:py-[5.4px] bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 hover:text-gray-900 rounded-md font-medium text-xs transition-colors focus:outline-none touch-manipulation shrink-0 disabled:cursor-not-allowed disabled:opacity-40"
+          class="px-2.5 py-btn sm:py-btn-sm bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 hover:text-gray-900 rounded-md font-medium text-xs transition-colors focus:outline-none touch-manipulation shrink-0 disabled:cursor-not-allowed disabled:opacity-40"
         >Travar</button>
       </template>
       <p v-else class="text-sm text-gray-500 px-1">Informe a senha mestra para habilitar ações do Explorer.</p>

@@ -16,6 +16,11 @@ export default {
             colors: {
                 'code-bg': '#e8eef2',
             },
+            spacing: {
+                'btn': '7.2px',
+                'btn-sm': '5.4px',
+                'header': '9px',
+            },
         },
     },
     plugins: [],

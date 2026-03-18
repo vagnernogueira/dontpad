@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-col h-full w-full">
     <!-- Header -->
-    <header class="bg-gray-900 text-gray-100 px-3 sm:px-5 py-[7.2px] sm:py-[9px] flex items-center justify-between shadow-md z-20">
+    <header class="bg-gray-900 text-gray-100 px-3 sm:px-5 py-btn sm:py-header flex items-center justify-between shadow-md z-20">
       <div class="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
         <router-link to="/" class="font-bold text-base sm:text-lg hover:text-white transition-colors flex items-center gap-1 shrink-0">
           <ArrowLeft :size="18" />
@@ -20,11 +20,11 @@
     </header>
 
     <!-- Toolbar -->
-    <div class="bg-[#f8f9fa] border-b border-gray-200 px-2 sm:px-4 py-[7.2px] flex items-center gap-1 sm:gap-1.5 shadow-sm text-gray-600 z-10 text-sm overflow-x-auto overflow-y-hidden">
-      <button @click="undo" class="px-1.5 py-[7.2px] sm:py-[5.4px] hover:bg-gray-200 hover:text-gray-900 rounded transition-colors focus:outline-none touch-manipulation shrink-0" title="Desfazer">
+    <div class="bg-[#f8f9fa] border-b border-gray-200 px-2 sm:px-4 py-btn flex items-center gap-1 sm:gap-1.5 shadow-sm text-gray-600 z-10 text-sm overflow-x-auto overflow-y-hidden">
+      <button @click="undo" class="px-1.5 py-btn sm:py-btn-sm hover:bg-gray-200 hover:text-gray-900 rounded transition-colors focus:outline-none touch-manipulation shrink-0" title="Desfazer">
         <Undo2 :size="16" />
       </button>
-      <button @click="redo" class="px-1.5 py-[7.2px] sm:py-[5.4px] hover:bg-gray-200 hover:text-gray-900 rounded transition-colors focus:outline-none touch-manipulation shrink-0" title="Refazer">
+      <button @click="redo" class="px-1.5 py-btn sm:py-btn-sm hover:bg-gray-200 hover:text-gray-900 rounded transition-colors focus:outline-none touch-manipulation shrink-0" title="Refazer">
         <Redo2 :size="16" />
       </button>
       <div class="w-px h-5 bg-gray-300 mx-1.5 self-center shrink-0"></div>
@@ -67,11 +67,11 @@
       <div class="flex-1 min-w-[8px]"></div> <!-- Spacer -->
       
       <div class="flex gap-1.5 sm:gap-2 shrink-0">
-        <button @click="downloadMarkdown" class="px-2 sm:px-3 py-[7.2px] sm:py-[5.4px] bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 hover:text-gray-900 rounded-md font-medium text-xs transition-colors focus:outline-none flex items-center gap-1.5 shadow-sm touch-manipulation shrink-0" title="Baixar como .md">
+        <button @click="downloadMarkdown" class="px-2 sm:px-3 py-btn sm:py-btn-sm bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 hover:text-gray-900 rounded-md font-medium text-xs transition-colors focus:outline-none flex items-center gap-1.5 shadow-sm touch-manipulation shrink-0" title="Baixar como .md">
           <Download :size="14" />
           <span class="hidden xs:inline">.MD</span>
         </button>
-        <button @click="downloadPDF" class="px-2 sm:px-3 py-[7.2px] sm:py-[5.4px] bg-gray-800 border border-gray-800 text-white hover:bg-gray-900 rounded-md font-medium text-xs transition-colors focus:outline-none flex items-center gap-1.5 shadow-sm touch-manipulation shrink-0" title="Baixar como .pdf">
+        <button @click="downloadPDF" class="px-2 sm:px-3 py-btn sm:py-btn-sm bg-gray-800 border border-gray-800 text-white hover:bg-gray-900 rounded-md font-medium text-xs transition-colors focus:outline-none flex items-center gap-1.5 shadow-sm touch-manipulation shrink-0" title="Baixar como .pdf">
           <Download :size="14" />
           <span class="hidden xs:inline">.PDF</span>
         </button>

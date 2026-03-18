@@ -47,3 +47,11 @@ export {
   type Snippet,
   type WordInfo,
 } from './snippet-registry'
+
+export {
+  evaluateMathExpression,
+  formatResult,
+  tokenizeMathExpression,
+  MathParser,
+  type MathToken,
+} from './math-evaluator'
