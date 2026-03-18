@@ -84,7 +84,11 @@ Detalhes extensos de implementação por camada estão nos módulos listados na 
 │  ┌──────────────────────────────────────────────────────┐   │
 │  │              Vue 3 Application                       │   │
 │  │  ┌────────────┐  ┌────────────┐  ┌────────────┐      │   │
-│  │  │   Router   │  │ Components │  │  Services  │      │   │
+│  │  │   Router   │  │ Components │  │ Composables│      │   │
+│  │  └─────┬──────┘  └──────┬─────┘  └──────┬─────┘      │   │
+│  │        │                │                 │          │   │
+│  │  ┌────────────┐  ┌────────────┐  ┌────────────┐      │   │
+│  │  │  Services  │  │ CM Plugins │  │ CM Commands│      │   │
 │  │  └─────┬──────┘  └──────┬─────┘  └──────┬─────┘      │   │
 │  │        │                │                 │          │   │
 │  │  ┌─────▼────────────────▼─────────────────▼──────┐   │   │
@@ -149,9 +153,12 @@ _docs/
 
 - **Commands Pattern** no frontend para reduzir acoplamento da UI;
 - **Factory Pattern** em services para configuração e testabilidade;
+- **Composables Pattern** para extrair lógica reativa de componentes Vue complexos (`useYjsEditor`, `useDocumentAccess`, `useCollaborators`, `useExplorerSession`, `useDocumentList`);
 - **CRDT (Yjs)** em vez de OT para merge automático e melhor suporte offline;
 - **Lazy loading** para bibliotecas pesadas de export (`marked`, `html2pdf.js`);
-- **LevelDB local** para persistência incremental simples em ambiente self-hosted.
+- **LevelDB local** para persistência incremental simples em ambiente self-hosted;
+- **Design tokens Tailwind** para spacing, fontes e cores customizadas (`btn`, `btn-sm`, `header`, `font-ui`, `font-code`, `code-bg`);
+- **Barrel indexes** em todos os módulos `cm-*`, `services` e `composables` para centralizar exports.
 
 ### 6.3 Limitações conhecidas (resumo)
 
@@ -166,8 +173,12 @@ _docs/
 | Arquivo                                 | Descrição                                              |
 | --------------------------------------- | ------------------------------------------------------ |
 | `frontend/src/components/DocumentRoute.vue` | Resolução de modos por query params e fallback para edição. |
-| `frontend/src/components/Editor.vue`    | Componente principal do editor colaborativo.           |
-| `frontend/src/components/Explorer.vue`  | Gestão administrativa de documentos em `/explorer`.    |
+| `frontend/src/components/Editor.vue`    | Componente principal do editor colaborativo (orquestra composables). |
+| `frontend/src/components/Explorer.vue`  | Gestão administrativa de documentos em `/explorer` (orquestra composables). |
+| `frontend/src/components/ToolbarButton.vue` | Componente reutilizável para botões de toolbar com estilo padronizado. |
+| `frontend/src/composables/*`            | Composables Vue 3 para lógica reativa extraída dos componentes. |
+| `frontend/src/cm-utils/math-evaluator.ts` | Parser matemático recursivo descendente (tokenizer + avaliador). |
+| `frontend/src/cm-utils/snippet-registry.ts` | Registry compartilhado de snippets e prefixes para tab-keymap e snippet plugins. |
 | `frontend/src/services/document-api.ts` | Cliente HTTP para lock/access e ações administrativas. |
 | `backend/src/server.ts`                 | Bootstrap backend (Express + WS + rotas API).          |
 | `backend/src/sync.ts`                   | Persistência CRDT, lock e autenticação WS.             |
@@ -204,6 +215,11 @@ Referências externas:
   - Principais alterações arquiteturais: base SPA + API/WS, adoção de Yjs/CodeMirror e persistência em LevelDB.
 
 ### 9.2 Changelog do Documento
+
+- **Versão 3.1**
+  - **Data:** 2026-03-18
+  - **Autor:** GitHub Copilot
+  - **Mudanças:** Atualização para refletir refatoração completa do frontend: composables extraídos de Editor/Explorer, ToolbarButton.vue, snippet-registry.ts, math-evaluator.ts, barrel indexes, CSS modular, design tokens Tailwind.
 
 - **Versão 3.0**
   - **Data:** 2026-03-12
