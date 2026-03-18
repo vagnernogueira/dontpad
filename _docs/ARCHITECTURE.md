@@ -62,15 +62,15 @@ Características principais:
 
 ## 2. Stack de Tecnologias (Resumo)
 
-| Camada       | Tecnologias principais              |
-| ------------ | ----------------------------------- |
-| Frontend     | Vue 3, TypeScript, Vite, Vue Router |
-| Editor       | CodeMirror 6, @lezer/markdown       |
-| Colaboração  | Yjs, y-websocket, y-codemirror.next |
-| Backend      | Node.js, Express, ws, TypeScript    |
-| Persistência | y-leveldb, LevelDB, metadados JSON  |
-| UI/UX        | Tailwind CSS, Lucide Vue Next       |
-| Export       | marked, html2pdf.js                 |
+| Camada       | Tecnologias principais                                    |
+| ------------ | --------------------------------------------------------- |
+| Frontend     | Vue 3, TypeScript, Vite, Vue Router                       |
+| Editor       | CodeMirror 6, @lezer/markdown                             |
+| Colaboração  | Yjs, y-websocket, y-codemirror.next                       |
+| Backend      | Node.js, Express, ws, TypeScript                          |
+| Persistência | y-leveldb, LevelDB, metadados JSON                        |
+| UI/UX        | Tailwind CSS, shadcn-vue, reka-ui, Lucide Vue Next        |
+| Export       | marked, html2pdf.js                                       |
 
 Detalhes extensos de implementação por camada estão nos módulos listados na seção 5.
 
@@ -86,18 +86,18 @@ Detalhes extensos de implementação por camada estão nos módulos listados na 
 │  │  ┌────────────┐  ┌────────────┐  ┌────────────┐      │   │
 │  │  │   Router   │  │ Components │  │ Composables│      │   │
 │  │  └─────┬──────┘  └──────┬─────┘  └──────┬─────┘      │   │
-│  │        │                │                 │          │   │
+│  │        │                │               │            │   │
 │  │  ┌────────────┐  ┌────────────┐  ┌────────────┐      │   │
 │  │  │  Services  │  │ CM Plugins │  │ CM Commands│      │   │
 │  │  └─────┬──────┘  └──────┬─────┘  └──────┬─────┘      │   │
-│  │        │                │                 │          │   │
-│  │  ┌─────▼────────────────▼─────────────────▼──────┐   │   │
+│  │        │                │               │            │   │
+│  │  ┌─────▼────────────────▼───────────────▼────────┐   │   │
 │  │  │         CodeMirror 6 + Yjs                    │   │   │
 │  │  └───────────────────┬───────────────────────────┘   │   │
-│  └────────────────────┬─┴───────────────────────────────┘   │
-└───────────────────────┼─────────────────────────────────────┘
-                        │ WebSocket + HTTP API
-        ┌───────────────▼────────────────┐
+│  └──────────────────────┼───────────────────────────────┘   │
+└─────────────────────────┼───────────────────────────────────┘
+                          │ WebSocket + HTTP API
+        ┌─────────────────▼──────────────┐
         │      Backend Server (Node.js)  │
         │ - Express REST                 │
         │ - WebSocket Provider (Yjs)     │
@@ -154,8 +154,8 @@ _docs/
 - **Commands Pattern** no frontend para reduzir acoplamento da UI;
 - **Factory Pattern** em services para configuração e testabilidade;
 - **Composables Pattern** para extrair lógica reativa de componentes Vue complexos (`useYjsEditor`, `useDocumentAccess`, `useCollaborators`, `useExplorerSession`, `useDocumentList`);
-- **Component Composition** com sub-componentes focados: `EditorToolbar`, `BaseDialog`, `LinkDialog`, `ImageDialog`, `LockDialog`, `AccessDialog`;
-- **CSS Component Layer** via `@layer components` com `@apply` para abstrações reutilizáveis de layout, botões, inputs e diálogos;
+- **Component Composition** com sub-componentes focados: `EditorHeader`, `EditorToolbar`, `BaseDialog` (thin wrapper shadcn), `LinkDialog`, `ImageDialog`, `LockDialog`, `AccessDialog`, `ProfileDialog`;
+- **CSS Component Layer** via `@layer components` com `@apply` para abstrações reutilizáveis de layout, botões e inputs; camada de diálogos migrada para primitivos **shadcn-vue** (`Dialog`, `DialogContent`, `DialogHeader`, `DialogFooter` via `reka-ui`);
 - **CRDT (Yjs)** em vez de OT para merge automático e melhor suporte offline;
 - **Lazy loading** para bibliotecas pesadas de export (`marked`, `html2pdf.js`);
 - **LevelDB local** para persistência incremental simples em ambiente self-hosted;
@@ -172,35 +172,38 @@ _docs/
 
 ## 7. Arquivos Importantes
 
-| Arquivo                                 | Descrição                                              |
-| --------------------------------------- | ------------------------------------------------------ |
-| `frontend/src/components/DocumentRoute.vue` | Resolução de modos por query params e fallback para edição. |
-| `frontend/src/components/Editor.vue`    | Componente principal do editor colaborativo (orquestra composables). |
-| `frontend/src/components/EditorToolbar.vue` | Toolbar de formatação, undo/redo e downloads extraída do Editor. |
-| `frontend/src/components/BaseDialog.vue` | Shell reutilizável de diálogo (overlay + card + título + footer com slots). |
-| `frontend/src/components/*Dialog.vue`   | Diálogos focados: Link, Image, Lock, Access, Profile (usam BaseDialog). |
-| `frontend/src/components/Explorer.vue`  | Gestão administrativa de documentos em `/explorer` (orquestra composables). |
-| `frontend/src/components/ToolbarButton.vue` | Componente reutilizável para botões de toolbar com estilo padronizado. |
-| `frontend/src/styles/components.css`    | Abstrações CSS com `@apply` (`btn-*`, `dialog-*`, `input-*`, `page-header`, `toolbar`). |
-| `frontend/src/composables/*`            | Composables Vue 3 para lógica reativa extraída dos componentes. |
-| `frontend/src/cm-utils/math-evaluator.ts` | Parser matemático recursivo descendente (tokenizer + avaliador). |
-| `frontend/src/cm-utils/snippet-registry.ts` | Registry compartilhado de snippets e prefixes para tab-keymap e snippet plugins. |
-| `frontend/src/services/document-api.ts` | Cliente HTTP para lock/access e ações administrativas. |
-| `backend/src/server.ts`                 | Bootstrap backend (Express + WS + rotas API).          |
-| `backend/src/sync.ts`                   | Persistência CRDT, lock e autenticação WS.             |
-| `_docs/ARCHITECTURE.md`                 | Hub arquitetural (fonte de verdade central).           |
-| `_docs/architecture/*.md`               | Módulos especializados de arquitetura IA-first.        |
+| Arquivo                                     | Descrição                                                                                        |
+| ------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `frontend/src/components/DocumentRoute.vue` | Resolução de modos por query params e fallback para edição.                                      |
+| `frontend/src/components/Editor.vue`        | Componente principal do editor colaborativo (orquestra composables).                             |
+| `frontend/src/components/EditorHeader.vue`  | Header bar extraída do Editor: navegação, badge do documento, status de conexão e avatares.      |
+| `frontend/src/components/EditorToolbar.vue` | Toolbar de formatação, undo/redo e downloads extraída do Editor.                                 |
+| `frontend/src/components/BaseDialog.vue`    | Thin wrapper shadcn-vue: encapsula `Dialog` + `DialogContent` + `DialogHeader` + `DialogFooter`. |
+| `frontend/src/components/*Dialog.vue`       | Diálogos focados: Link, Image, Lock, Access, Profile (usam shadcn `Dialog` diretamente).         |
+| `frontend/src/components/Explorer.vue`      | Gestão administrativa de documentos em `/explorer` (orquestra composables).                      |
+| `frontend/src/components/ToolbarButton.vue` | Componente reutilizável para botões de toolbar com estilo padronizado.                           |
+| `frontend/src/styles/components.css`        | Abstrações CSS com `@apply` (`btn-*`, `dialog-*`, `input-*`, `page-header`, `toolbar`).          |
+| `frontend/src/composables/*`                | Composables Vue 3 para lógica reativa extraída dos componentes.                                  |
+| `frontend/src/cm-utils/math-evaluator.ts`   | Parser matemático recursivo descendente (tokenizer + avaliador).                                 |
+| `frontend/src/cm-utils/snippet-registry.ts` | Registry compartilhado de snippets e prefixes para tab-keymap e snippet plugins.                 |
+| `frontend/src/services/document-api.ts`     | Cliente HTTP para lock/access e ações administrativas.                                           |
+| `backend/src/server.ts`                     | Bootstrap backend (Express + WS + rotas API).                                                    |
+| `backend/src/sync.ts`                       | Persistência CRDT, lock e autenticação WS.                                                       |
+| `_docs/ARCHITECTURE.md`                     | Hub arquitetural (fonte de verdade central).                                                     |
+| `_docs/architecture/*.md`                   | Módulos especializados de arquitetura IA-first.                                                  |
 
 ---
 
 ## 8. Dependências Externas e Integrações
 
-| Dependência           | Tipo                      | Criticidade |
-| --------------------- | ------------------------- | ----------- |
-| Yjs + y-websocket     | Colaboração (CRDT)        | Alta        |
-| CodeMirror 6          | Editor extensível         | Alta        |
-| LevelDB via y-leveldb | Persistência colaborativa | Alta        |
-| html2pdf.js           | Export PDF frontend       | Média       |
+| Dependência           | Tipo                                                | Criticidade |
+| --------------------- | --------------------------------------------------- | ----------- |
+| Yjs + y-websocket     | Colaboração (CRDT)                                  | Alta        |
+| CodeMirror 6          | Editor extensível                                   | Alta        |
+| LevelDB via y-leveldb | Persistência colaborativa                           | Alta        |
+| reka-ui               | Primitivos headless UI (focus trap, aria, keyboard) | Alta        |
+| shadcn-vue            | Componentes UI copiados para `components/ui/`       | Média       |
+| html2pdf.js           | Export PDF frontend                                 | Média       |
 
 Referências externas:
 
@@ -221,6 +224,16 @@ Referências externas:
   - Principais alterações arquiteturais: base SPA + API/WS, adoção de Yjs/CodeMirror e persistência em LevelDB.
 
 ### 9.2 Changelog do Documento
+
+- **Versão 3.4**
+  - **Data:** 2026-03-18
+  - **Autor:** GitHub Copilot
+  - **Mudanças:** Extração de `EditorHeader.vue` do `Editor.vue` (header bar descoplada como componente próprio). Contagem de componentes: 13 → 14.
+
+- **Versão 3.3**
+  - **Data:** 2026-03-18
+  - **Autor:** GitHub Copilot
+  - **Mudanças:** Adoção de shadcn-vue (Fase 1 + 2): infraestrutura (`components.json`, `src/lib/utils.ts`, CSS variables em `base.css`, tokens shadcn em `tailwind.config.js`), instalação de `dialog` e `button`, migração de todos os 6 diálogos para primitivos `reka-ui` (focus trap, aria-modal, Escape nativo). Stack UI/UX adicionada: `reka-ui`, `shadcn-vue`.
 
 - **Versão 3.2**
   - **Data:** 2026-03-18

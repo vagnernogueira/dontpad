@@ -10,7 +10,9 @@ Este módulo documenta a arquitetura do frontend focada no editor colaborativo: 
 
 ## Arquivos-fonte principais
 
-- `frontend/src/components/*.vue` — 13 componentes Vue
+- `frontend/src/components/*.vue` — 14 componentes Vue
+- `frontend/src/components/ui/` — componentes shadcn-vue (dialog, button)
+- `frontend/src/lib/utils.ts` — utilitário `cn()` (clsx + tailwind-merge)
 - `frontend/src/composables/*.ts` — 5 composables Vue 3
 - `frontend/src/cm-commands/*` — 5 arquivos (formatting, history, insertions, table, index)
 - `frontend/src/cm-extensions/*` — 2 arquivos (editor-theme, index)
@@ -23,7 +25,9 @@ Este módulo documenta a arquitetura do frontend focada no editor colaborativo: 
 
 ```filesystem
 src/
-├── components/       # 13 componentes Vue
+├── components/       # 14 componentes Vue
+│   └── ui/           # componentes shadcn-vue (dialog, button)
+├── lib/              # utils.ts — cn()
 ├── composables/      # 5 composables (lógica reativa extraída)
 ├── services/         # 5 serviços + barrel index
 ├── cm-commands/      # 5 arquivos (formatting, history, insertions, table, index)
@@ -53,9 +57,18 @@ src/
 ### `Editor.vue`
 
 - Orquestra composables `useYjsEditor`, `useDocumentAccess` e `useCollaborators`;
+- Delega header para `EditorHeader.vue`;
 - Delega toolbar para `EditorToolbar.vue`;
 - Delega diálogos para componentes focados (`LinkDialog`, `ImageDialog`, `LockDialog`, `AccessDialog`, `ProfileDialog`);
 - Delega regras para comandos/plugins/services.
+
+### `EditorHeader.vue`
+
+- Header bar extraída do `Editor.vue` (descoplada em 2026-03-18);
+- Renderiza navegação (link Início + `ArrowLeft`), badge `/documentId`, avatares de colaboradores e indicador de status de conexão;
+- Aceita props `documentId`, `collaborators`, `status`;
+- Emite `@edit-profile` ao clicar nos avatares;
+- Isola completamente o markup e as classes `.page-header`, `.page-header-link`, `.page-header-badge`.
 
 ### `EditorToolbar.vue`
 
@@ -66,10 +79,11 @@ src/
 
 ### `BaseDialog.vue`
 
-- Shell reutilizável de diálogo com overlay, card, título e footer;
+- Thin wrapper shadcn-vue: encapsula `Dialog` + `DialogContent` + `DialogHeader` + `DialogTitle` + `DialogFooter` do pacote `@/components/ui/dialog`;
 - Aceita `title` e `cardClass` como props;
 - Slot default para conteúdo e slot `#actions` para botões do footer;
-- Emite `@close` ao clicar no overlay.
+- Fecha ao atualizar o estado do `Dialog` para `false` (via `@update:open`);
+- Mantido para retro-compatibilidade; todos os diálogos do projeto usam shadcn `Dialog` diretamente.
 
 ### Diálogos focados
 
@@ -81,7 +95,7 @@ src/
 | `AccessDialog.vue` | Solicitar senha para abrir documento protegido |
 | `ProfileDialog.vue` | Edição de perfil do colaborador (emoji, nome, telemetria) |
 
-Todos usam `BaseDialog.vue` como shell e são auto-contidos: gerenciam estado interno e emitem eventos (`@insert`, `@lock`, `@unlock`, `@close`).
+Todos usam **diretamente** os primitivos shadcn-vue (`Dialog`, `DialogContent`, `DialogHeader`, `DialogTitle`, `DialogFooter` de `@/components/ui/dialog`) — não dependem de `BaseDialog.vue`. O foco inicial em cada diálogo é gerenciado via `@open-auto-focus.prevent` no `DialogContent`, eliminando o padrão anterior de `onMounted` + `nextTick`. Focus trap, Escape e `aria-modal` são gerenciados automaticamente por `reka-ui`.
 
 ### `DocumentRoute.vue`
 
@@ -161,8 +175,8 @@ CSS global organizado em módulos importados sequencialmente por `index.css`:
 
 | Arquivo | Conteúdo |
 |---|---|
-| `base.css` | Tailwind directives, variáveis CSS `:root`, estilos de `html`/`body` |
-| `components.css` | Abstrações CSS com `@layer components` e `@apply` (layout, botões, inputs, diálogos) |
+| `base.css` | Tailwind directives, variáveis CSS `:root` do projeto + variáveis CSS shadcn-vue (`--background`, `--foreground`, `--primary`, `--border`, etc.), estilos de `html`/`body` |
+| `components.css` | Abstrações CSS com `@layer components` e `@apply` (layout, botões, inputs); classes de diálogo (`.dialog-*`) mantidas apenas como fallback |
 | `codemirror.css` | Estilos do CodeMirror (editor chrome, cursor, gutter) |
 | `plugins.css` | Widgets de plugins CM (code blocks, links, images, checkboxes, etc.) |
 | `collaboration.css` | Cursores Yjs e avatares de colaboradores |
@@ -174,12 +188,12 @@ Utiliza `@layer components` com `@apply` para criar abstrações reutilizáveis 
 
 | Categoria | Classes | Uso |
 |---|---|---|
-| Layout | `.page-header`, `.page-header-link`, `.page-header-badge` | Header compartilhado entre Editor e Explorer |
+| Layout | `.page-header`, `.page-header-link`, `.page-header-badge` | Header renderizado por `EditorHeader.vue` e Explorer |
 | Layout | `.toolbar`, `.toolbar-divider` | Container de toolbar e divisores verticais |
 | Botões | `.btn-primary`, `.btn-secondary`, `.btn-danger`, `.btn-icon` | Botões de ação padronizados |
-| Botões | `.btn-dialog-cancel`, `.btn-dialog-confirm`, `.btn-dialog-danger` | Botões de footer de diálogo |
+| Botões | `.btn-dialog-cancel`, `.btn-dialog-confirm`, `.btn-dialog-danger` | Botões de footer de diálogo (usam os primitivos shadcn como container) |
 | Inputs | `.input-field`, `.input-label` | Campos de formulário padronizados |
-| Diálogos | `.dialog-overlay`, `.dialog-card`, `.dialog-card-sm`, `.dialog-title`, `.dialog-footer` | Estrutura de modal reutilizável |
+| Diálogos | `.dialog-overlay`, `.dialog-card`, `.dialog-card-sm`, `.dialog-title`, `.dialog-footer` | Estrutura legacy — mantida para retrocompatibilidade; não usada pelos diálogos migrados |
 
 Por estar em `@layer components`, essas classes podem ser sobrescritas por utilidades Tailwind quando necessário.
 
@@ -196,6 +210,8 @@ Tokens customizados registrados em `tailwind.config.js`:
 | Font | `code` | Fira Code, Consolas | `font-code` |
 | Color | `code-bg` | #e8eef2 | `bg-code-bg` |
 | Screen | `xs` | 480px | `xs:...` |
+| Colors (shadcn) | `background`, `foreground`, `primary`, `secondary`, `muted`, `accent`, `destructive`, `border`, `input`, `ring`, `card`, `popover` | `hsl(var(--*))` | `bg-background`, `text-foreground`, etc. |
+| Border radius (shadcn) | `lg`, `md`, `sm` | `var(--radius)` derivados | `rounded-lg`, `rounded-md`, `rounded-sm` |
 
 ## Fluxos críticos
 
@@ -235,6 +251,18 @@ Regras:
 3. Markdown é renderizado em HTML;
 4. Browser gera e baixa o PDF.
 
+## shadcn-vue (`src/components/ui/`)
+
+Components copiados via CLI (`npx shadcn-vue@latest add`) para `src/components/ui/`. Não são dependência versionada — pertencem ao projeto e podem ser editados.
+
+| Diretório | Conteúdo | Status |
+|---|---|---|
+| `ui/dialog/` | `Dialog`, `DialogContent`, `DialogHeader`, `DialogTitle`, `DialogFooter`, `DialogClose`, `DialogDescription`, `DialogScrollContent`, `DialogTrigger` | Instalado |
+| `ui/button/` | `Button` (com variantes via `class-variance-authority`) | Instalado |
+
+Dependência headless: `reka-ui` (gerencia focus trap, Escape, `aria-modal`, `role=dialog`, portal DOM).  
+Utilidade de classes: `cn()` em `src/lib/utils.ts` (combina `clsx` + `tailwind-merge`).
+
 ## Barrel indexes
 
 Todos os diretórios de módulos possuem barrel `index.ts` para centralizar exports:
@@ -250,8 +278,10 @@ Todos os diretórios de módulos possuem barrel `index.ts` para centralizar expo
 Atualizar este módulo ao alterar:
 
 - contratos entre `Editor.vue` e `cm-*`;
+- props/eventos de `EditorHeader.vue` ou `EditorToolbar.vue`;
 - inicialização do editor/Yjs;
 - composables e suas interfaces;
 - interfaces públicas de `services/*`;
+- componentes instalados em `src/components/ui/` (shadcn-vue);
 - estrutura de arquivos CSS, CSS Component Layer ou design tokens Tailwind;
 - fluxos de acesso, edição ou export.
