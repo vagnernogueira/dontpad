@@ -154,6 +154,8 @@ _docs/
 - **Commands Pattern** no frontend para reduzir acoplamento da UI;
 - **Factory Pattern** em services para configuração e testabilidade;
 - **Composables Pattern** para extrair lógica reativa de componentes Vue complexos (`useYjsEditor`, `useDocumentAccess`, `useCollaborators`, `useExplorerSession`, `useDocumentList`);
+- **Component Composition** com sub-componentes focados: `EditorToolbar`, `BaseDialog`, `LinkDialog`, `ImageDialog`, `LockDialog`, `AccessDialog`;
+- **CSS Component Layer** via `@layer components` com `@apply` para abstrações reutilizáveis de layout, botões, inputs e diálogos;
 - **CRDT (Yjs)** em vez de OT para merge automático e melhor suporte offline;
 - **Lazy loading** para bibliotecas pesadas de export (`marked`, `html2pdf.js`);
 - **LevelDB local** para persistência incremental simples em ambiente self-hosted;
@@ -174,8 +176,12 @@ _docs/
 | --------------------------------------- | ------------------------------------------------------ |
 | `frontend/src/components/DocumentRoute.vue` | Resolução de modos por query params e fallback para edição. |
 | `frontend/src/components/Editor.vue`    | Componente principal do editor colaborativo (orquestra composables). |
+| `frontend/src/components/EditorToolbar.vue` | Toolbar de formatação, undo/redo e downloads extraída do Editor. |
+| `frontend/src/components/BaseDialog.vue` | Shell reutilizável de diálogo (overlay + card + título + footer com slots). |
+| `frontend/src/components/*Dialog.vue`   | Diálogos focados: Link, Image, Lock, Access, Profile (usam BaseDialog). |
 | `frontend/src/components/Explorer.vue`  | Gestão administrativa de documentos em `/explorer` (orquestra composables). |
 | `frontend/src/components/ToolbarButton.vue` | Componente reutilizável para botões de toolbar com estilo padronizado. |
+| `frontend/src/styles/components.css`    | Abstrações CSS com `@apply` (`btn-*`, `dialog-*`, `input-*`, `page-header`, `toolbar`). |
 | `frontend/src/composables/*`            | Composables Vue 3 para lógica reativa extraída dos componentes. |
 | `frontend/src/cm-utils/math-evaluator.ts` | Parser matemático recursivo descendente (tokenizer + avaliador). |
 | `frontend/src/cm-utils/snippet-registry.ts` | Registry compartilhado de snippets e prefixes para tab-keymap e snippet plugins. |
@@ -215,6 +221,11 @@ Referências externas:
   - Principais alterações arquiteturais: base SPA + API/WS, adoção de Yjs/CodeMirror e persistência em LevelDB.
 
 ### 9.2 Changelog do Documento
+
+- **Versão 3.2**
+  - **Data:** 2026-03-18
+  - **Autor:** GitHub Copilot
+  - **Mudanças:** Componentização avançada do Editor (EditorToolbar, BaseDialog, 5 diálogos focados). CSS Component Layer com `@apply` para 19 classes reutilizáveis. Aplicação das classes em Editor, Explorer, ProfileDialog e DocumentRoute. Contagem de componentes: 7 → 13.
 
 - **Versão 3.1**
   - **Data:** 2026-03-18

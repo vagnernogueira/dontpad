@@ -39,6 +39,8 @@ Documenta a funcionalidade administrativa da rota protegida `/explorer`: acesso,
 
 O componente foca exclusivamente em template, eventos de UI e ações que delegam para os composables.
 
+Estilos utilizam classes reutilizáveis do CSS Component Layer (`page-header`, `toolbar`, `btn-secondary`, `btn-danger`, `input-field`) definidas em `styles/components.css`, reduzindo CSS inline repetido.
+
 ## Listagem
 
 Colunas da tela:

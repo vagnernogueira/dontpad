@@ -10,27 +10,27 @@ Este módulo documenta a arquitetura do frontend focada no editor colaborativo: 
 
 ## Arquivos-fonte principais
 
-- `frontend/src/components/*.vue` — 7 componentes Vue
+- `frontend/src/components/*.vue` — 13 componentes Vue
 - `frontend/src/composables/*.ts` — 5 composables Vue 3
 - `frontend/src/cm-commands/*` — 5 arquivos (formatting, history, insertions, table, index)
 - `frontend/src/cm-extensions/*` — 2 arquivos (editor-theme, index)
 - `frontend/src/cm-plugins/*` — 17 plugins + barrel index
 - `frontend/src/cm-utils/*` — 6 módulos utilitários + barrel index
 - `frontend/src/services/*` — 5 serviços + barrel index
-- `frontend/src/styles/*.css` — 5 arquivos CSS modulares
+- `frontend/src/styles/*.css` — 6 arquivos CSS modulares (inclui camada de componentes)
 
 ## Visão da camada
 
 ```filesystem
 src/
-├── components/       # 7 componentes Vue
+├── components/       # 13 componentes Vue
 ├── composables/      # 5 composables (lógica reativa extraída)
 ├── services/         # 5 serviços + barrel index
 ├── cm-commands/      # 5 arquivos (formatting, history, insertions, table, index)
 ├── cm-extensions/    # 2 arquivos (editor-theme, index)
 ├── cm-plugins/       # 17 plugins + barrel index
 ├── cm-utils/         # 6 módulos + barrel index
-└── styles/           # 5 arquivos CSS modulares
+└── styles/           # 6 arquivos CSS modulares
 ```
 
 - `DocumentRoute.vue` resolve modos de acesso por query params e delega fallback para edição padrão;
@@ -53,9 +53,35 @@ src/
 ### `Editor.vue`
 
 - Orquestra composables `useYjsEditor`, `useDocumentAccess` e `useCollaborators`;
-- Gerencia diálogos (link, imagem, lock, access, profile);
-- Delega regras para comandos/plugins/services;
-- Utiliza `ToolbarButton.vue` para botões de toolbar padronizados.
+- Delega toolbar para `EditorToolbar.vue`;
+- Delega diálogos para componentes focados (`LinkDialog`, `ImageDialog`, `LockDialog`, `AccessDialog`, `ProfileDialog`);
+- Delega regras para comandos/plugins/services.
+
+### `EditorToolbar.vue`
+
+- Toolbar de formatação extraída do Editor;
+- Contém undo/redo, botões de formatação Markdown, downloads;
+- Utiliza `ToolbarButton.vue` para cada ação;
+- Emite eventos para o `Editor.vue` orquestrar (`@format`, `@undo`, `@redo`, `@open-link`, etc.).
+
+### `BaseDialog.vue`
+
+- Shell reutilizável de diálogo com overlay, card, título e footer;
+- Aceita `title` e `cardClass` como props;
+- Slot default para conteúdo e slot `#actions` para botões do footer;
+- Emite `@close` ao clicar no overlay.
+
+### Diálogos focados
+
+| Componente | Responsabilidade |
+|---|---|
+| `LinkDialog.vue` | Inserção de link Markdown com campos texto/URL |
+| `ImageDialog.vue` | Inserção de imagem Markdown com campos alt/URL |
+| `LockDialog.vue` | Travar/destravar documento com senha |
+| `AccessDialog.vue` | Solicitar senha para abrir documento protegido |
+| `ProfileDialog.vue` | Edição de perfil do colaborador (emoji, nome, telemetria) |
+
+Todos usam `BaseDialog.vue` como shell e são auto-contidos: gerenciam estado interno e emitem eventos (`@insert`, `@lock`, `@unlock`, `@close`).
 
 ### `DocumentRoute.vue`
 
@@ -136,10 +162,26 @@ CSS global organizado em módulos importados sequencialmente por `index.css`:
 | Arquivo | Conteúdo |
 |---|---|
 | `base.css` | Tailwind directives, variáveis CSS `:root`, estilos de `html`/`body` |
+| `components.css` | Abstrações CSS com `@layer components` e `@apply` (layout, botões, inputs, diálogos) |
 | `codemirror.css` | Estilos do CodeMirror (editor chrome, cursor, gutter) |
 | `plugins.css` | Widgets de plugins CM (code blocks, links, images, checkboxes, etc.) |
 | `collaboration.css` | Cursores Yjs e avatares de colaboradores |
 | `responsive.css` | Media queries para mobile/tablet |
+
+### CSS Component Layer (`components.css`)
+
+Utiliza `@layer components` com `@apply` para criar abstrações reutilizáveis que substituem padrões inline repetidos. Classes disponíveis:
+
+| Categoria | Classes | Uso |
+|---|---|---|
+| Layout | `.page-header`, `.page-header-link`, `.page-header-badge` | Header compartilhado entre Editor e Explorer |
+| Layout | `.toolbar`, `.toolbar-divider` | Container de toolbar e divisores verticais |
+| Botões | `.btn-primary`, `.btn-secondary`, `.btn-danger`, `.btn-icon` | Botões de ação padronizados |
+| Botões | `.btn-dialog-cancel`, `.btn-dialog-confirm`, `.btn-dialog-danger` | Botões de footer de diálogo |
+| Inputs | `.input-field`, `.input-label` | Campos de formulário padronizados |
+| Diálogos | `.dialog-overlay`, `.dialog-card`, `.dialog-card-sm`, `.dialog-title`, `.dialog-footer` | Estrutura de modal reutilizável |
+
+Por estar em `@layer components`, essas classes podem ser sobrescritas por utilidades Tailwind quando necessário.
 
 ## Design tokens Tailwind
 
@@ -211,5 +253,5 @@ Atualizar este módulo ao alterar:
 - inicialização do editor/Yjs;
 - composables e suas interfaces;
 - interfaces públicas de `services/*`;
-- estrutura de arquivos CSS ou design tokens Tailwind;
+- estrutura de arquivos CSS, CSS Component Layer ou design tokens Tailwind;
 - fluxos de acesso, edição ou export.
