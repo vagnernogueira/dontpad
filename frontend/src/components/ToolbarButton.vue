@@ -4,8 +4,8 @@
     :class="[
       'px-2.5 py-btn sm:py-btn-sm h-auto touch-manipulation shrink-0',
       active
-        ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
-        : 'hover:bg-gray-200 hover:text-gray-900',
+        ? 'bg-primary/15 text-primary hover:bg-primary/25'
+        : 'hover:bg-accent hover:text-accent-foreground',
     ]"
     :title="title"
     :aria-pressed="active || undefined"

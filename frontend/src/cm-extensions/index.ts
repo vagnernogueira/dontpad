@@ -7,6 +7,9 @@
 // Re-export all extensions
 export { 
   editorTheme, 
+  darkEditorTheme,
   markdownHighlightStyle, 
-  editorVisualTheme 
+  darkMarkdownHighlightStyle,
+  editorVisualTheme,
+  darkEditorVisualTheme
 } from './editor-theme'

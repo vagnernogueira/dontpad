@@ -42,6 +42,7 @@ export interface YjsEditorInstance {
   view: EditorView
   undoManager: Y.UndoManager
   spellcheckCompartment: Compartment
+  themeCompartment: Compartment
 }
 
 export function useYjsEditor() {
@@ -83,6 +84,7 @@ export function useYjsEditor() {
     const ytext = ydoc.getText('codemirror')
     const undoManager = new Y.UndoManager(ytext)
     const spellcheckCompartment = new Compartment()
+    const themeCompartment = new Compartment()
 
     const state = EditorState.create({
       doc: ytext.toString(),
@@ -92,7 +94,7 @@ export function useYjsEditor() {
         spellcheckCompartment.of(spellcheckPlugin(options.spellcheckEnabled)),
         EditorView.lineWrapping,
         markdown({ extensions: [Strikethrough, { remove: ['IndentedCode', 'SetextHeading'] }] }),
-        ...editorTheme,
+        themeCompartment.of(editorTheme),
         listCustomPlugin,
         checkboxClickPlugin,
         codeBlockPlugin,
@@ -107,7 +109,7 @@ export function useYjsEditor() {
 
     const view = new EditorView({ state, parent: container })
 
-    instance = { ydoc, provider, view, undoManager, spellcheckCompartment }
+    instance = { ydoc, provider, view, undoManager, spellcheckCompartment, themeCompartment }
     return instance
   }
 
