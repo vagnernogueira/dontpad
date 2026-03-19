@@ -9,6 +9,7 @@
             {{ baseUrl }}/
           </span>
           <input
+            ref="docNameInput"
             v-model="docName"
             type="text"
             placeholder="documento"
@@ -29,13 +30,18 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { Button } from '@/components/ui/button'
 import { trimTrailingSlashes } from '../cm-utils/document-name'
 
 const router = useRouter()
 const docName = ref('')
+const docNameInput = ref<HTMLInputElement | null>(null)
+
+onMounted(() => {
+  docNameInput.value?.focus()
+})
 
 const baseUrl = computed(() => {
   if (typeof window !== 'undefined') {

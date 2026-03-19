@@ -85,6 +85,7 @@
         <p class="mb-3 text-sm text-gray-600">Informe a senha mestra para entrar no Explorer.</p>
         <form @submit.prevent="session.unlock" class="space-y-3">
           <Input
+            ref="masterPasswordInputEl"
             v-model="session.masterPasswordInput.value"
             type="password"
             class="py-2 focus:ring-gray-800 focus:border-gray-800"
@@ -170,7 +171,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue'
+import { nextTick, onMounted, ref, watch } from 'vue'
 import { ArrowLeft, RefreshCw } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -210,6 +211,19 @@ const isDocumentSummary = (item: unknown): item is DocumentSummary => {
 // ── Local state ────────────────────────────────────────────────────
 
 const errorMessage = ref('')
+const masterPasswordInputEl = ref<{ $el: HTMLInputElement } | null>(null)
+
+const focusMasterPassword = () => {
+  nextTick(() => masterPasswordInputEl.value?.$el?.focus())
+}
+
+onMounted(() => {
+  if (!session.hasAccess.value) focusMasterPassword()
+})
+
+watch(session.hasAccess, (hasAccess) => {
+  if (!hasAccess) focusMasterPassword()
+})
 
 // ── Actions that need both session & list ──────────────────────────
 
