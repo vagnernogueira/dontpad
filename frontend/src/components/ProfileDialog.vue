@@ -2,7 +2,7 @@
   <Dialog :open="true" @update:open="(v) => !v && $emit('close')">
     <DialogContent
       class="sm:max-w-sm"
-      @open-auto-focus.prevent="nameInput?.select()"
+      @open-auto-focus.prevent="nameInput?.$el?.select()"
     >
       <DialogHeader>
         <DialogTitle>Meu Perfil</DialogTitle>
@@ -27,11 +27,10 @@
       <!-- Name input -->
       <div class="mb-4">
         <label class="input-label">Nome exibido</label>
-        <input
+        <Input
           ref="nameInput"
           v-model="editName"
           type="text"
-          class="input-field"
           placeholder="Seu nome"
           maxlength="30"
           @keyup.enter="save"
@@ -57,6 +56,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { ANIMAL_EMOJIS, type CollaboratorProfile } from '../cm-utils/cursor'
+import { Input } from '@/components/ui/input'
 import {
   Dialog,
   DialogContent,
@@ -76,7 +76,7 @@ const emit = defineEmits<{
 
 const editName = ref(props.profile.name)
 const selectedEmoji = ref(props.profile.emoji)
-const nameInput = ref<HTMLInputElement | null>(null)
+const nameInput = ref<{ $el: HTMLInputElement } | null>(null)
 
 function formatDate(iso: string): string {
   try {

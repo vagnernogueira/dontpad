@@ -12,14 +12,13 @@
           <h3 class="dialog-title">Documento Protegido</h3>
           <div class="mb-3">
             <label class="input-label">Senha para continuar</label>
-            <input
+            <Input
               ref="accessPasswordInput"
               v-model="accessPassword"
               type="password"
-              class="input-field"
               placeholder="Digite a senha"
               @keyup.enter="retryWithPassword"
-            >
+            />
           </div>
           <p v-if="errorMessage" class="mb-3 text-xs text-red-600">{{ errorMessage }}</p>
           <div class="dialog-footer">
@@ -50,6 +49,7 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
+import { Input } from '@/components/ui/input'
 import Editor from './Editor.vue'
 import * as exportService from '../services/export'
 import { markdownStyles } from '../services/pdf-styles'
@@ -67,7 +67,7 @@ const errorMessage = ref('')
 const viewHtml = ref('')
 const rawContent = ref('')
 const accessPassword = ref('')
-const accessPasswordInput = ref<HTMLInputElement | null>(null)
+const accessPasswordInput = ref<{ $el: HTMLInputElement } | null>(null)
 
 const documentId = computed(() => {
   const value = route.params.documentId
@@ -110,7 +110,7 @@ const loadSpecialMode = async () => {
       requiresPassword.value = true
       errorMessage.value = 'Senha necessária para acessar este documento.'
       await nextTick()
-      accessPasswordInput.value?.focus()
+      accessPasswordInput.value?.$el?.focus()
       return
     }
 

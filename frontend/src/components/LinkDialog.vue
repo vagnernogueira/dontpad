@@ -2,28 +2,26 @@
   <Dialog :open="true" @update:open="(v) => !v && $emit('close')">
     <DialogContent
       class="sm:max-w-md"
-      @open-auto-focus.prevent="textInput?.select()"
+      @open-auto-focus.prevent="textInput?.$el?.select()"
     >
       <DialogHeader>
         <DialogTitle>Inserir Link</DialogTitle>
       </DialogHeader>
       <div class="mb-3">
         <label class="input-label">Texto do Link</label>
-        <input
+        <Input
           ref="textInput"
           v-model="text"
           type="text"
-          class="input-field"
           placeholder="Ex: Google"
           @keyup.enter="insert"
         />
       </div>
       <div class="mb-4">
         <label class="input-label">URL / Link</label>
-        <input
+        <Input
           v-model="url"
           type="text"
-          class="input-field"
           placeholder="https://"
           @keyup.enter="insert"
         />
@@ -38,6 +36,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { Input } from '@/components/ui/input'
 import {
   Dialog,
   DialogContent,
@@ -57,7 +56,7 @@ const emit = defineEmits<{
 
 const text = ref(props.initialText ?? '')
 const url = ref('https://')
-const textInput = ref<HTMLInputElement | null>(null)
+const textInput = ref<{ $el: HTMLInputElement } | null>(null)
 
 function insert() {
   if (!url.value) return

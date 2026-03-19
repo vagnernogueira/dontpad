@@ -2,18 +2,17 @@
   <Dialog :open="true" @update:open="(v) => !v && $emit('close')">
     <DialogContent
       class="sm:max-w-md"
-      @open-auto-focus.prevent="passwordInput?.focus()"
+      @open-auto-focus.prevent="passwordInput?.$el?.focus()"
     >
       <DialogHeader>
         <DialogTitle>Documento Protegido</DialogTitle>
       </DialogHeader>
       <div class="mb-3">
         <label class="input-label">Senha para abrir</label>
-        <input
+        <Input
           ref="passwordInput"
           v-model="password"
           type="password"
-          class="input-field"
           placeholder="Digite a senha"
           @keyup.enter="unlock"
         />
@@ -29,6 +28,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { Input } from '@/components/ui/input'
 import {
   Dialog,
   DialogContent,
@@ -47,7 +47,7 @@ const emit = defineEmits<{
 }>()
 
 const password = ref('')
-const passwordInput = ref<HTMLInputElement | null>(null)
+const passwordInput = ref<{ $el: HTMLInputElement } | null>(null)
 
 function unlock() {
   if (!password.value.trim()) return

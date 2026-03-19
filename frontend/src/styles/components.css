@@ -18,49 +18,13 @@
            transition-colors flex items-center gap-1 shrink-0;
   }
 
-  .page-header-badge {
-    @apply font-mono bg-gray-800 text-gray-300 px-2 sm:px-3 py-1
-           rounded-md text-xs sm:text-sm shrink-0 border border-gray-700;
-  }
-
   .toolbar {
     @apply bg-[#f8f9fa] border-b border-gray-200 px-2 sm:px-4 py-btn
            flex items-center gap-1 sm:gap-1.5 shadow-sm text-gray-600
            z-10 text-sm overflow-x-auto overflow-y-hidden;
   }
 
-  .toolbar-divider {
-    @apply w-px h-5 bg-gray-300 mx-1.5 self-center shrink-0;
-  }
-
   /* ── Buttons ───────────────────────────────────────────────────── */
-
-  .btn-secondary {
-    @apply px-2.5 py-btn sm:py-btn-sm bg-white border border-gray-300
-           text-gray-700 hover:bg-gray-50 hover:text-gray-900 rounded-md
-           font-medium text-xs transition-colors focus:outline-none
-           touch-manipulation shrink-0 shadow-sm
-           disabled:cursor-not-allowed disabled:opacity-40;
-  }
-
-  .btn-primary {
-    @apply px-2 sm:px-3 py-btn sm:py-btn-sm bg-gray-800 border border-gray-800
-           text-white hover:bg-gray-900 rounded-md font-medium text-xs
-           transition-colors focus:outline-none touch-manipulation shrink-0
-           shadow-sm disabled:cursor-not-allowed disabled:opacity-40;
-  }
-
-  .btn-danger {
-    @apply px-2.5 py-btn sm:py-btn-sm bg-white border border-red-300
-           text-red-700 hover:bg-red-50 rounded-md font-medium text-xs
-           transition-colors focus:outline-none touch-manipulation shrink-0
-           disabled:cursor-not-allowed disabled:opacity-40;
-  }
-
-  .btn-icon {
-    @apply px-1.5 py-btn sm:py-btn-sm hover:bg-gray-200 hover:text-gray-900
-           rounded transition-colors focus:outline-none touch-manipulation shrink-0;
-  }
 
   /* Dialog buttons */
 
@@ -81,12 +45,6 @@
   }
 
   /* ── Form Inputs ───────────────────────────────────────────────── */
-
-  .input-field {
-    @apply w-full border border-gray-300 rounded px-3 py-1.5 text-sm
-           focus:outline-none focus:border-emerald-500
-           focus:ring-1 focus:ring-emerald-500;
-  }
 
   .input-label {
     @apply block text-sm text-gray-600 mb-1;

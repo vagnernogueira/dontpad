@@ -6,56 +6,73 @@
           <ArrowLeft :size="18" />
           <span class="hidden xs:inline">Início</span>
         </router-link>
-        <div class="page-header-badge">
+        <Badge variant="secondary" class="font-mono bg-gray-800 text-gray-300 border-gray-700 rounded-md text-xs sm:text-sm px-2 sm:px-3 py-1 shrink-0">
           /explorer
-        </div>
+        </Badge>
       </div>
-      <button
-        v-if="session.hasAccess.value"
-        @click="refreshDocuments"
-        class="btn-primary flex items-center gap-1.5 border-gray-700 hover:bg-gray-700"
-      >
-        <RefreshCw :size="14" />
-        Atualizar
-      </button>
+      <div class="flex items-center gap-1 shrink-0">
+        <Button
+          v-if="session.hasAccess.value"
+          @click="refreshDocuments"
+          size="sm"
+          class="bg-gray-800 border border-gray-700 hover:bg-gray-700 text-xs h-auto py-btn sm:py-btn-sm flex items-center gap-1.5"
+        >
+          <RefreshCw :size="14" />
+          Atualizar
+        </Button>
+        <Button variant="ghost" size="icon" class="text-gray-300 hover:text-white hover:bg-white/10 h-7 w-7" :aria-label="isDark ? 'Ativar modo claro' : 'Ativar modo escuro'" @click="toggle">
+          <Sun v-if="isDark" :size="16" />
+          <Moon v-else :size="16" />
+        </Button>
+      </div>
     </header>
 
     <div class="toolbar">
       <template v-if="session.hasAccess.value">
-        <input
+        <Input
           v-model="list.search.value"
           type="text"
-          class="input-field py-btn sm:py-btn-sm focus:ring-gray-800 focus:border-gray-800 sm:max-w-sm bg-white shrink-0"
+          class="py-btn sm:py-btn-sm focus:ring-gray-800 focus:border-gray-800 sm:max-w-sm bg-white shrink-0"
           placeholder="Buscar por nome"
         />
 
-        <div class="toolbar-divider"></div>
+        <Separator orientation="vertical" class="h-5 mx-1.5 shrink-0" />
 
-        <button
+        <Button
+          variant="outline"
+          size="sm"
           @click="renameSelected"
           :disabled="!list.selectedDocumentName.value"
-          class="btn-secondary"
-        >Renomear</button>
-        <button
+          class="text-xs h-auto py-btn sm:py-btn-sm shrink-0"
+        >Renomear</Button>
+        <Button
+          variant="destructive"
+          size="sm"
           @click="removeSelected"
           :disabled="!list.selectedDocumentName.value"
-          class="btn-danger"
-        >Remover</button>
-        <button
+          class="text-xs h-auto py-btn sm:py-btn-sm shrink-0"
+        >Remover</Button>
+        <Button
+          variant="outline"
+          size="sm"
           @click="downloadSelectedMarkdown"
           :disabled="!list.selectedDocumentName.value"
-          class="btn-secondary"
-        >Download markdown</button>
-        <button
+          class="text-xs h-auto py-btn sm:py-btn-sm shrink-0"
+        >Download markdown</Button>
+        <Button
+          variant="outline"
+          size="sm"
           @click="downloadSelectedPDF"
           :disabled="!list.selectedDocumentName.value"
-          class="btn-secondary"
-        >Download PDF</button>
-        <button
+          class="text-xs h-auto py-btn sm:py-btn-sm shrink-0"
+        >Download PDF</Button>
+        <Button
+          variant="outline"
+          size="sm"
           @click="lockSelected"
           :disabled="!list.selectedDocumentName.value"
-          class="btn-secondary"
-        >Travar</button>
+          class="text-xs h-auto py-btn sm:py-btn-sm shrink-0"
+        >Travar</Button>
       </template>
       <p v-else class="text-sm text-gray-500 px-1">Informe a senha mestra para habilitar ações do Explorer.</p>
     </div>
@@ -65,10 +82,10 @@
         <h2 class="mb-3 text-base font-medium text-gray-800">Acesso protegido</h2>
         <p class="mb-3 text-sm text-gray-600">Informe a senha mestra para entrar no Explorer.</p>
         <form @submit.prevent="session.unlock" class="space-y-3">
-          <input
+          <Input
             v-model="session.masterPasswordInput.value"
             type="password"
-            class="input-field py-2 focus:ring-gray-800 focus:border-gray-800"
+            class="py-2 focus:ring-gray-800 focus:border-gray-800"
             placeholder="Senha mestra"
             autocomplete="off"
           />
@@ -153,7 +170,12 @@
 
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue'
-import { ArrowLeft, RefreshCw } from 'lucide-vue-next'
+import { ArrowLeft, RefreshCw, Sun, Moon } from 'lucide-vue-next'
+import { Button } from '@/components/ui/button'
+import { useColorMode } from '@/composables/useColorMode'
+import { Input } from '@/components/ui/input'
+import { Separator } from '@/components/ui/separator'
+import { Badge } from '@/components/ui/badge'
 import { createDocumentAPI, type DocumentSummary } from '../services/document-api'
 import { getApiBaseUrl } from '../services/config'
 import { downloadMarkdown, downloadPDF } from '../services/export'
@@ -161,6 +183,8 @@ import { trimTrailingSlashes } from '../cm-utils/document-name'
 import persistence from '../services/persistence'
 import { useExplorerSession } from '../composables/useExplorerSession'
 import { useDocumentList } from '../composables/useDocumentList'
+
+const { isDark, toggle } = useColorMode()
 
 const documentAPI = createDocumentAPI(getApiBaseUrl())
 const EXPLORER_DOCUMENTS_CACHE_KEY = 'explorer.documentsCache'

@@ -2,28 +2,26 @@
   <Dialog :open="true" @update:open="(v) => !v && $emit('close')">
     <DialogContent
       class="sm:max-w-md"
-      @open-auto-focus.prevent="altInput?.select()"
+      @open-auto-focus.prevent="altInput?.$el?.select()"
     >
       <DialogHeader>
         <DialogTitle>Inserir Imagem</DialogTitle>
       </DialogHeader>
       <div class="mb-3">
         <label class="input-label">Texto Alternativo (Alt)</label>
-        <input
+        <Input
           ref="altInput"
           v-model="alt"
           type="text"
-          class="input-field"
           placeholder="Descrição da imagem"
           @keyup.enter="insert"
         />
       </div>
       <div class="mb-4">
         <label class="input-label">URL da Imagem</label>
-        <input
+        <Input
           v-model="url"
           type="text"
-          class="input-field"
           placeholder="https://..."
           @keyup.enter="insert"
         />
@@ -38,6 +36,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { Input } from '@/components/ui/input'
 import {
   Dialog,
   DialogContent,
@@ -57,7 +56,7 @@ const emit = defineEmits<{
 
 const alt = ref(props.initialAlt ?? '')
 const url = ref('https://')
-const altInput = ref<HTMLInputElement | null>(null)
+const altInput = ref<{ $el: HTMLInputElement } | null>(null)
 
 function insert() {
   if (!url.value) return
