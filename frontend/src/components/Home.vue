@@ -16,12 +16,12 @@
             required
           />
         </div>
-        <button
+        <Button
           type="submit"
-          class="w-full shrink-0 rounded-md bg-gray-800 px-6 py-2 font-bold text-white transition-colors hover:bg-gray-900 sm:w-auto"
+          class="w-full shrink-0 font-bold sm:w-auto"
         >
           🔗
-        </button>
+        </Button>
       </form>
     </div>
 
@@ -31,6 +31,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { Button } from '@/components/ui/button'
 import { trimTrailingSlashes } from '../cm-utils/document-name'
 
 const router = useRouter()

@@ -90,9 +90,9 @@
             autocomplete="off"
           />
           <p v-if="session.authError.value" class="text-xs text-red-600">{{ session.authError.value }}</p>
-          <button type="submit" class="w-full rounded bg-gray-800 px-3 py-2 text-sm text-white hover:bg-gray-900 transition-colors">
+          <Button type="submit" class="w-full">
             Entrar
-          </button>
+          </Button>
         </form>
       </section>
 
@@ -138,10 +138,9 @@
                 class="border-t border-gray-100"
               >
                 <td class="px-3 py-2">
-                  <input
-                    type="checkbox"
+                  <Checkbox
                     :checked="list.selectedDocumentName.value === document.name"
-                    @change="list.toggleSelection(document.name)"
+                    @update:checked="() => list.toggleSelection(document.name)"
                   />
                 </td>
                 <td class="px-3 py-2">
@@ -176,6 +175,7 @@ import { useColorMode } from '@/composables/useColorMode'
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
 import { Badge } from '@/components/ui/badge'
+import { Checkbox } from '@/components/ui/checkbox'
 import { createDocumentAPI, type DocumentSummary } from '../services/document-api'
 import { getApiBaseUrl } from '../services/config'
 import { downloadMarkdown, downloadPDF } from '../services/export'
