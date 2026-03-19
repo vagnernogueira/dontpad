@@ -20,10 +20,12 @@
           <RefreshCw :size="14" />
           Atualizar
         </Button>
+        <!-- dark mode toggle: temporariamente desativado
         <Button variant="ghost" size="icon" class="text-gray-300 hover:text-white hover:bg-white/10 h-7 w-7" :aria-label="isDark ? 'Ativar modo claro' : 'Ativar modo escuro'" @click="toggle">
           <Sun v-if="isDark" :size="16" />
           <Moon v-else :size="16" />
         </Button>
+        -->
       </div>
     </header>
 
@@ -169,9 +171,8 @@
 
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue'
-import { ArrowLeft, RefreshCw, Sun, Moon } from 'lucide-vue-next'
+import { ArrowLeft, RefreshCw } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
-import { useColorMode } from '@/composables/useColorMode'
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
 import { Badge } from '@/components/ui/badge'
@@ -184,7 +185,6 @@ import persistence from '../services/persistence'
 import { useExplorerSession } from '../composables/useExplorerSession'
 import { useDocumentList } from '../composables/useDocumentList'
 
-const { isDark, toggle } = useColorMode()
 
 const documentAPI = createDocumentAPI(getApiBaseUrl())
 const EXPLORER_DOCUMENTS_CACHE_KEY = 'explorer.documentsCache'
