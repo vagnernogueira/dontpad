@@ -51,3 +51,34 @@ O diretório `_docs/ia-context` define a estrutura oficial de contexto operacion
 ## Regra prática
 
 - Para elaborar demandas do Dontpad, use a skill `_docs/ia-context/core/skills/generate-demand/SKILL.md` como ponto de partida.
+
+## Arquivos de entrada por ferramenta de IA
+
+Os arquivos abaixo estão em `_docs/ia-context/project-overlay/` e são o ponto de entrada para cada ferramenta. Todos derivam de `CLAUDE.md` (arquivo mestre).
+
+| Arquivo | Ferramenta | Mecanismo de import | Observação |
+|---------|-----------|---------------------|------------|
+| `CLAUDE.md` | Claude Code | `@path/to/file` (qualquer tipo) | **Mestre** — demais derivam deste |
+| `GEMINI.md` | Gemini CLI | `@./arquivo.md` (só `.md`, até 5 níveis) | Inclui `@imports` no final |
+| `AGENTS.md` | OpenCode | Não suporta imports no arquivo | Tudo inline + config via `opencode.json` |
+| `copilot-instructions.md` | GitHub Copilot | Não suporta imports | Tudo inline |
+
+### Ativação via symlink
+
+**Claude Code** (já ativo):
+```bash
+# criado na raiz do projeto
+ln -s _docs/ia-context/project-overlay/CLAUDE.md CLAUDE.md
+```
+
+**Gemini CLI:**
+```bash
+ln -s _docs/ia-context/project-overlay/GEMINI.md GEMINI.md
+```
+
+**GitHub Copilot:**
+```bash
+ln -s ../_docs/ia-context/project-overlay/copilot-instructions.md .github/copilot-instructions.md
+```
+
+**OpenCode:** mover `AGENTS.md` para a raiz e configurar `opencode.json` com os arquivos de instrução adicionais (ver cabeçalho do próprio `AGENTS.md`).
