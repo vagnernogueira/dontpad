@@ -53,7 +53,7 @@ class LinkWidget extends WidgetType {
 function buildLinkDecorations(view: EditorView) {
     const builder = new RangeSetBuilder<Decoration>()
     
-    for (let { from, to } of view.visibleRanges) {
+    for (const { from, to } of view.visibleRanges) {
         const text = view.state.doc.sliceString(from, to)
         
         // Coleta decorações de ambas as fontes para ordenar por posição
@@ -107,6 +107,6 @@ export const linkPreviewPlugin = ViewPlugin.fromClass(
         }
     },
     {
-        decorations: (v: any) => v.decorations
+        decorations: (v: { decorations: DecorationSet }) => v.decorations
     }
 )

@@ -29,7 +29,7 @@
     </div>
 
     <!-- Editor Area -->
-    <main v-if="access.hasDocumentAccess.value" class="flex-1 overflow-hidden relative bg-background" ref="editorContainer"></main>
+    <main v-if="access.hasDocumentAccess.value" ref="editorContainer" class="flex-1 overflow-hidden relative bg-background"></main>
     <main v-else class="flex-1 flex items-center justify-center bg-background text-muted-foreground text-sm px-4 text-center">
       Este documento está protegido por senha. Insira a senha para continuar.
     </main>

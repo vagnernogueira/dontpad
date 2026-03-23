@@ -46,8 +46,8 @@
       </div>
 
       <DialogFooter>
-        <button @click="$emit('close')" class="btn-dialog-cancel">Cancelar</button>
-        <button @click="save" class="btn-dialog-confirm" :disabled="!editName.trim()">Salvar</button>
+        <button class="btn-dialog-cancel" @click="$emit('close')">Cancelar</button>
+        <button class="btn-dialog-confirm" :disabled="!editName.trim()" @click="save">Salvar</button>
       </DialogFooter>
     </DialogContent>
   </Dialog>

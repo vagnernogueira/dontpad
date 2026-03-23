@@ -13,9 +13,9 @@
       <div class="flex items-center gap-1 shrink-0">
         <Button
           v-if="session.hasAccess.value"
-          @click="refreshDocuments"
           size="sm"
           class="bg-gray-800 border border-gray-700 hover:bg-gray-700 text-xs h-auto py-btn sm:py-btn-sm flex items-center gap-1.5"
+          @click="refreshDocuments"
         >
           <RefreshCw :size="14" />
           Atualizar
@@ -43,37 +43,37 @@
         <Button
           variant="outline"
           size="sm"
-          @click="renameSelected"
           :disabled="!list.selectedDocumentName.value"
           class="text-xs h-auto py-btn sm:py-btn-sm shrink-0"
+          @click="renameSelected"
         >Renomear</Button>
         <Button
           variant="destructive"
           size="sm"
-          @click="removeSelected"
           :disabled="!list.selectedDocumentName.value"
           class="text-xs h-auto py-btn sm:py-btn-sm shrink-0"
+          @click="removeSelected"
         >Remover</Button>
         <Button
           variant="outline"
           size="sm"
-          @click="downloadSelectedMarkdown"
           :disabled="!list.selectedDocumentName.value"
           class="text-xs h-auto py-btn sm:py-btn-sm shrink-0"
+          @click="downloadSelectedMarkdown"
         >Download markdown</Button>
         <Button
           variant="outline"
           size="sm"
-          @click="downloadSelectedPDF"
           :disabled="!list.selectedDocumentName.value"
           class="text-xs h-auto py-btn sm:py-btn-sm shrink-0"
+          @click="downloadSelectedPDF"
         >Download PDF</Button>
         <Button
           variant="outline"
           size="sm"
-          @click="lockSelected"
           :disabled="!list.selectedDocumentName.value"
           class="text-xs h-auto py-btn sm:py-btn-sm shrink-0"
+          @click="lockSelected"
         >Travar</Button>
       </template>
       <p v-else class="text-sm text-gray-500 px-1">Informe a senha mestra para habilitar ações do Explorer.</p>
@@ -83,7 +83,7 @@
       <section v-if="!session.hasAccess.value" class="mx-auto mt-10 w-full max-w-sm rounded-lg bg-white p-5 shadow">
         <h2 class="mb-3 text-base font-medium text-gray-800">Acesso protegido</h2>
         <p class="mb-3 text-sm text-gray-600">Informe a senha mestra para entrar no Explorer.</p>
-        <form @submit.prevent="session.unlock" class="space-y-3">
+        <form class="space-y-3" @submit.prevent="session.unlock">
           <Input
             ref="masterPasswordInputEl"
             v-model="session.masterPasswordInput.value"
@@ -108,25 +108,25 @@
             <thead class="bg-gray-100 text-left text-gray-700">
               <tr>
                 <th class="px-3 py-2 font-medium">
-                  <button @click="list.toggleSort('selected')" class="hover:text-gray-900">Seleção</button>
+                  <button class="hover:text-gray-900" @click="list.toggleSort('selected')">Seleção</button>
                 </th>
                 <th class="px-3 py-2 font-medium">
-                  <button @click="list.toggleSort('name')" class="hover:text-gray-900">Nome</button>
+                  <button class="hover:text-gray-900" @click="list.toggleSort('name')">Nome</button>
                 </th>
                 <th class="px-3 py-2 font-medium">
-                  <button @click="list.toggleSort('createdAt')" class="hover:text-gray-900">dt criação</button>
+                  <button class="hover:text-gray-900" @click="list.toggleSort('createdAt')">dt criação</button>
                 </th>
                 <th class="px-3 py-2 font-medium">
-                  <button @click="list.toggleSort('updatedAt')" class="hover:text-gray-900">dt alteração</button>
+                  <button class="hover:text-gray-900" @click="list.toggleSort('updatedAt')">dt alteração</button>
                 </th>
                 <th class="px-3 py-2 font-medium">
-                  <button @click="list.toggleSort('locked')" class="hover:text-gray-900">travado (S/N)</button>
+                  <button class="hover:text-gray-900" @click="list.toggleSort('locked')">travado (S/N)</button>
                 </th>
                 <th class="px-3 py-2 font-medium">
-                  <button @click="list.toggleSort('empty')" class="hover:text-gray-900">vazio (S/N)</button>
+                  <button class="hover:text-gray-900" @click="list.toggleSort('empty')">vazio (S/N)</button>
                 </th>
                 <th class="px-3 py-2 font-medium">
-                  <button @click="list.toggleSort('open')" class="hover:text-gray-900">aberto (S/N)</button>
+                  <button class="hover:text-gray-900" @click="list.toggleSort('open')">aberto (S/N)</button>
                 </th>
               </tr>
             </thead>

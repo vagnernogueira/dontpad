@@ -80,7 +80,7 @@ export async function downloadPDF(
   }
 
   // Generate and download PDF
-  // @ts-ignore
+  // @ts-expect-error html2pdf.js does not provide complete call-chain typings
   html2pdf().set(opt).from(container).save()
 }
 

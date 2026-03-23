@@ -21,7 +21,7 @@ import { findPlainUrls } from '../cm-utils/markdown-parsing'
 function buildPlainUrlDecorations(view: EditorView) {
     const builder = new RangeSetBuilder<Decoration>()
     
-    for (let { from, to } of view.visibleRanges) {
+    for (const { from, to } of view.visibleRanges) {
         const text = view.state.doc.sliceString(from, to)
         const plainUrls = findPlainUrls(text, from)
         

@@ -18,7 +18,7 @@ import { normalizeMarkdownTable } from './table'
 // Type definitions for the registry
 import type { EditorView } from '@codemirror/view'
 
-export type Command = (view: EditorView, ...args: any[]) => boolean
+export type Command = (view: EditorView, ...args: unknown[]) => boolean
 
 export interface CommandRegistry {
   [key: string]: Command

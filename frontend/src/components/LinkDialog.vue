@@ -27,8 +27,8 @@
         />
       </div>
       <DialogFooter>
-        <button @click="$emit('close')" class="btn-dialog-cancel">Cancelar</button>
-        <button @click="insert" class="btn-dialog-confirm" :disabled="!url">Inserir</button>
+        <button class="btn-dialog-cancel" @click="$emit('close')">Cancelar</button>
+        <button class="btn-dialog-confirm" :disabled="!url" @click="insert">Inserir</button>
       </DialogFooter>
     </DialogContent>
   </Dialog>

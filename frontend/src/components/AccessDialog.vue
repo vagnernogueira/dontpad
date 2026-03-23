@@ -19,8 +19,8 @@
       </div>
       <p v-if="error" class="mb-3 text-xs text-red-600">{{ error }}</p>
       <DialogFooter>
-        <button @click="$emit('close')" class="btn-dialog-cancel">Cancelar</button>
-        <button @click="unlock" class="btn-dialog-confirm" :disabled="!password.trim()">Abrir</button>
+        <button class="btn-dialog-cancel" @click="$emit('close')">Cancelar</button>
+        <button class="btn-dialog-confirm" :disabled="!password.trim()" @click="unlock">Abrir</button>
       </DialogFooter>
     </DialogContent>
   </Dialog>

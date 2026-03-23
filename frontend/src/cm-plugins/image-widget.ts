@@ -73,7 +73,7 @@ function isInsideCode(view: EditorView, pos: number): boolean {
  */
 function buildImageDecorations(view: EditorView) {
     const builder = new RangeSetBuilder<Decoration>()
-    for (let { from, to } of view.visibleRanges) {
+    for (const { from, to } of view.visibleRanges) {
         const text = view.state.doc.sliceString(from, to)
         const regex = /!\[.*?\]\(([^)]+)\)/g
         let match
@@ -106,6 +106,6 @@ export const imagePreviewPlugin = ViewPlugin.fromClass(
         }
     },
     {
-        decorations: (v: any) => v.decorations
+        decorations: (v: { decorations: DecorationSet }) => v.decorations
     }
 )

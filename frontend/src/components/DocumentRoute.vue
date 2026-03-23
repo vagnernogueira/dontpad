@@ -22,7 +22,7 @@
           </div>
           <p v-if="errorMessage" class="mb-3 text-xs text-red-600">{{ errorMessage }}</p>
           <div class="dialog-footer">
-            <button @click="retryWithPassword" class="btn-dialog-confirm" :disabled="!accessPassword.trim()">
+            <button class="btn-dialog-confirm" :disabled="!accessPassword.trim()" @click="retryWithPassword">
               Validar
             </button>
           </div>
@@ -33,6 +33,7 @@
         {{ errorMessage }}
       </div>
 
+      <!-- eslint-disable-next-line vue/no-v-html -->
       <div v-else-if="activeMode === 'view'" class="max-w-4xl mx-auto py-3 px-4" v-html="viewHtml"></div>
 
       <div v-else-if="activeMode === 'raw'" class="max-w-4xl mx-auto py-3 px-4">

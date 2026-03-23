@@ -48,7 +48,7 @@ const MARKDOWN_LINK_REGEX = /(!?)\[([^\]]*)\]\(([^)]+)\)/g
 /**
  * Regex para URLs avulsas
  */
-const PLAIN_URL_REGEX = /\b(https?:\/\/|www\.|ftp:\/\/)[^\s<>"\[\](){}]+/gi
+const PLAIN_URL_REGEX = /\b(https?:\/\/|www\.|ftp:\/\/)[^\s<>"[\](){}]+/gi
 
 /**
  * Regex para task list:

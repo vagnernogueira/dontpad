@@ -3,7 +3,7 @@
     <h1 class="text-5xl font-bold mb-4 text-gray-800">Dontpad</h1>
     
     <div class="w-full bg-white p-8 rounded-xl shadow-lg">
-      <form @submit.prevent="goToDocument" class="flex w-full flex-col gap-2 sm:flex-row sm:items-stretch">
+      <form class="flex w-full flex-col gap-2 sm:flex-row sm:items-stretch" @submit.prevent="goToDocument">
         <div class="flex min-w-0 flex-1 overflow-hidden rounded-md border border-gray-300">
           <span class="flex items-center whitespace-nowrap bg-gray-100 px-3 text-gray-400 border-r border-gray-300">
             {{ baseUrl }}/

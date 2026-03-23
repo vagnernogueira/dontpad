@@ -31,7 +31,7 @@ export const tabIndentKeymap = keymap.of([
 
             // If there's a selection, indent all selected lines
             if (!selection.empty) {
-                const changes: any[] = []
+                const changes: { from: number; insert: string }[] = []
                 let currentLine = state.doc.lineAt(selection.from)
                 const endLine = state.doc.lineAt(selection.to)
                 let offset = 0
