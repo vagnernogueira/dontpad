@@ -1,5 +1,5 @@
 import * as Y from 'yjs';
-// @ts-ignore
+// @ts-expect-error y-websocket does not provide typed export for this internal path
 import { setupWSConnection as originalSetupWSConnection } from 'y-websocket/bin/utils';
 import { LeveldbPersistence } from 'y-leveldb';
 import path from 'path';
@@ -430,7 +430,7 @@ export const verifyDocumentsMasterPassword = (password: string): boolean => {
 }
 
 // y-websocket looks at 'setPersistence' on its util object
-// @ts-ignore
+// @ts-expect-error y-websocket does not provide typed export for this internal path
 import * as utils from 'y-websocket/bin/utils';
 
 (utils as any).setPersistence({
@@ -451,7 +451,7 @@ import * as utils from 'y-websocket/bin/utils';
             touchDocumentUpdatedAt(docName);
         });
     },
-    writeState: async (docName: string, ydoc: Y.Doc) => {
+    writeState: async (_docName: string, _ydoc: Y.Doc) => {
         // This is called when all clients disconnect.
         // For LevelDB we can just trust the incrementally stored updates.
         return Promise.resolve();
