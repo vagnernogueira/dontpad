@@ -62,15 +62,16 @@ Características principais:
 
 ## 2. Stack de Tecnologias (Resumo)
 
-| Camada       | Tecnologias principais                                    |
-| ------------ | --------------------------------------------------------- |
-| Frontend     | Vue 3, TypeScript, Vite, Vue Router                       |
-| Editor       | CodeMirror 6, @lezer/markdown                             |
-| Colaboração  | Yjs, y-websocket, y-codemirror.next                       |
-| Backend      | Node.js, Express, ws, TypeScript                          |
-| Persistência | y-leveldb, LevelDB, metadados JSON                        |
-| UI/UX        | Tailwind CSS, shadcn-vue, reka-ui, Lucide Vue Next        |
-| Export       | marked, html2pdf.js                                       |
+| Camada            | Tecnologias principais                                    |
+| ----------------- | --------------------------------------------------------- |
+| Frontend          | Vue 3, TypeScript, Vite, Vue Router                       |
+| Editor            | CodeMirror 6, @lezer/markdown                             |
+| Colaboração       | Yjs, y-websocket, y-codemirror.next                       |
+| Backend           | Node.js, Express, ws, TypeScript                          |
+| Persistência      | y-leveldb, LevelDB, metadados JSON                        |
+| UI/UX             | Tailwind CSS, shadcn-vue, reka-ui, Lucide Vue Next        |
+| Export            | marked, html2pdf.js                                       |
+| Qualidade de código | ESLint v9 (flat config), typescript-eslint v8, eslint-plugin-vue v9, Prettier v3 |
 
 Detalhes extensos de implementação por camada estão nos módulos listados na seção 5.
 
@@ -162,7 +163,18 @@ _docs/
 - **Design tokens Tailwind** para spacing, fontes e cores customizadas (`btn`, `btn-sm`, `header`, `font-ui`, `font-code`, `code-bg`);
 - **Barrel indexes** em todos os módulos `cm-*`, `services` e `composables` para centralizar exports.
 
-### 6.3 Limitações conhecidas (resumo)
+### 6.3 Estratégia de qualidade de código (lint)
+
+- **ESLint v9** com flat config (`eslint.config.js`) — padrão atual, configurado por pacote;
+- **typescript-eslint v8** — parser e regras para TypeScript em ambas as camadas;
+- **eslint-plugin-vue v9** — regras Vue 3 + parser de `.vue` (frontend only);
+- **Prettier v3** — formatação de código; config compartilhada em `.prettierrc` na raiz;
+- **eslint-config-prettier** — desativa regras ESLint que conflitam com Prettier;
+- Scripts disponíveis em cada pacote: `lint`, `lint:fix`, `format`;
+- Backend usa `eslint.config.mjs` (ESM explícito) por ser pacote CommonJS sem `"type": "module"`;
+- Regras adotadas: `no-explicit-any` em `warn`, `no-unused-vars` em `error` (variáveis `_` ignoradas), `vue/multi-word-component-names` desativado (compatível com `App.vue`).
+
+### 6.4 Limitações conhecidas (resumo)
 
 - lock metadata local não é ideal em multi-réplica sem storage compartilhado;
 - ausência de rate limiting nativo nas rotas;
@@ -224,6 +236,11 @@ Referências externas:
   - Principais alterações arquiteturais: base SPA + API/WS, adoção de Yjs/CodeMirror e persistência em LevelDB.
 
 ### 9.2 Changelog do Documento
+
+- **Versão 3.5**
+  - **Data:** 2026-03-23
+  - **Autor:** Claude Sonnet 4.6
+  - **Mudanças:** Adoção de estratégia de lint unificada. ESLint v9 (flat config) + typescript-eslint v8 + eslint-plugin-vue v9 + Prettier v3 configurados em frontend e backend. Scripts `lint`, `lint:fix` e `format` adicionados a ambos os pacotes. Seção 6.3 (qualidade de código) adicionada ao hub. Linha "Qualidade de código" adicionada à tabela de stack (seção 2).
 
 - **Versão 3.4**
   - **Data:** 2026-03-18
