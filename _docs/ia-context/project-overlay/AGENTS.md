@@ -2,20 +2,7 @@
 
 > Arquivo adaptado para OpenCode (AGENTS.md). Fonte canônica: `_docs/ia-context/project-overlay/CLAUDE.md`.
 > OpenCode não suporta @imports em AGENTS.md — todo conteúdo crítico está inline.
-> Para carregar arquivos de referência adicionais, configure `opencode.json`:
->
-> ```json
-> {
->   "instructions": [
->     "_docs/ia-context/core/rules.md",
->     "_docs/ia-context/core/workflow.md",
->     "_docs/ia-context/core/output-contracts.md",
->     "_docs/ia-context/project-overlay/context.md",
->     "_docs/ia-context/project-overlay/workflow-overrides.md",
->     "_docs/ia-context/project-overlay/mcp-policy.md"
->   ]
-> }
-> ```
+> Os arquivos de referência adicionais estão configurados em `opencode.json` (symlink na raiz).
 
 ## Produto
 

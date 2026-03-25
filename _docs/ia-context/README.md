@@ -81,4 +81,9 @@ ln -s _docs/ia-context/project-overlay/GEMINI.md GEMINI.md
 ln -s ../_docs/ia-context/project-overlay/copilot-instructions.md .github/copilot-instructions.md
 ```
 
-**OpenCode:** mover `AGENTS.md` para a raiz e configurar `opencode.json` com os arquivos de instrução adicionais (ver cabeçalho do próprio `AGENTS.md`).
+**OpenCode:**
+```bash
+ln -s _docs/ia-context/project-overlay/AGENTS.md AGENTS.md
+ln -s _docs/ia-context/project-overlay/opencode.json opencode.json
+```
+Os arquivos de instrução adicionais estão configurados no `opencode.json` (ver cabeçalho do próprio `AGENTS.md`).
