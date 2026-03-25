@@ -29,6 +29,8 @@ Núcleo: colaboração em tempo real, lock por senha, exportação e plugins Cod
 
 ```bash
 npm run build          # valida sintaxe após implementação
+npm run lint           # executa lint no pacote afetado
+npm run test           # executa testes existentes
 make stop              # para container local
 make build             # gera nova imagem (corrigir falhas antes de prosseguir)
 make run               # sobe a aplicação com as mudanças

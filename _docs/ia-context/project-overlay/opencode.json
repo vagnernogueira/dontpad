@@ -1,4 +1,5 @@
 {
+  "$schema": "https://opencode.ai/config.json",
   "instructions": [
     "_docs/ia-context/core/rules.md",
     "_docs/ia-context/core/workflow.md",
