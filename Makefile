@@ -1,6 +1,10 @@
-.PHONY: build run stop dev-frontend dev-backend install
+.PHONY: build run stop dev-frontend dev-backend install test
 
-build:
+test:
+	cd backend && npm run test
+	cd frontend && npm run test
+
+build: test
 	podman-compose build
 
 run:

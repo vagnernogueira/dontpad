@@ -33,6 +33,7 @@ node-compile-cache
 
 # TypeScript
 *.tsbuildinfo
+backend/db/yjs-data/
 
 # IA
 agent-workspace/

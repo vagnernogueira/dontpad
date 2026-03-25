@@ -10,10 +10,10 @@ import crypto from 'crypto';
 const setupWSConnectionOriginal = originalSetupWSConnection as any;
 
 // Use y-leveldb as a backend for storing Yjs documents. We will store it in the db folder.
-const dbPath = path.resolve(__dirname, '../db/yjs-data');
-const persistence = new LeveldbPersistence(dbPath);
-const lockFilePath = path.resolve(__dirname, '../db/document-locks.json');
-const metadataFilePath = path.resolve(__dirname, '../db/document-metadata.json');
+const dbPath = process.env.YJS_DB_PATH || path.resolve(__dirname, '../db/yjs-data');
+let lockFilePath = process.env.DOCUMENT_LOCKS_FILE || path.resolve(__dirname, '../db/document-locks.json');
+let metadataFilePath = process.env.DOCUMENT_METADATA_FILE || path.resolve(__dirname, '../db/document-metadata.json');
+let persistence: LeveldbPersistence | null = null;
 
 type DocumentLockRecord = {
     salt: string;
@@ -118,7 +118,18 @@ let documentLocks: DocumentLocks = loadLocks();
 let documentsMetadata: DocumentsMetadata = loadMetadata();
 const activeDocumentSessions = new Map<string, number>();
 
-const normalizeDocName = (value: string) => {
+const getPersistence = () => {
+    if (testPersistence) {
+        return testPersistence;
+    }
+    if (!persistence) {
+        fs.mkdirSync(dbPath, { recursive: true });
+        persistence = new LeveldbPersistence(dbPath);
+    }
+    return persistence;
+};
+
+export const normalizeDocName = (value: string) => {
     return value
         .split('/')
         .map(part => {
@@ -131,11 +142,11 @@ const normalizeDocName = (value: string) => {
         .join('/');
 };
 
-const hashPassword = (password: string, salt: string) => {
+export const hashPassword = (password: string, salt: string) => {
     return crypto.scryptSync(password, salt, 64).toString('hex');
 };
 
-const equalsHash = (first: string, second: string) => {
+export const equalsHash = (first: string, second: string) => {
     const a = Buffer.from(first, 'hex');
     const b = Buffer.from(second, 'hex');
     if (a.length !== b.length) return false;
@@ -251,7 +262,7 @@ const removeOpenSessions = (docName: string) => {
 };
 
 const clearDocumentFromPersistence = async (docName: string) => {
-    const persistenceAny = persistence as any;
+    const persistenceAny = getPersistence() as any;
     if (typeof persistenceAny.clearDocument === 'function') {
         await persistenceAny.clearDocument(docName);
         return;
@@ -267,7 +278,7 @@ const canUseMasterPassword = (password: string) => {
     return !!masterPassword && password === masterPassword;
 };
 
-const verifyDocumentPassword = (docName: string, password: string) => {
+export const verifyDocumentPassword = (docName: string, password: string) => {
     const lock = getDocumentLock(docName);
     if (!lock) return true;
     if (canUseMasterPassword(password)) return true;
@@ -284,7 +295,7 @@ const extractPasswordFromReq = (req: any) => {
 };
 
 export const listDocumentNames = async (): Promise<string[]> => {
-    const names = await (persistence as any).getAllDocNames();
+    const names = await (getPersistence() as any).getAllDocNames();
     return Array.isArray(names)
         ? names.filter((name: unknown): name is string => typeof name === 'string' && name.length > 0).sort((a, b) => a.localeCompare(b))
         : [];
@@ -292,7 +303,7 @@ export const listDocumentNames = async (): Promise<string[]> => {
 
 export const getDocumentContent = async (docName: string): Promise<string> => {
     const normalized = normalizeDocName(docName);
-    const ydoc = await persistence.getYDoc(normalized);
+    const ydoc = await getPersistence().getYDoc(normalized);
     const ytext = ydoc.getText('codemirror');
     return ytext.toString();
 }
@@ -389,9 +400,9 @@ export const renameDocument = async (fromDocName: string, toDocName: string): Pr
         return { ok: false, error: 'target_document_already_exists' };
     }
 
-    const sourceDoc = await persistence.getYDoc(from);
+    const sourceDoc = await getPersistence().getYDoc(from);
     const fullState = Y.encodeStateAsUpdate(sourceDoc);
-    await persistence.storeUpdate(to, fullState);
+    await getPersistence().storeUpdate(to, fullState);
     await clearDocumentFromPersistence(from);
 
     moveDocumentPassword(from, to);
@@ -429,6 +440,36 @@ export const verifyDocumentsMasterPassword = (password: string): boolean => {
     return password.trim() === masterPassword;
 }
 
+export const __setTestStoragePaths = (paths: { lockFilePath?: string; metadataFilePath?: string }) => {
+    if (paths.lockFilePath) {
+        lockFilePath = paths.lockFilePath;
+    }
+    if (paths.metadataFilePath) {
+        metadataFilePath = paths.metadataFilePath;
+    }
+    documentLocks = loadLocks();
+    documentsMetadata = loadMetadata();
+};
+
+export const __resetTestState = () => {
+    documentLocks = {};
+    documentsMetadata = {};
+    activeDocumentSessions.clear();
+    persistence = null;
+};
+
+let testPersistence: any = null;
+
+export const __setTestPersistence = (mock: any) => {
+    testPersistence = mock;
+};
+
+export const __getTestPersistence = () => testPersistence;
+
+export const __clearTestPersistence = () => {
+    testPersistence = null;
+};
+
 // y-websocket looks at 'setPersistence' on its util object
 // @ts-expect-error y-websocket does not provide typed export for this internal path
 import * as utils from 'y-websocket/bin/utils';
@@ -436,6 +477,7 @@ import * as utils from 'y-websocket/bin/utils';
 (utils as any).setPersistence({
     bindState: async (docName: string, ydoc: Y.Doc) => {
         // Here you listen to sync events and write documents to the database.
+        const persistence = getPersistence();
         const persistedYdoc = await persistence.getYDoc(docName);
 
         // Merge the existing state from the database into the new document in memory
