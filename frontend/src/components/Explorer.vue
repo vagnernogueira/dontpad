@@ -143,7 +143,7 @@
                 <td class="px-3 py-2">
                   <Checkbox
                     :checked="list.selectedDocumentName.value === document.name"
-                    @update:checked="() => list.toggleSelection(document.name)"
+                    @click="() => list.toggleSelection(document.name)"
                   />
                 </td>
                 <td class="px-3 py-2">
