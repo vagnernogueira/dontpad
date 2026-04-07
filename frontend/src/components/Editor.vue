@@ -93,8 +93,6 @@ import { useCollaborators } from '../composables/useCollaborators'
 // Commands
 import { applyFormat as applyFormatCommand, insertLink as insertLinkCommand, insertImage as insertImageCommand, transformCase } from '../cm-commands'
 import { spellcheckPlugin } from '../cm-plugins/spellcheck'
-import { editorTheme, darkEditorTheme } from '../cm-extensions'
-import { useColorMode } from '../composables/useColorMode'
 
 import * as persistence from '../services/persistence'
 import * as exportService from '../services/export'
@@ -110,7 +108,6 @@ const documentAPI = createDocumentAPI(apiBaseUrl)
 const yjsEditor = useYjsEditor()
 const access = useDocumentAccess(documentAPI)
 const { myProfile, collaborators, bind: bindCollaborators, saveProfile } = useCollaborators(apiBaseUrl)
-const { isDark } = useColorMode()
 
 // ── Local state ────────────────────────────────────────────────────
 const route = useRoute()
@@ -140,13 +137,6 @@ const initEditor = () => {
   }, {
     onAccessDenied: () => access.handleAccessDenied(ref(null)),
   })
-
-  // Apply current color mode immediately on editor init
-  if (isDark.value) {
-    inst.view.dispatch({
-      effects: inst.themeCompartment.reconfigure(darkEditorTheme),
-    })
-  }
 
   bindCollaborators(inst.provider)
 }
@@ -305,13 +295,5 @@ watch(() => route.params.documentId, (newId) => {
     yjsEditor.destroy()
     ensureDocumentAccess()
   }
-})
-
-watch(isDark, (dark) => {
-  const inst = yjsEditor.getInstance()
-  if (!inst) return
-  inst.view.dispatch({
-    effects: inst.themeCompartment.reconfigure(dark ? darkEditorTheme : editorTheme),
-  })
 })
 </script>

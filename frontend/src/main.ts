@@ -4,13 +4,7 @@ import './index.css'
 import App from './App.vue'
 import { trimTrailingSlashes } from './cm-utils/document-name'
 
-// Apply saved color mode before Vue mounts to prevent flash of unstyled theme
-;(function () {
-  const stored = localStorage.getItem('dontpad-color-mode')
-  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-  const isDark = stored !== null ? stored === 'dark' : prefersDark
-  if (isDark) document.documentElement.classList.add('dark')
-})()
+document.documentElement.classList.remove('dark')
 
 const routes = [
     { path: '/', component: () => import('./components/Home.vue') },

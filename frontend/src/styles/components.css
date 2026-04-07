@@ -68,7 +68,7 @@
   }
 
   .dialog-title {
-    @apply font-bold text-gray-800 dark:text-zinc-100 mb-4 text-lg;
+    @apply font-bold text-gray-800 mb-4 text-lg;
   }
 
   .dialog-footer {

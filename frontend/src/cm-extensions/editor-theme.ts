@@ -72,61 +72,6 @@ export const editorTheme = [
   editorVisualTheme
 ]
 
-// ── Dark theme ────────────────────────────────────────────────────────────────
-
-export const darkMarkdownHighlightStyle = HighlightStyle.define([
-  { tag: tags.emphasis, fontStyle: 'italic' },
-  { tag: tags.strong, fontWeight: '700' },
-  { tag: tags.strikethrough, textDecoration: 'line-through' },
-  { tag: tags.link, color: '#6c5ce7' },                        // midnight-bloom primary
-  {
-    tag: tags.monospace,
-    fontFamily: '"Fira Code", "Consolas", monospace',
-    backgroundColor: '#2f3436',                                 // midnight-bloom card
-    fontSize: '0.88em'
-  },
-  { tag: tags.quote, fontStyle: 'italic', color: '#a3a3a3' }, // midnight-bloom muted-foreground
-  {
-    tag: tags.processingInstruction,
-    fontFamily: '"Fira Code", "JetBrains Mono", "Consolas", monospace',
-    color: '#a3a3a3',
-    fontSize: '0.88em'
-  },
-  { tag: tags.heading1, fontSize: '1.9em', fontWeight: '800', textDecoration: 'none' },
-  { tag: tags.heading2, fontSize: '1.55em', fontWeight: '750', textDecoration: 'none' },
-  { tag: tags.heading3, fontSize: '1.3em', fontWeight: '700', textDecoration: 'none' }
-])
-
-export const darkEditorVisualTheme = EditorView.theme({
-  "&": { height: "100%", backgroundColor: "#1a1d23", color: "#e5e5e5" }, // midnight-bloom bg / fg
-  ".cm-scroller": { overflow: "auto" },
-  ".cm-content": { caretColor: "#e5e5e5" },
-  ".cm-cursor, .cm-dropCursor": { borderLeftColor: "#6c5ce7" }, // primary
-  ".cm-selectionBackground, .cm-focused .cm-selectionBackground": { backgroundColor: "#444444" }, // muted
-  "::selection": { backgroundColor: "#444444" },
-  ".cm-gutters": { backgroundColor: "#1a1d23", color: "#a3a3a3", borderRight: "1px solid #444444" },
-  ".cm-activeLineGutter": { backgroundColor: "#2f3436" },     // card
-  ".cm-activeLine": { backgroundColor: "#2f343660" },
-  ".cm-line.cm-codeBlock": {
-    background: "transparent !important",
-    fontFamily: "inherit !important",
-    fontSize: "inherit !important",
-    color: "inherit !important"
-  },
-  ".cm-header, .cm-heading, .cm-heading1, .cm-heading2, .cm-heading3, .cm-formatting-header, .cm-formatting-heading": {
-    textDecoration: "none !important",
-    borderBottom: "none !important"
-  },
-  ".cm-line.cm-header, .cm-line.cm-heading": {
-    textDecoration: "none !important",
-    borderBottom: "none !important"
-  }
-}, { dark: true })
-
-/**
- * Complete editor theme (visual + syntax highlighting) — DARK
- */
-export const darkEditorTheme = [
-  syntaxHighlighting(darkMarkdownHighlightStyle),
-  darkEditorVisualTheme
-]
+export const darkMarkdownHighlightStyle = markdownHighlightStyle
+export const darkEditorVisualTheme = editorVisualTheme
+export const darkEditorTheme = editorTheme
