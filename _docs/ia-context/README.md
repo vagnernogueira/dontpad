@@ -28,7 +28,7 @@ O diretório `_docs/ia-context` define a estrutura oficial de contexto operacion
 10. `_docs/ia-context/project-overlay/mcp-policy.md`
 11. `_docs/ia-context/project-overlay/mcp-servers.md`
 12. `_docs/ia-context/core/skills/*` (quando aplicável)
-13. `_docs/ia-context/core/templates/*` (ponto de partida da demanda)
+13. `_docs/ia-context/core/skills/generate-demand/templates/*` (ponto de partida da demanda, quando usar a skill de geração de demanda)
 
 ## Convenção de precedência (em caso de conflito)
 
@@ -45,7 +45,7 @@ O diretório `_docs/ia-context` define a estrutura oficial de contexto operacion
 11. `_docs/ia-context/core/mcp/capability-routing.md`
 12. `_docs/ia-context/project-overlay/mcp-policy.md`
 13. `_docs/ia-context/project-overlay/mcp-servers.md`
-14. `_docs/ia-context/core/templates/*` e `_docs/ia-context/core/skills/*` aplicáveis à demanda
+14. `_docs/ia-context/core/skills/*` e seus templates internos aplicáveis à demanda
 15. Demais documentos auxiliares em `_docs/`
 
 ## Regra prática

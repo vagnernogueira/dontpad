@@ -96,7 +96,7 @@ Após toda implementação entregar:
 | `_docs/ia-context/core/workflow.md` | Fluxo de execução padrão |
 | `_docs/ia-context/core/mcp/` | Framework MCP agnóstico (tool-contracts, capability-routing) |
 | `_docs/ia-context/core/skills/` | Skills: generate-demand · documentation-blueprint · shadcn-vue |
-| `_docs/ia-context/core/templates/` | Templates de demanda: 01-simple → 04-full |
+| `_docs/ia-context/core/skills/generate-demand/templates/` | Templates de demanda da skill generate-demand: 01-simple → 04-full |
 | `_docs/ia-context/project-overlay/mcp-policy.md` | Política de autorização MCP |
 | `_docs/ia-context/project-overlay/mcp-servers.md` | Inventário e configuração dos servidores MCP |
 | `_docs/ARCHITECTURE.md` | Arquitetura do sistema |

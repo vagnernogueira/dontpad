@@ -10,7 +10,6 @@ Este diretório contém o núcleo **genérico e reutilizável** para uso em qual
 - `workflow.md`: fluxo operacional padrão de execução.
 - `output-contracts.md`: formato de saída esperado.
 - `mcp/`: contratos e roteamento de capacidades MCP (agnóstico).
-- `templates/`: modelos de entrada reutilizáveis.
 - `skills/`: playbooks operacionais reutilizáveis.
 
 ## Ordem de leitura recomendada
@@ -20,13 +19,13 @@ Este diretório contém o núcleo **genérico e reutilizável** para uso em qual
 3. `output-contracts.md`
 4. `mcp/*` (quando houver execução por ferramentas)
 5. `skills/*` (quando aplicável)
-6. `templates/*` (ponto de partida da demanda)
+6. `skills/generate-demand/templates/*` (ponto de partida da demanda, quando aplicável)
 
 ## Regras de uso
 
 - Este núcleo não substitui contexto específico do projeto.
 - Sempre combinar com `project-overlay/*` quando disponível.
-- O guia de seleção de templates está em `templates/README.md`.
+- O guia de seleção de templates da geração de demanda está em `skills/generate-demand/SKILL.md`.
 
 ## Conceitualização breve
 
@@ -35,4 +34,4 @@ Este diretório contém o núcleo **genérico e reutilizável** para uso em qual
 - **Workflow**: sequência de execução com etapas e critérios de bloqueio.
 - **Agent**: orquestrador que aplica regras, contexto, skills e workflow.
 - **Context**: estado factual e convenções do projeto.
-- **Templates**: moldes de entrada para demandas recorrentes.
+- **Templates**: moldes de entrada mantidos junto da skill que os consome, quando fizer sentido operacional.
