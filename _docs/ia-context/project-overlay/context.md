@@ -41,3 +41,7 @@
 - Ícones: preferir `lucide-vue-next`.
 - Evitar SVG inline em novos componentes.
 - Estrutura modular em `cm-commands`, `cm-extensions`, `cm-plugins`, `cm-utils`, `services`.
+
+### Contexto de IA
+
+- A camada de skills é mantida apenas na forma canônica `SKILL.md`; arquivos legados de compatibilidade não fazem parte do fluxo suportado.

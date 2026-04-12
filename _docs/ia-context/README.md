@@ -17,8 +17,8 @@ O diretório `_docs/ia-context` define a estrutura oficial de contexto operacion
 4. `_docs/ia-context/core/workflow.md`
 5. `_docs/ia-context/project-overlay/workflow-overrides.md`
 6. `_docs/ia-context/core/output-contracts.md`
-7. `_docs/ia-context/core/skills/*` (quando aplicável)
-8. `_docs/ia-context/core/skills/generate-demand/templates/*` (ponto de partida da demanda, quando usar a skill de geração de demanda)
+7. `_docs/ia-context/core/skills/*/SKILL.md` (quando aplicável)
+8. `_docs/ia-context/core/skills/generate-demand/templates/*` (ponto de partida da demanda, quando usar a skill canônica de geração de demanda)
 
 ## Convenção de precedência (em caso de conflito)
 
@@ -31,12 +31,12 @@ O diretório `_docs/ia-context` define a estrutura oficial de contexto operacion
 7. `_docs/ia-context/core/workflow.md`
 8. `_docs/ia-context/project-overlay/workflow-overrides.md`
 9. `_docs/ia-context/core/output-contracts.md`
-10. `_docs/ia-context/core/skills/*` e seus templates internos aplicáveis à demanda
+10. `_docs/ia-context/core/skills/*/SKILL.md` e seus templates internos aplicáveis à demanda
 11. Demais documentos auxiliares em `_docs/`
 
 ## Regra prática
 
-- Para elaborar demandas do Dontpad, use a skill `_docs/ia-context/core/skills/generate-demand/SKILL.md` como ponto de partida.
+- Para elaborar demandas do Dontpad, use a skill canônica `_docs/ia-context/core/skills/generate-demand/SKILL.md` como ponto de partida.
 
 ## Arquivos de entrada por ferramenta de IA
 
