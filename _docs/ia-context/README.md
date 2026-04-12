@@ -9,11 +9,6 @@ O diretório `_docs/ia-context` define a estrutura oficial de contexto operacion
 - Core genérico: `_docs/ia-context/core/`
 - Overlay do projeto atual: `_docs/ia-context/project-overlay/`
 
-## Camada MCP (agnóstica)
-
-- Core MCP: `_docs/ia-context/core/mcp/`
-- Políticas do projeto: `_docs/ia-context/project-overlay/mcp-servers.md` e `_docs/ia-context/project-overlay/mcp-policy.md`
-
 ## Ordem de leitura recomendada
 
 1. `_docs/ia-context/core/rules.md`
@@ -22,13 +17,8 @@ O diretório `_docs/ia-context` define a estrutura oficial de contexto operacion
 4. `_docs/ia-context/core/workflow.md`
 5. `_docs/ia-context/project-overlay/workflow-overrides.md`
 6. `_docs/ia-context/core/output-contracts.md`
-7. `_docs/ia-context/core/mcp/README.md`
-8. `_docs/ia-context/core/mcp/tool-contracts.md`
-9. `_docs/ia-context/core/mcp/capability-routing.md`
-10. `_docs/ia-context/project-overlay/mcp-policy.md`
-11. `_docs/ia-context/project-overlay/mcp-servers.md`
-12. `_docs/ia-context/core/skills/*` (quando aplicável)
-13. `_docs/ia-context/core/skills/generate-demand/templates/*` (ponto de partida da demanda, quando usar a skill de geração de demanda)
+7. `_docs/ia-context/core/skills/*` (quando aplicável)
+8. `_docs/ia-context/core/skills/generate-demand/templates/*` (ponto de partida da demanda, quando usar a skill de geração de demanda)
 
 ## Convenção de precedência (em caso de conflito)
 
@@ -41,12 +31,8 @@ O diretório `_docs/ia-context` define a estrutura oficial de contexto operacion
 7. `_docs/ia-context/core/workflow.md`
 8. `_docs/ia-context/project-overlay/workflow-overrides.md`
 9. `_docs/ia-context/core/output-contracts.md`
-10. `_docs/ia-context/core/mcp/tool-contracts.md`
-11. `_docs/ia-context/core/mcp/capability-routing.md`
-12. `_docs/ia-context/project-overlay/mcp-policy.md`
-13. `_docs/ia-context/project-overlay/mcp-servers.md`
-14. `_docs/ia-context/core/skills/*` e seus templates internos aplicáveis à demanda
-15. Demais documentos auxiliares em `_docs/`
+10. `_docs/ia-context/core/skills/*` e seus templates internos aplicáveis à demanda
+11. Demais documentos auxiliares em `_docs/`
 
 ## Regra prática
 

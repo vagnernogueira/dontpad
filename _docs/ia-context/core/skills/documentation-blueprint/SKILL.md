@@ -30,8 +30,6 @@ Ao ativar esta skill, considerar como referências obrigatórias:
 - `_docs/ia-context/core/workflow.md`
 - `_docs/ia-context/project-overlay/workflow-overrides.md`
 - `_docs/ia-context/core/output-contracts.md`
-- `_docs/ia-context/core/mcp/tool-contracts.md`
-- `_docs/ia-context/core/mcp/capability-routing.md`
 - `_docs/ia-context/core/skills/documentation-blueprint/blueprints/blueprint-doc.md`
 - `_docs/ia-context/core/skills/documentation-blueprint/blueprints/blueprint-doc-README-model.md`
 - `_docs/ia-context/core/skills/documentation-blueprint/blueprints/blueprint-doc-ARCHITECTURE-model.md`
@@ -98,9 +96,9 @@ Adicionalmente, incluir seção `Conformidade Blueprint` contendo:
 - itens não conformes;
 - ações pendentes.
 
-## Tooling contract (agnostic)
+## Tooling contract
 
-Toda chamada de ferramenta MUST seguir `_docs/ia-context/core/mcp/tool-contracts.md`:
+Toda chamada de ferramenta MUST registrar:
 
 - entrada com `capability`, `intent`, `input`;
 - saída com `status`, `evidence`, `notes`;

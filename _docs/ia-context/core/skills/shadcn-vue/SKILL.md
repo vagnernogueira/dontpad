@@ -220,7 +220,6 @@ npx skills add shadcn/ui
 - Referência completa de CLI (`init`, `add`, `search`, `docs`, `diff`, `info`)
 - Guia de theming (CSS variables, OKLCH, dark mode, Tailwind v3/v4)
 - Documentação de registry authoring
-- Configuração do MCP server
 
 **Limitação Vue:** A skill oficial foi desenhada para React/Next.js. A instalação no projeto
 Vue funciona no nível de CLI e theming, mas os exemplos de componentes são TSX.
@@ -228,14 +227,14 @@ Esta SKILL.md serve de complemento Vue-específico.
 
 ---
 
-## 7. shadcn MCP Server
+## 7. Consulta ao registry shadcn
 
-Ver referência completa em `project-overlay/mcp-servers.md`.
+Para descobrir componentes, prefira a CLI oficial e a documentação do registry.
 
-O MCP server permite ao agente:
-- Listar componentes disponíveis no registry shadcn
-- Buscar por nome ou funcionalidade
-- Instalar componentes via linguagem natural
+Fluxos recomendados:
+- Listar e procurar componentes com os comandos de CLI suportados pela versão adotada.
+- Validar instalação com `--dry-run` antes de aplicar mudanças no projeto.
+- Registrar no resultado quais componentes foram consultados ou adicionados.
 
 ```
 "adicione o componente Dialog ao projeto"

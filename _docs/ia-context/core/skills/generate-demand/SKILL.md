@@ -26,10 +26,6 @@ Ao ativar esta skill, considerar como referências de contexto:
 - `_docs/ia-context/core/workflow.md`
 - `_docs/ia-context/project-overlay/workflow-overrides.md`
 - `_docs/ia-context/core/output-contracts.md`
-- `_docs/ia-context/core/mcp/tool-contracts.md`
-- `_docs/ia-context/core/mcp/capability-routing.md`
-- `_docs/ia-context/project-overlay/mcp-policy.md`
-- `_docs/ia-context/project-overlay/mcp-servers.md`
 
 ## Templates bundled with this skill
 

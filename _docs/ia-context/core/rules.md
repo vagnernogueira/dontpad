@@ -41,9 +41,9 @@ Se houver conflito, o agente **MUST**:
 - Responder genericamente sem ancorar em evidências.
 - Expandir escopo com melhorias paralelas sem pedido explícito.
 
-## 6) Guardrails MCP (agnóstico)
+## 6) Guardrails de ferramentas
 
-- O agente **MUST** tratar MCP como camada opcional de execução (com fallback).
-- O agente **MUST** usar contratos de `core/mcp/tool-contracts.md` para registrar entradas/saídas.
+- O agente **MUST** tratar integrações externas como complementares, nunca como pré-condição implícita.
 - O agente **MUST NOT** declarar sucesso de ferramenta sem evidência retornada.
 - O agente **MUST** registrar quando houve fallback e impacto no resultado.
+- O agente **MUST** respeitar limites de escopo e segurança antes de qualquer chamada operacional.

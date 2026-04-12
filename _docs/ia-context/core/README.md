@@ -9,7 +9,6 @@ Este diretório contém o núcleo **genérico e reutilizável** para uso em qual
 - `rules.md`: regras normativas e guardrails universais.
 - `workflow.md`: fluxo operacional padrão de execução.
 - `output-contracts.md`: formato de saída esperado.
-- `mcp/`: contratos e roteamento de capacidades MCP (agnóstico).
 - `skills/`: playbooks operacionais reutilizáveis.
 
 ## Ordem de leitura recomendada
@@ -17,9 +16,8 @@ Este diretório contém o núcleo **genérico e reutilizável** para uso em qual
 1. `rules.md`
 2. `workflow.md`
 3. `output-contracts.md`
-4. `mcp/*` (quando houver execução por ferramentas)
-5. `skills/*` (quando aplicável)
-6. `skills/generate-demand/templates/*` (ponto de partida da demanda, quando aplicável)
+4. `skills/*` (quando aplicável)
+5. `skills/generate-demand/templates/*` (ponto de partida da demanda, quando aplicável)
 
 ## Regras de uso
 

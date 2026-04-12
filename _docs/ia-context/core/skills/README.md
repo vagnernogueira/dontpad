@@ -10,7 +10,7 @@ Este diretório é reservado para playbooks operacionais reutilizáveis.
 - `generate-demand.md` (compatibilidade)
 - `documentation-blueprint/SKILL.md` (estruturação e revisão de docs por blueprint)
 - `documentation-blueprint.md` (compatibilidade)
-- `shadcn-vue/SKILL.md` (adoção e uso de shadcn-vue: CLI, componentes, theming, MCP)
+- `shadcn-vue/SKILL.md` (adoção e uso de shadcn-vue: CLI, componentes, theming e fluxo Vue)
 - `implement-plugin.md`
 - `bugfix-api.md`
 - `review-pr.md`

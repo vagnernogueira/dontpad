@@ -43,8 +43,7 @@ make run               # sobe a aplicação com as mudanças
 - **MUST** declarar suposições quando faltar contexto
 - **MUST NOT** alterar contrato de API pública sem justificativa explícita
 - **SHOULD** priorizar mecanismos nativos do CodeMirror quando aplicável
-- **SHOULD** preferir solução simples sobre abstração prematura
-- **MUST** tratar MCP como camada opcional com fallback — nunca declarar sucesso sem evidência retornada
+- **SHOULD** preferir solução simples sobre desenho extensível prematuro
 
 ### Conflito de fontes (precedência decrescente)
 
@@ -60,16 +59,6 @@ Inventar endpoints/arquivos/comportamentos · omitir conflito documental · resp
 
 - Ícones: `lucide-vue-next` — sem SVG inline em novos componentes
 - Módulos: `cm-commands/` · `cm-extensions/` · `cm-plugins/` · `cm-utils/` · `services/`
-
-## MCP disponíveis
-
-| Server | Transport | Capabilities | Status |
-|--------|-----------|-------------|--------|
-| `context7` | http/ws | docs.search · docs.read · docs.extract · docs.summarize · docs.cite | ativo |
-| `shadcn` | stdio (npx) | registry.list · registry.search · registry.install · registry.info | pendente |
-
-Endpoint context7: `https://mcp.context7.com/mcp` · auth: `CONTEXT7_API_KEY` (env)
-Política completa: `_docs/ia-context/project-overlay/mcp-policy.md`
 
 ## Entrega padrão
 
@@ -94,9 +83,7 @@ Após toda implementação entregar:
 | Documento | Conteúdo |
 |-----------|----------|
 | `_docs/ia-context/core/workflow.md` | Fluxo de execução padrão |
-| `_docs/ia-context/core/mcp/` | Framework MCP agnóstico (tool-contracts, capability-routing) |
 | `_docs/ia-context/core/skills/` | Skills: generate-demand · documentation-blueprint · shadcn-vue |
 | `_docs/ia-context/core/skills/generate-demand/templates/` | Templates de demanda da skill generate-demand: 01-simple → 04-full |
-| `_docs/ia-context/project-overlay/mcp-policy.md` | Política de autorização MCP |
-| `_docs/ia-context/project-overlay/mcp-servers.md` | Inventário e configuração dos servidores MCP |
+| `_docs/ia-context/project-overlay/context.md` | Baseline factual do produto |
 | `_docs/ARCHITECTURE.md` | Arquitetura do sistema |

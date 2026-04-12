@@ -156,6 +156,6 @@ Histórico e evolução do projeto:
 - [Arquitetura do Sistema (Hub)](./_docs/ARCHITECTURE.md) — visão central, contratos e navegação dos módulos.
 - [Arquitetura de Plugins do CodeMirror](./_docs/architecture/plugins-codemirror.md) — plugins, keymaps, snippets e limites do parser.
 - [Explorer de Documentos](./_docs/architecture/explorer.md) — fluxo funcional, regras e endpoints da gestão administrativa.
-- **CodeMirror 6:** documentação consultada via [Context7 MCP Server](https://github.com/context7/context7) — acesso dinâmico à documentação oficial e changelog.
+- **CodeMirror 6:** documentação oficial e changelog devem ser consultados diretamente quando necessário.
 
 ---

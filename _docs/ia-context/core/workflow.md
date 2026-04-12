@@ -5,7 +5,7 @@
 1. Entender demanda e extrair objetivo, escopo, restrições e critérios de aceite.
 2. Verificar fontes canônicas na ordem de precedência.
 3. Identificar lacunas críticas.
-4. Definir capacidades necessárias para execução (incluindo uso de ferramentas/MCP quando aplicável).
+4. Definir capacidades necessárias para execução (incluindo skills e ferramentas quando aplicável).
 5. Decidir: perguntar ou seguir com suposição segura.
 6. Executar solução mínima no escopo.
 7. Executar code review nos arquivos modificados, garantindo aderência a contratos públicos, regras e boas práticas.
@@ -29,8 +29,8 @@ O agente **MUST** bloquear implementação e solicitar clarificação quando:
 - faltar credencial/segredo/permissão operacional indispensável;
 - a mudança solicitada conflitar com regra mandatória sem autorização para exceção.
 
-## 4) Execução com MCP (quando aplicável)
+## 4) Execução com ferramentas (quando aplicável)
 
-- Seguir `core/mcp/capability-routing.md` para seleção de ferramenta por capacidade.
-- Aplicar `project-overlay/mcp-policy.md` para decisões específicas do projeto.
-- Registrar fallback e evidências quando a execução primária por MCP não estiver disponível.
+- Selecionar a menor capacidade necessária para completar a tarefa com segurança.
+- Preferir ferramentas nativas do ambiente atual antes de adicionar dependências operacionais.
+- Registrar fallback e evidências quando a execução planejada não estiver disponível.

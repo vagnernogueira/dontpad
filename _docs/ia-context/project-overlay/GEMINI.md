@@ -44,7 +44,6 @@ make run               # sobe a aplicação com as mudanças
 - **MUST NOT** alterar contrato de API pública sem justificativa explícita
 - **SHOULD** priorizar mecanismos nativos do CodeMirror quando aplicável
 - **SHOULD** preferir solução simples sobre abstração prematura
-- **MUST** tratar MCP como camada opcional com fallback — nunca declarar sucesso sem evidência retornada
 
 ### Conflito de fontes (precedência decrescente)
 
@@ -61,15 +60,6 @@ Inventar endpoints/arquivos/comportamentos · omitir conflito documental · resp
 - Ícones: `lucide-vue-next` — sem SVG inline em novos componentes
 - Módulos: `cm-commands/` · `cm-extensions/` · `cm-plugins/` · `cm-utils/` · `services/`
 
-## MCP disponíveis
-
-| Server | Transport | Capabilities | Status |
-|--------|-----------|-------------|--------|
-| `context7` | http/ws | docs.search · docs.read · docs.extract · docs.summarize · docs.cite | ativo |
-| `shadcn` | stdio (npx) | registry.list · registry.search · registry.install · registry.info | pendente |
-
-Endpoint context7: `https://mcp.context7.com/mcp` · auth: `CONTEXT7_API_KEY` (env)
-
 ## Entrega padrão
 
 Após toda implementação entregar: resumo das mudanças · arquivos alterados · impactos · validações recomendadas · commit message em inglês (conventional commits).
@@ -84,7 +74,6 @@ Após toda implementação entregar: resumo das mudanças · arquivos alterados 
 
 @./context.md
 @./workflow-overrides.md
-@./mcp-policy.md
 @../core/rules.md
 @../core/workflow.md
 @../core/output-contracts.md
