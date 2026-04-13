@@ -3,6 +3,6 @@ description: Cria uma demanda estruturada a partir de texto bruto usando a skill
 agent: build
 ---
 
-Carregue a skill "generate-demand" e processe a seguinte demanda:
+Carregue a skill em @_docs/ia-context/skills/generate-demand/SKILL.md e processe a seguinte demanda:
 
 $ARGUMENTS

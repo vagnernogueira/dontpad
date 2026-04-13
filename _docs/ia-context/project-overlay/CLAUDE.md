@@ -83,7 +83,7 @@ Após toda implementação entregar:
 | Documento | Conteúdo |
 |-----------|----------|
 | `_docs/ia-context/core/workflow.md` | Fluxo de execução padrão |
-| `_docs/ia-context/core/skills/` | Skills: generate-demand · documentation-blueprint · shadcn-vue |
-| `_docs/ia-context/core/skills/generate-demand/templates/` | Templates de demanda da skill generate-demand: 01-simple → 04-full |
+| `_docs/ia-context/skills/` | Skills: generate-demand · documentation-blueprint · shadcn-vue |
+| `_docs/ia-context/skills/generate-demand/templates/` | Templates de demanda da skill generate-demand: 01-simple → 04-full |
 | `_docs/ia-context/project-overlay/context.md` | Baseline factual do produto |
 | `_docs/ARCHITECTURE.md` | Arquitetura do sistema |

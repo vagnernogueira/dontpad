@@ -79,6 +79,6 @@ Após toda implementação entregar:
 | `_docs/ia-context/core/rules.md` | Regras universais e guardrails operacionais |
 | `_docs/ia-context/core/workflow.md` | Fluxo de execução padrão |
 | `_docs/ia-context/core/output-contracts.md` | Contratos de saída e checklist anti-alucinação |
-| `_docs/ia-context/core/skills/` | Skills: generate-demand · documentation-blueprint · shadcn-vue |
-| `_docs/ia-context/core/skills/generate-demand/templates/` | Templates de demanda da skill generate-demand: 01-simple → 04-full |
+| `_docs/ia-context/skills/` | Skills: generate-demand · documentation-blueprint · shadcn-vue |
+| `_docs/ia-context/skills/generate-demand/templates/` | Templates de demanda da skill generate-demand: 01-simple → 04-full |
 | `_docs/ia-context/project-overlay/context.md` | Baseline factual do produto |
