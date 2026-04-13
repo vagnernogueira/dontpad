@@ -1,0 +1,42 @@
+name: Sincronizar Skills Externas
+
+on:
+  schedule:
+    - cron: '0 0 * * 0'
+  workflow_dispatch:
+
+jobs:
+  sync-skills:
+    runs-on: ubuntu-latest
+    
+    # RESOLUÇÃO DO AVISO NODE.JS: Força o uso do Node 24
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+      
+    # RESOLUÇÃO DO ERRO 128 NO PUSH: Concede permissão de escrita
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout do repositório agregador
+        uses: actions/checkout@v4
+
+      - name: Dar permissão de execução ao script
+        run: chmod +x sync.sh
+
+      - name: Executar Sincronização
+        run: ./sync.sh
+
+      - name: Verificar mudanças e fazer Commit
+        run: |
+          git config --global user.name "GitHub Actions Bot"
+          git config --global user.email "actions@github.com"
+          
+          git add .
+          
+          if ! git diff-index --quiet HEAD; then
+            git commit -m "Sincronização automática de skills [skip ci]"
+            git push
+          else
+            echo "Nenhuma atualização encontrada nas origens."
+          fi
