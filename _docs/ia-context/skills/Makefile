@@ -2,7 +2,7 @@
 
 SKILLS_REPO ?= git@github.com:vagnernogueira/xskills.git
 SKILLS_BRANCH ?= main
-SKILLS_PREFIX ?= skills
+SKILLS_PREFIX ?= _docs/ia-context/skills
 
 update-skills:
 	@if ! git log --format=%H --grep='^git-subtree-dir: $(SKILLS_PREFIX)$$' -n 1 | grep -q .; then \
