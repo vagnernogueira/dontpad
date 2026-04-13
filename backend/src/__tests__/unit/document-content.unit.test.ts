@@ -7,6 +7,7 @@ import {
     __setTestPersistence,
     getDocumentContent,
     listDocumentSummaries,
+    matchesContentContains,
     isDocumentLocked,
     setDocumentPassword,
     removeDocumentPassword,
@@ -171,6 +172,34 @@ describe('listDocumentSummaries', () => {
         expect(lockedDoc?.locked).toBe(true);
 
         removeDocumentPassword('locked-doc');
+    });
+
+    it('filters documents by content substring when requested', async () => {
+        const initialDocs = new Map<string, string>();
+        initialDocs.set('alpha-doc', 'Needle in haystack');
+        initialDocs.set('beta-doc', 'different content');
+        initialDocs.set('gamma-doc', 'another needle appears');
+        mockPersistence = createMockPersistence(initialDocs);
+        __setTestPersistence(mockPersistence);
+
+        const summaries = await listDocumentSummaries('needle');
+
+        expect(summaries.map(summary => summary.name)).toEqual(['alpha-doc', 'gamma-doc']);
+    });
+});
+
+describe('matchesContentContains', () => {
+    it('returns true when no content filter is provided', () => {
+        expect(matchesContentContains('Any content', '')).toBe(true);
+    });
+
+    it('matches content case-insensitively', () => {
+        expect(matchesContentContains('Needle in haystack', 'needle')).toBe(true);
+        expect(matchesContentContains('Needle in haystack', 'HAYSTACK')).toBe(true);
+    });
+
+    it('returns false when content does not contain the substring', () => {
+        expect(matchesContentContains('Needle in haystack', 'missing')).toBe(false);
     });
 });
 

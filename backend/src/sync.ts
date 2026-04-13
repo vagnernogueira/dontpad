@@ -308,12 +308,25 @@ export const getDocumentContent = async (docName: string): Promise<string> => {
     return ytext.toString();
 }
 
-export const listDocumentSummaries = async (): Promise<DocumentSummary[]> => {
+export const matchesContentContains = (content: string, contentContains = ''): boolean => {
+    const normalizedTerm = contentContains.trim().toLowerCase();
+    if (!normalizedTerm) {
+        return true;
+    }
+
+    return content.toLowerCase().includes(normalizedTerm);
+}
+
+export const listDocumentSummaries = async (contentContains = ''): Promise<DocumentSummary[]> => {
     const names = await listDocumentNames();
 
     const summaries = await Promise.all(names.map(async (name) => {
         const metadata = getDocumentMetadata(name) ?? ensureDocumentMetadata(name);
         const content = await getDocumentContent(name);
+
+        if (!matchesContentContains(content, contentContains)) {
+            return null;
+        }
 
         return {
             name,
@@ -325,7 +338,7 @@ export const listDocumentSummaries = async (): Promise<DocumentSummary[]> => {
         } as DocumentSummary;
     }));
 
-    return summaries;
+    return summaries.filter((summary): summary is DocumentSummary => summary !== null);
 }
 
 export const isDocumentLocked = (docName: string): boolean => {

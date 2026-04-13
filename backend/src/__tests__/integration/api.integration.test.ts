@@ -1,12 +1,35 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import request from 'supertest';
 import { app } from '../../server';
-import { __resetTestState, __setTestStoragePaths, removeDocumentPassword, setDocumentPassword } from '../../sync';
+import { __clearTestPersistence, __resetTestState, __setTestPersistence, __setTestStoragePaths, removeDocumentPassword, setDocumentPassword } from '../../sync';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
+import * as Y from 'yjs';
 
 const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'dontpad-api-test-'));
+
+const createMockPersistence = (initialDocs: Map<string, string> = new Map()) => {
+    const docs = new Map<string, Uint8Array>();
+
+    initialDocs.forEach((content, name) => {
+        const ydoc = new Y.Doc();
+        ydoc.getText('codemirror').insert(0, content);
+        docs.set(name, Y.encodeStateAsUpdate(ydoc));
+    });
+
+    return {
+        getAllDocNames: async () => [...docs.keys()],
+        getYDoc: async (docName: string) => {
+            const ydoc = new Y.Doc();
+            const stored = docs.get(docName);
+            if (stored) {
+                Y.applyUpdate(ydoc, stored);
+            }
+            return ydoc;
+        }
+    };
+};
 
 describe('api integration', () => {
     beforeEach(() => {
@@ -15,6 +38,7 @@ describe('api integration', () => {
             metadataFilePath: path.join(tempDir, `meta-${Date.now()}.json`)
         });
         __resetTestState();
+        __clearTestPersistence();
     });
 
     it('returns health status', async () => {
@@ -72,5 +96,22 @@ describe('api integration', () => {
         expect(allowedResponse.body).toEqual({ allowed: true });
 
         removeDocumentPassword('secret-doc');
+    });
+
+    it('filters document summaries by content substring when requested', async () => {
+        const initialDocs = new Map<string, string>();
+        initialDocs.set('alpha-doc', 'needle content');
+        initialDocs.set('beta-doc', 'something else');
+        initialDocs.set('gamma-doc', 'another Needle here');
+        __setTestPersistence(createMockPersistence(initialDocs));
+
+        const response = await request(app)
+            .get('/api/documents')
+            .set('x-docs-password', 'master')
+            .query({ contentContains: 'needle' });
+
+        expect(response.status).toBe(200);
+        expect(response.body.summaries.map((summary: { name: string }) => summary.name)).toEqual(['alpha-doc', 'gamma-doc']);
+        expect(response.body.documents).toEqual(['alpha-doc', 'beta-doc', 'gamma-doc']);
     });
 });

@@ -20,13 +20,14 @@ app.get('/api/health', (req, res) => {
 app.get('/api/documents', async (req, res) => {
     try {
         const providedPassword = typeof req.headers['x-docs-password'] === 'string' ? req.headers['x-docs-password'] : '';
+        const contentContains = typeof req.query.contentContains === 'string' ? req.query.contentContains : '';
         if (!verifyDocumentsMasterPassword(providedPassword)) {
             res.status(403).json({ error: 'invalid_password' });
             return;
         }
 
         const documents = await listDocumentNames();
-        const summaries = await listDocumentSummaries();
+        const summaries = await listDocumentSummaries(contentContains);
         res.json({ documents, summaries });
     } catch (error) {
         console.error('Failed to list documents', error);

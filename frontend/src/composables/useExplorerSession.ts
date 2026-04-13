@@ -6,11 +6,11 @@
  */
 
 import { ref } from 'vue'
-import type { DocumentSummary } from '../services/document-api'
+import type { DocumentSummary, ListSummariesOptions } from '../services/document-api'
 import persistence from '../services/persistence'
 
 export interface ExplorerSessionAPI {
-  listSummaries(masterPassword: string): Promise<DocumentSummary[] | null>
+  listSummaries(masterPassword: string, options?: ListSummariesOptions): Promise<DocumentSummary[] | null>
 }
 
 const EXPLORER_UNLOCKED_KEY = 'explorer.unlocked'
@@ -72,12 +72,12 @@ export function useExplorerSession(documentAPI: ExplorerSessionAPI) {
     persistence.set(EXPLORER_UNLOCKED_KEY, true)
   }
 
-  async function refresh(): Promise<DocumentSummary[] | null> {
+  async function refresh(options: ListSummariesOptions = {}): Promise<DocumentSummary[] | null> {
     if (!hasAccess.value) return null
     if (!ensureMasterPassword()) return null
 
     isLoading.value = true
-    const summaries = await documentAPI.listSummaries(masterPassword.value)
+    const summaries = await documentAPI.listSummaries(masterPassword.value, options)
     isLoading.value = false
 
     if (summaries === null) {

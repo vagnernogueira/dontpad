@@ -177,6 +177,24 @@ describe('DocumentAPI', () => {
       expect(result).toHaveLength(1)
       expect(result?.[0]?.name).toBe('valid-doc')
     })
+
+    it('sends contentContains as query parameter when provided', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ summaries: [] })
+      } as Response)
+
+      await api.listSummaries('master', { contentContains: 'needle value' })
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        'http://localhost:3000/api/documents?contentContains=needle+value',
+        expect.objectContaining({
+          headers: {
+            'x-docs-password': 'master'
+          }
+        })
+      )
+    })
   })
 
   describe('getDocumentContent', () => {

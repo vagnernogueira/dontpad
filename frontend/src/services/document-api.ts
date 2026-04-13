@@ -23,6 +23,10 @@ export interface DocumentSummary {
   open: boolean
 }
 
+export interface ListSummariesOptions {
+  contentContains?: string
+}
+
 export interface PublicDocumentContentResult {
   ok: boolean
   content: string
@@ -141,9 +145,19 @@ class DocumentAPI {
   /**
    * List document summaries (requires master password)
    */
-  async listSummaries(masterPassword: string): Promise<DocumentSummary[] | null> {
+  async listSummaries(masterPassword: string, options: ListSummariesOptions = {}): Promise<DocumentSummary[] | null> {
     try {
-      const response = await fetch(`${this.baseUrl}/api/documents`, {
+      const params = new URLSearchParams()
+      if (options.contentContains?.trim()) {
+        params.set('contentContains', options.contentContains.trim())
+      }
+
+      const queryString = params.toString()
+      const endpoint = queryString
+        ? `${this.baseUrl}/api/documents?${queryString}`
+        : `${this.baseUrl}/api/documents`
+
+      const response = await fetch(endpoint, {
         headers: {
           'x-docs-password': masterPassword
         }

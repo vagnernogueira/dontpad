@@ -31,12 +31,27 @@
 
     <div class="toolbar">
       <template v-if="session.hasAccess.value">
-        <Input
-          v-model="list.search.value"
-          type="text"
-          class="py-btn sm:py-btn-sm focus:ring-gray-800 focus:border-gray-800 sm:max-w-sm bg-white shrink-0"
-          placeholder="Buscar por nome"
-        />
+        <div class="flex items-center gap-2 shrink-0">
+          <label for="explorer-search" class="text-xs font-medium text-gray-600 shrink-0">Nm</label>
+          <Input
+            id="explorer-search"
+            v-model="list.search.value"
+            type="text"
+            class="w-36 sm:w-40 md:w-44 py-btn sm:py-btn-sm focus:ring-gray-800 focus:border-gray-800 bg-white shrink-0"
+            placeholder="Buscar por nome"
+          />
+        </div>
+
+        <div class="flex items-center gap-2 shrink-0">
+          <label for="explorer-content-search" class="text-xs font-medium text-gray-600 shrink-0">Ct</label>
+          <Input
+            id="explorer-content-search"
+            v-model="list.contentSearch.value"
+            type="text"
+            class="w-36 sm:w-40 md:w-44 py-btn sm:py-btn-sm focus:ring-gray-800 focus:border-gray-800 bg-white shrink-0"
+            placeholder="Busca por Conteúdo"
+          />
+        </div>
 
         <Separator orientation="vertical" class="h-5 mx-1.5 shrink-0" />
 
@@ -178,7 +193,7 @@ import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
 import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
-import { createDocumentAPI, type DocumentSummary } from '../services/document-api'
+import { createDocumentAPI, type DocumentSummary, type ListSummariesOptions } from '../services/document-api'
 import { getApiBaseUrl } from '../services/config'
 import { downloadMarkdown, downloadPDF } from '../services/export'
 import { trimTrailingSlashes } from '../cm-utils/document-name'
@@ -222,14 +237,26 @@ onMounted(() => {
 })
 
 watch(session.hasAccess, (hasAccess) => {
-  if (!hasAccess) focusMasterPassword()
+  if (!hasAccess) {
+    focusMasterPassword()
+    return
+  }
+
+  if (list.debouncedContentSearch.value.trim()) {
+    void refreshDocuments(getListSummariesOptions())
+  }
 })
 
 // ── Actions that need both session & list ──────────────────────────
 
-const refreshDocuments = async () => {
+const getListSummariesOptions = (): ListSummariesOptions => {
+  const contentContains = list.debouncedContentSearch.value.trim()
+  return contentContains ? { contentContains } : {}
+}
+
+const refreshDocuments = async (options: ListSummariesOptions = getListSummariesOptions()) => {
   errorMessage.value = ''
-  const summaries = await session.refresh()
+  const summaries = await session.refresh(options)
   if (summaries) list.clearSelectionIfMissing(summaries)
 }
 
@@ -363,6 +390,11 @@ onMounted(() => {
 watch(session.documents, value => {
   persistence.set(EXPLORER_DOCUMENTS_CACHE_KEY, value)
 }, { deep: true })
+
+watch(list.debouncedContentSearch, () => {
+  if (!session.hasAccess.value) return
+  void refreshDocuments(getListSummariesOptions())
+})
 
 // Persist unlocked flag
 watch(session.hasAccess, value => {

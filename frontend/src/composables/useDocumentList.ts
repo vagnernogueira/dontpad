@@ -5,7 +5,7 @@
  * document list in the Explorer view.
  */
 
-import { computed, ref, watch } from 'vue'
+import { computed, onScopeDispose, ref, watch } from 'vue'
 import type { DocumentSummary } from '../services/document-api'
 import persistence from '../services/persistence'
 
@@ -13,8 +13,19 @@ export type SortKey = 'selected' | 'name' | 'createdAt' | 'updatedAt' | 'locked'
 const SORT_KEYS: SortKey[] = ['selected', 'name', 'createdAt', 'updatedAt', 'locked', 'empty', 'open']
 
 const EXPLORER_SEARCH_KEY = 'explorer.search'
+const EXPLORER_CONTENT_SEARCH_KEY = 'explorer.contentSearch'
 const EXPLORER_SORT_KEY = 'explorer.sortKey'
 const EXPLORER_SORT_DIRECTION_KEY = 'explorer.sortDirection'
+
+export function normalizeSearchTerm(value: string) {
+  return value.trim().toLowerCase()
+}
+
+export function filterDocumentsByName(documents: DocumentSummary[], searchTerm: string) {
+  const term = normalizeSearchTerm(searchTerm)
+  if (!term) return documents
+  return documents.filter(document => document.name.toLowerCase().includes(term))
+}
 
 function isSortKey(value: string): value is SortKey {
   return SORT_KEYS.includes(value as SortKey)
@@ -26,16 +37,17 @@ function isSortDirection(value: string): value is 'asc' | 'desc' {
 
 export function useDocumentList(documents: () => DocumentSummary[]) {
   const search = ref('')
+  const contentSearch = ref('')
+  const debouncedContentSearch = ref('')
   const selectedDocumentName = ref<string | null>(null)
   const sortKey = ref<SortKey>('updatedAt')
   const sortDirection = ref<'asc' | 'desc'>('desc')
+  let contentSearchDebounceTimer: number | null = null
 
   // ── Computed ─────────────────────────────────────────────────────
 
   const filteredDocuments = computed(() => {
-    const term = search.value.trim().toLowerCase()
-    if (!term) return documents()
-    return documents().filter(d => d.name.toLowerCase().includes(term))
+    return filterDocumentsByName(documents(), search.value)
   })
 
   const sortedDocuments = computed(() => {
@@ -92,6 +104,8 @@ export function useDocumentList(documents: () => DocumentSummary[]) {
 
   function restoreFromStorage() {
     search.value = persistence.get(EXPLORER_SEARCH_KEY, '')
+    contentSearch.value = persistence.get(EXPLORER_CONTENT_SEARCH_KEY, '')
+    debouncedContentSearch.value = contentSearch.value.trim()
     const sk = persistence.get(EXPLORER_SORT_KEY, 'updatedAt')
     if (isSortKey(sk)) sortKey.value = sk
     const sd = persistence.get(EXPLORER_SORT_DIRECTION_KEY, 'desc')
@@ -100,11 +114,30 @@ export function useDocumentList(documents: () => DocumentSummary[]) {
 
   // Auto-persist on change
   watch(search, v => persistence.set(EXPLORER_SEARCH_KEY, v))
+  watch(contentSearch, v => {
+    persistence.set(EXPLORER_CONTENT_SEARCH_KEY, v)
+
+    if (contentSearchDebounceTimer) {
+      window.clearTimeout(contentSearchDebounceTimer)
+    }
+
+    contentSearchDebounceTimer = window.setTimeout(() => {
+      debouncedContentSearch.value = v.trim()
+    }, 300)
+  })
   watch(sortKey, v => persistence.set(EXPLORER_SORT_KEY, v))
   watch(sortDirection, v => persistence.set(EXPLORER_SORT_DIRECTION_KEY, v))
 
+  onScopeDispose(() => {
+    if (contentSearchDebounceTimer) {
+      window.clearTimeout(contentSearchDebounceTimer)
+    }
+  })
+
   return {
     search,
+    contentSearch,
+    debouncedContentSearch,
     selectedDocumentName,
     sortKey,
     sortDirection,
