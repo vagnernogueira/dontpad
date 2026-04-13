@@ -195,6 +195,24 @@ describe('DocumentAPI', () => {
         })
       )
     })
+
+    it('sends contentMatchesRegex as query parameter when provided', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ summaries: [] })
+      } as Response)
+
+      await api.listSummaries('master', { contentMatchesRegex: '^needle$' })
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        'http://localhost:3000/api/documents?contentMatchesRegex=%5Eneedle%24',
+        expect.objectContaining({
+          headers: {
+            'x-docs-password': 'master'
+          }
+        })
+      )
+    })
   })
 
   describe('getDocumentContent', () => {

@@ -21,15 +21,21 @@ app.get('/api/documents', async (req, res) => {
     try {
         const providedPassword = typeof req.headers['x-docs-password'] === 'string' ? req.headers['x-docs-password'] : '';
         const contentContains = typeof req.query.contentContains === 'string' ? req.query.contentContains : '';
+        const contentMatchesRegex = typeof req.query.contentMatchesRegex === 'string' ? req.query.contentMatchesRegex : '';
         if (!verifyDocumentsMasterPassword(providedPassword)) {
             res.status(403).json({ error: 'invalid_password' });
             return;
         }
 
         const documents = await listDocumentNames();
-        const summaries = await listDocumentSummaries(contentContains);
+        const summaries = await listDocumentSummaries({ contentContains, contentMatchesRegex });
         res.json({ documents, summaries });
     } catch (error) {
+        if (error instanceof Error && (error.message === 'invalid_content_regex' || error.message === 'content_filter_mode_conflict')) {
+            res.status(400).json({ error: error.message });
+            return;
+        }
+
         console.error('Failed to list documents', error);
         res.status(500).json({ error: 'failed_to_list_documents' });
     }

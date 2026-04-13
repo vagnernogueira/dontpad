@@ -114,4 +114,32 @@ describe('api integration', () => {
         expect(response.body.summaries.map((summary: { name: string }) => summary.name)).toEqual(['alpha-doc', 'gamma-doc']);
         expect(response.body.documents).toEqual(['alpha-doc', 'beta-doc', 'gamma-doc']);
     });
+
+    it('filters document summaries by regex when requested', async () => {
+        const initialDocs = new Map<string, string>();
+        initialDocs.set('alpha-doc', 'needle content');
+        initialDocs.set('beta-doc', 'something else');
+        initialDocs.set('gamma-doc', 'another Needle here');
+        __setTestPersistence(createMockPersistence(initialDocs));
+
+        const response = await request(app)
+            .get('/api/documents')
+            .set('x-docs-password', 'master')
+            .query({ contentMatchesRegex: '^another\\s+needle' });
+
+        expect(response.status).toBe(200);
+        expect(response.body.summaries.map((summary: { name: string }) => summary.name)).toEqual(['gamma-doc']);
+    });
+
+    it('returns 400 for invalid regex filters', async () => {
+        __setTestPersistence(createMockPersistence(new Map([['alpha-doc', 'needle content']])));
+
+        const response = await request(app)
+            .get('/api/documents')
+            .set('x-docs-password', 'master')
+            .query({ contentMatchesRegex: '(' });
+
+        expect(response.status).toBe(400);
+        expect(response.body).toEqual({ error: 'invalid_content_regex' });
+    });
 });

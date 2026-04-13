@@ -25,6 +25,7 @@ export interface DocumentSummary {
 
 export interface ListSummariesOptions {
   contentContains?: string
+  contentMatchesRegex?: string
 }
 
 export interface PublicDocumentContentResult {
@@ -150,6 +151,9 @@ class DocumentAPI {
       const params = new URLSearchParams()
       if (options.contentContains?.trim()) {
         params.set('contentContains', options.contentContains.trim())
+      }
+      if (options.contentMatchesRegex?.trim()) {
+        params.set('contentMatchesRegex', options.contentMatchesRegex.trim())
       }
 
       const queryString = params.toString()

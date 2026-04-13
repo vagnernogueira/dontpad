@@ -14,6 +14,7 @@ const SORT_KEYS: SortKey[] = ['selected', 'name', 'createdAt', 'updatedAt', 'loc
 
 const EXPLORER_SEARCH_KEY = 'explorer.search'
 const EXPLORER_CONTENT_SEARCH_KEY = 'explorer.contentSearch'
+const EXPLORER_REGEX_ENABLED_KEY = 'explorer.regexEnabled'
 const EXPLORER_SORT_KEY = 'explorer.sortKey'
 const EXPLORER_SORT_DIRECTION_KEY = 'explorer.sortDirection'
 
@@ -21,7 +22,28 @@ export function normalizeSearchTerm(value: string) {
   return value.trim().toLowerCase()
 }
 
-export function filterDocumentsByName(documents: DocumentSummary[], searchTerm: string) {
+export function createCaseInsensitiveRegex(pattern: string) {
+  const normalizedPattern = pattern.trim()
+  if (!normalizedPattern) return null
+
+  try {
+    return new RegExp(normalizedPattern, 'i')
+  } catch {
+    return null
+  }
+}
+
+export function isValidRegexPattern(pattern: string) {
+  return !pattern.trim() || createCaseInsensitiveRegex(pattern) !== null
+}
+
+export function filterDocumentsByName(documents: DocumentSummary[], searchTerm: string, useRegex = false) {
+  if (useRegex) {
+    const regex = createCaseInsensitiveRegex(searchTerm)
+    if (!searchTerm.trim() || !regex) return documents
+    return documents.filter(document => regex.test(document.name))
+  }
+
   const term = normalizeSearchTerm(searchTerm)
   if (!term) return documents
   return documents.filter(document => document.name.toLowerCase().includes(term))
@@ -39,6 +61,7 @@ export function useDocumentList(documents: () => DocumentSummary[]) {
   const search = ref('')
   const contentSearch = ref('')
   const debouncedContentSearch = ref('')
+  const regexEnabled = ref(false)
   const selectedDocumentName = ref<string | null>(null)
   const sortKey = ref<SortKey>('updatedAt')
   const sortDirection = ref<'asc' | 'desc'>('desc')
@@ -47,7 +70,15 @@ export function useDocumentList(documents: () => DocumentSummary[]) {
   // ── Computed ─────────────────────────────────────────────────────
 
   const filteredDocuments = computed(() => {
-    return filterDocumentsByName(documents(), search.value)
+    return filterDocumentsByName(documents(), search.value, regexEnabled.value)
+  })
+
+  const invalidNameSearchRegex = computed(() => {
+    return regexEnabled.value && !!search.value.trim() && !isValidRegexPattern(search.value)
+  })
+
+  const invalidContentSearchRegex = computed(() => {
+    return regexEnabled.value && !!contentSearch.value.trim() && !isValidRegexPattern(contentSearch.value)
   })
 
   const sortedDocuments = computed(() => {
@@ -106,6 +137,7 @@ export function useDocumentList(documents: () => DocumentSummary[]) {
     search.value = persistence.get(EXPLORER_SEARCH_KEY, '')
     contentSearch.value = persistence.get(EXPLORER_CONTENT_SEARCH_KEY, '')
     debouncedContentSearch.value = contentSearch.value.trim()
+    regexEnabled.value = persistence.get(EXPLORER_REGEX_ENABLED_KEY, false)
     const sk = persistence.get(EXPLORER_SORT_KEY, 'updatedAt')
     if (isSortKey(sk)) sortKey.value = sk
     const sd = persistence.get(EXPLORER_SORT_DIRECTION_KEY, 'desc')
@@ -125,6 +157,7 @@ export function useDocumentList(documents: () => DocumentSummary[]) {
       debouncedContentSearch.value = v.trim()
     }, 300)
   })
+  watch(regexEnabled, v => persistence.set(EXPLORER_REGEX_ENABLED_KEY, v))
   watch(sortKey, v => persistence.set(EXPLORER_SORT_KEY, v))
   watch(sortDirection, v => persistence.set(EXPLORER_SORT_DIRECTION_KEY, v))
 
@@ -138,11 +171,14 @@ export function useDocumentList(documents: () => DocumentSummary[]) {
     search,
     contentSearch,
     debouncedContentSearch,
+    regexEnabled,
     selectedDocumentName,
     sortKey,
     sortDirection,
     filteredDocuments,
     sortedDocuments,
+    invalidNameSearchRegex,
+    invalidContentSearchRegex,
     toggleSort,
     toggleSelection,
     clearSelectionIfMissing,

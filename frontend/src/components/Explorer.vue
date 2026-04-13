@@ -53,6 +53,16 @@
           />
         </div>
 
+        <label for="explorer-regex-mode" class="flex items-center gap-2 shrink-0 text-xs font-medium text-gray-600">
+          <span>Rgx</span>
+          <Switch
+            id="explorer-regex-mode"
+            v-model="list.regexEnabled.value"
+            aria-label="Rgx"
+            class="data-[state=checked]:bg-gray-800"
+          />
+        </label>
+
         <Separator orientation="vertical" class="h-5 mx-1.5 shrink-0" />
 
         <Button
@@ -115,7 +125,7 @@
       </section>
 
       <section v-else class="space-y-4">
-        <p v-if="errorMessage" class="text-sm text-red-600">{{ errorMessage }}</p>
+        <p v-if="displayedErrorMessage" class="text-sm text-red-600">{{ displayedErrorMessage }}</p>
         <p v-else-if="session.isLoading.value" class="text-sm text-gray-500">Carregando documentos...</p>
 
         <div class="overflow-auto rounded-lg bg-white shadow">
@@ -186,13 +196,14 @@
 </template>
 
 <script setup lang="ts">
-import { nextTick, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { ArrowLeft, RefreshCw } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
 import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
+import { Switch } from '@/components/ui/switch'
 import { createDocumentAPI, type DocumentSummary, type ListSummariesOptions } from '../services/document-api'
 import { getApiBaseUrl } from '../services/config'
 import { downloadMarkdown, downloadPDF } from '../services/export'
@@ -228,6 +239,18 @@ const isDocumentSummary = (item: unknown): item is DocumentSummary => {
 const errorMessage = ref('')
 const masterPasswordInputEl = ref<{ $el: HTMLInputElement } | null>(null)
 
+const displayedErrorMessage = computed(() => {
+  if (list.invalidNameSearchRegex.value) {
+    return 'Expressão regular inválida no filtro de nome.'
+  }
+
+  if (list.invalidContentSearchRegex.value) {
+    return 'Expressão regular inválida no filtro de conteúdo.'
+  }
+
+  return errorMessage.value
+})
+
 const focusMasterPassword = () => {
   nextTick(() => masterPasswordInputEl.value?.$el?.focus())
 }
@@ -250,11 +273,21 @@ watch(session.hasAccess, (hasAccess) => {
 // ── Actions that need both session & list ──────────────────────────
 
 const getListSummariesOptions = (): ListSummariesOptions => {
-  const contentContains = list.debouncedContentSearch.value.trim()
-  return contentContains ? { contentContains } : {}
+  const contentQuery = list.debouncedContentSearch.value.trim()
+  if (!contentQuery) return {}
+
+  if (list.regexEnabled.value) {
+    return { contentMatchesRegex: contentQuery }
+  }
+
+  return { contentContains: contentQuery }
 }
 
 const refreshDocuments = async (options: ListSummariesOptions = getListSummariesOptions()) => {
+  if (list.invalidContentSearchRegex.value) {
+    return
+  }
+
   errorMessage.value = ''
   const summaries = await session.refresh(options)
   if (summaries) list.clearSelectionIfMissing(summaries)
@@ -391,8 +424,10 @@ watch(session.documents, value => {
   persistence.set(EXPLORER_DOCUMENTS_CACHE_KEY, value)
 }, { deep: true })
 
-watch(list.debouncedContentSearch, () => {
+watch([list.debouncedContentSearch, list.regexEnabled], ([contentSearch], [previousContentSearch]) => {
   if (!session.hasAccess.value) return
+  if (!contentSearch.trim() && !previousContentSearch?.trim()) return
+  if (list.invalidContentSearchRegex.value) return
   void refreshDocuments(getListSummariesOptions())
 })
 

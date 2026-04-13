@@ -65,8 +65,18 @@ const contentFilteredSummaries = [
   },
 ]
 
+const unlockExplorerIfNeeded = async () => {
+  const passwordInput = screen.queryByPlaceholderText('Senha mestra')
+  const submitButton = screen.queryByRole('button', { name: 'Entrar' })
+  if (!passwordInput || !submitButton) return
+
+  await fireEvent.update(passwordInput, 'master')
+  await fireEvent.submit(submitButton.closest('form') as HTMLFormElement)
+}
+
 describe('Explorer content filter flow', () => {
   beforeEach(() => {
+    vi.resetModules()
     vi.useFakeTimers()
     window.localStorage.clear()
     listSummariesMock.mockReset()
@@ -79,9 +89,13 @@ describe('Explorer content filter flow', () => {
     renameDocumentMock.mockReset()
     removeDocumentMock.mockReset()
 
-    listSummariesMock.mockImplementation(async (_masterPassword: string, options?: { contentContains?: string }) => {
+    listSummariesMock.mockImplementation(async (_masterPassword: string, options?: { contentContains?: string; contentMatchesRegex?: string }) => {
       if (options?.contentContains === 'needle') {
         return contentFilteredSummaries
+      }
+
+      if (options?.contentMatchesRegex === '^another\\s+needle') {
+        return [contentFilteredSummaries[1]]
       }
 
       return initialSummaries
@@ -108,8 +122,7 @@ describe('Explorer content filter flow', () => {
       }
     })
 
-    await fireEvent.update(screen.getByPlaceholderText('Senha mestra'), 'master')
-    await fireEvent.submit(screen.getByRole('button', { name: 'Entrar' }).closest('form') as HTMLFormElement)
+    await unlockExplorerIfNeeded()
 
     await screen.findByText('alpha-doc')
     await screen.findByText('beta-doc')
@@ -129,5 +142,74 @@ describe('Explorer content filter flow', () => {
     expect(screen.getByText('alpha-doc')).toBeInTheDocument()
     expect(screen.queryByText('beta-doc')).not.toBeInTheDocument()
     expect(screen.queryByText('gamma-doc')).not.toBeInTheDocument()
+  })
+
+  it('uses regex content query when regex mode is enabled and restores it from storage', async () => {
+    const { default: Explorer } = await import('../../components/Explorer.vue')
+
+    const firstRender = render(Explorer, {
+      global: {
+        stubs: {
+          RouterLink: {
+            template: '<a><slot /></a>'
+          }
+        }
+      }
+    })
+
+    await unlockExplorerIfNeeded()
+
+    const regexSwitch = screen.getByRole('switch', { name: 'Rgx' })
+    await fireEvent.click(regexSwitch)
+    await fireEvent.update(screen.getByLabelText('Ct'), '^another\\s+needle')
+    await vi.advanceTimersByTimeAsync(300)
+
+    await waitFor(() => {
+      expect(listSummariesMock).toHaveBeenLastCalledWith('master', { contentMatchesRegex: '^another\\s+needle' })
+    })
+
+    expect(window.localStorage.getItem('dontpad:explorer.regexEnabled')).toBe('true')
+
+    firstRender.unmount()
+
+    render(Explorer, {
+      global: {
+        stubs: {
+          RouterLink: {
+            template: '<a><slot /></a>'
+          }
+        }
+      }
+    })
+
+    await unlockExplorerIfNeeded()
+
+    expect(screen.getByRole('switch', { name: 'Rgx' })).toHaveAttribute('aria-checked', 'true')
+  })
+
+  it('shows a safe error for invalid regex without triggering a new content request', async () => {
+    const { default: Explorer } = await import('../../components/Explorer.vue')
+
+    render(Explorer, {
+      global: {
+        stubs: {
+          RouterLink: {
+            template: '<a><slot /></a>'
+          }
+        }
+      }
+    })
+
+    await unlockExplorerIfNeeded()
+
+    listSummariesMock.mockClear()
+
+    await fireEvent.click(screen.getByRole('switch', { name: 'Rgx' }))
+    await fireEvent.update(screen.getByLabelText('Ct'), '(')
+    await vi.advanceTimersByTimeAsync(300)
+
+    expect(screen.getByText('Expressão regular inválida no filtro de conteúdo.')).toBeInTheDocument()
+    expect(listSummariesMock).not.toHaveBeenCalled()
+    expect(screen.getByText('alpha-doc')).toBeInTheDocument()
   })
 })

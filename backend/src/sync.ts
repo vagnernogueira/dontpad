@@ -39,6 +39,11 @@ export type DocumentSummary = {
     open: boolean;
 };
 
+export type ListDocumentSummariesOptions = {
+    contentContains?: string;
+    contentMatchesRegex?: string;
+};
+
 const masterPassword = (process.env.DOCUMENTS_MASTER_PASSWORD || '').trim();
 
 const ensureLockDir = () => {
@@ -317,14 +322,59 @@ export const matchesContentContains = (content: string, contentContains = ''): b
     return content.toLowerCase().includes(normalizedTerm);
 }
 
-export const listDocumentSummaries = async (contentContains = ''): Promise<DocumentSummary[]> => {
+export const tryCreateCaseInsensitiveRegex = (pattern = ''): RegExp | null => {
+    const normalizedPattern = pattern.trim();
+    if (!normalizedPattern) {
+        return null;
+    }
+
+    try {
+        return new RegExp(normalizedPattern, 'i');
+    } catch {
+        return null;
+    }
+};
+
+export const matchesContentRegex = (content: string, contentMatchesRegex = ''): boolean => {
+    const regex = tryCreateCaseInsensitiveRegex(contentMatchesRegex);
+    if (!contentMatchesRegex.trim()) {
+        return true;
+    }
+
+    if (!regex) {
+        return false;
+    }
+
+    return regex.test(content);
+}
+
+export const listDocumentSummaries = async (options: ListDocumentSummariesOptions = {}): Promise<DocumentSummary[]> => {
+    const contentContains = options.contentContains?.trim() ?? '';
+    const contentMatchesRegex = options.contentMatchesRegex?.trim() ?? '';
+
+    if (contentContains && contentMatchesRegex) {
+        throw new Error('content_filter_mode_conflict');
+    }
+
+    const contentRegex = contentMatchesRegex
+        ? tryCreateCaseInsensitiveRegex(contentMatchesRegex)
+        : null;
+
+    if (contentMatchesRegex && !contentRegex) {
+        throw new Error('invalid_content_regex');
+    }
+
     const names = await listDocumentNames();
 
     const summaries = await Promise.all(names.map(async (name) => {
         const metadata = getDocumentMetadata(name) ?? ensureDocumentMetadata(name);
         const content = await getDocumentContent(name);
 
-        if (!matchesContentContains(content, contentContains)) {
+        if (contentRegex && !contentRegex.test(content)) {
+            return null;
+        }
+
+        if (!contentRegex && !matchesContentContains(content, contentContains)) {
             return null;
         }
 

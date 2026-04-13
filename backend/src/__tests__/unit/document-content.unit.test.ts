@@ -8,10 +8,12 @@ import {
     getDocumentContent,
     listDocumentSummaries,
     matchesContentContains,
+    matchesContentRegex,
     isDocumentLocked,
     setDocumentPassword,
     removeDocumentPassword,
-    normalizeDocName
+    normalizeDocName,
+    tryCreateCaseInsensitiveRegex
 } from '../../sync';
 import fs from 'fs';
 import os from 'os';
@@ -182,9 +184,29 @@ describe('listDocumentSummaries', () => {
         mockPersistence = createMockPersistence(initialDocs);
         __setTestPersistence(mockPersistence);
 
-        const summaries = await listDocumentSummaries('needle');
+        const summaries = await listDocumentSummaries({ contentContains: 'needle' });
 
         expect(summaries.map(summary => summary.name)).toEqual(['alpha-doc', 'gamma-doc']);
+    });
+
+    it('filters documents by regex when requested', async () => {
+        const initialDocs = new Map<string, string>();
+        initialDocs.set('alpha-doc', 'Needle in haystack');
+        initialDocs.set('beta-doc', 'different content');
+        initialDocs.set('gamma-doc', 'another Needle appears');
+        mockPersistence = createMockPersistence(initialDocs);
+        __setTestPersistence(mockPersistence);
+
+        const summaries = await listDocumentSummaries({ contentMatchesRegex: '^another\\s+needle' });
+
+        expect(summaries.map(summary => summary.name)).toEqual(['gamma-doc']);
+    });
+
+    it('rejects invalid regex patterns', async () => {
+        mockPersistence = createMockPersistence(new Map([['doc-a', 'content']]));
+        __setTestPersistence(mockPersistence);
+
+        await expect(listDocumentSummaries({ contentMatchesRegex: '(' })).rejects.toThrow('invalid_content_regex');
     });
 });
 
@@ -200,6 +222,24 @@ describe('matchesContentContains', () => {
 
     it('returns false when content does not contain the substring', () => {
         expect(matchesContentContains('Needle in haystack', 'missing')).toBe(false);
+    });
+});
+
+describe('regex content helpers', () => {
+    it('creates case-insensitive regex safely', () => {
+        expect(tryCreateCaseInsensitiveRegex('needle')?.test('Needle')).toBe(true);
+    });
+
+    it('returns null for invalid regex patterns', () => {
+        expect(tryCreateCaseInsensitiveRegex('(')).toBeNull();
+    });
+
+    it('matches content using regex case-insensitively', () => {
+        expect(matchesContentRegex('Needle in haystack', '^needle')).toBe(true);
+    });
+
+    it('returns false for invalid regex patterns', () => {
+        expect(matchesContentRegex('Needle in haystack', '(')).toBe(false);
     });
 });
 
