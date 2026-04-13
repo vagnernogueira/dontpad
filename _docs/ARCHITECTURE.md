@@ -157,6 +157,7 @@ _docs/
 - **Composables Pattern** para extrair lógica reativa de componentes Vue complexos (`useYjsEditor`, `useDocumentAccess`, `useCollaborators`, `useExplorerSession`, `useDocumentList`);
 - **Component Composition** com sub-componentes focados: `EditorHeader`, `EditorToolbar`, `BaseDialog` (thin wrapper shadcn), `LinkDialog`, `ImageDialog`, `LockDialog`, `AccessDialog`, `ProfileDialog`;
 - **CSS Component Layer** via `@layer components` com `@apply` para abstrações reutilizáveis de layout, botões e inputs; camada de diálogos migrada para primitivos **shadcn-vue** (`Dialog`, `DialogContent`, `DialogHeader`, `DialogFooter` via `reka-ui`);
+- **Contexto operacional shadcn-vue**: a configuração vive em `frontend/components.json`; comandos de inspeção/instalação devem rodar em `frontend/` com `npx shadcn-vue@latest ...` (ou scripts equivalentes do pacote), não na raiz com `npx shadcn@latest`;
 - **CRDT (Yjs)** em vez de OT para merge automático e melhor suporte offline;
 - **Lazy loading** para bibliotecas pesadas de export (`marked`, `html2pdf.js`);
 - **LevelDB local** para persistência incremental simples em ambiente self-hosted;

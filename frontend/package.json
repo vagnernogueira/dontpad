@@ -12,7 +12,9 @@
         "preview": "vite preview",
         "lint": "eslint src --ext .ts,.vue",
         "lint:fix": "eslint src --ext .ts,.vue --fix",
-        "format": "prettier --write src"
+        "format": "prettier --write src",
+        "shadcn:info": "npx --yes shadcn-vue@latest info",
+        "shadcn:add": "npx --yes shadcn-vue@latest add"
     },
     "dependencies": {
         "@codemirror/lang-markdown": "^6.3.4",

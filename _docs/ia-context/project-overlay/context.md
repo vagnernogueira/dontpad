@@ -41,6 +41,7 @@
 - Ícones: preferir `lucide-vue-next`.
 - Evitar SVG inline em novos componentes.
 - Estrutura modular em `cm-commands`, `cm-extensions`, `cm-plugins`, `cm-utils`, `services`.
+- Operações shadcn devem usar o pacote `frontend` como diretório de execução e a CLI `shadcn-vue` (`cd frontend && npx shadcn-vue@latest info`). `npx shadcn@latest` na raiz reporta `Manual` e não representa ausência de configuração.
 
 ### Contexto de IA
 

@@ -35,6 +35,7 @@ participantes.
 - **Ícones:** usar `lucide-vue-next` em telas e componentes novos.
 - **Evitar SVG inline:** não adicionar tags `<svg>` diretamente em templates Vue.
 - **Consistência:** ao precisar de novo ícone, importar o componente da biblioteca.
+- **shadcn-vue:** executar a CLI a partir de `frontend/`, usando `npx shadcn-vue@latest ...` ou `npm run shadcn:info`. Rodar `npx shadcn@latest` na raiz identifica o workspace como projeto manual e não valida a configuração real do frontend.
 
 ## Guia de Onboarding
 
@@ -67,6 +68,7 @@ Defina no `.env` ao menos:
 cd frontend
 npm install
 npm run build
+npm run shadcn:info
 
 # backend
 cd ../backend

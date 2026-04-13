@@ -255,6 +255,8 @@ Regras:
 
 Components copiados via CLI (`npx shadcn-vue@latest add`) para `src/components/ui/`. Não são dependência versionada — pertencem ao projeto e podem ser editados.
 
+Contexto operacional: a configuração da CLI vive em `frontend/components.json`. Para inspecionar ou adicionar componentes, executar os comandos dentro de `frontend/` com `npx shadcn-vue@latest ...` ou scripts do pacote. Executar `npx shadcn@latest` na raiz do workspace produz falso negativo (`framework: Manual`) porque consulta a ferramenta/diretório errados para este projeto Vue.
+
 | Diretório | Conteúdo | Status |
 |---|---|---|
 | `ui/dialog/` | `Dialog`, `DialogContent`, `DialogHeader`, `DialogTitle`, `DialogFooter`, `DialogClose`, `DialogDescription`, `DialogScrollContent`, `DialogTrigger` | Instalado |

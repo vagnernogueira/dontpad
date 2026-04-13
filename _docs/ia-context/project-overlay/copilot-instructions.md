@@ -54,6 +54,7 @@ Proibido: inventar endpoints/arquivos/comportamentos · omitir conflito document
 
 - Ícones: `lucide-vue-next` — sem SVG inline em novos componentes
 - Módulos: `cm-commands/` · `cm-extensions/` · `cm-plugins/` · `cm-utils/` · `services/`
+- Operações shadcn: executar no pacote `frontend` com `npx shadcn-vue@latest ...` (ou scripts do `frontend/package.json`). Não usar `npx shadcn@latest` na raiz para validar a configuração do projeto.
 
 ## Entrega padrão
 
