@@ -7,11 +7,16 @@ ARG VITE_BACKEND_WS_URL
 ENV VITE_BACKEND_HTTP_URL=$VITE_BACKEND_HTTP_URL
 ENV VITE_BACKEND_WS_URL=$VITE_BACKEND_WS_URL
 
-COPY package*.json ./
+COPY package*.json .dockerignore .containerignore ./
 RUN npm ci --legacy-peer-deps
 
+WORKDIR /tmp/frontend-src
 COPY . .
-RUN npm run build
+
+WORKDIR /usr/src/app
+RUN cp -R /tmp/frontend-src/. /usr/src/app/ \
+	&& rm -rf /tmp/frontend-src \
+	&& sh -lc 'ulimit -n 65536 >/dev/null 2>&1 || true; npm run build'
 
 FROM docker.io/nginx:alpine
 

@@ -5,6 +5,7 @@
  * Decoupled from UI to enable reuse and testing.
  */
 
+import { marked } from 'marked'
 import { markdownStyles } from './pdf-styles'
 
 /**
@@ -30,7 +31,6 @@ export function downloadMarkdown(content: string, filename: string): void {
  * @returns Promise resolving to HTML string
  */
 export async function markdownToHtml(content: string): Promise<string> {
-  const { marked } = await import('marked')
   return marked.parse(content, { breaks: true, gfm: true })
 }
 

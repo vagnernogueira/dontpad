@@ -2,7 +2,7 @@
  * Main stylesheet entry point.
  *
  * Split into focused files for maintainability:
- *  - base.css          → Tailwind directives, CSS variables, root styles
+ *  - base.css          → Tailwind v4 entrypoint, config bridge, CSS variables, root styles
  *  - codemirror.css    → CodeMirror editor chrome
  *  - plugins.css       → CM plugin widgets (code blocks, links, images, etc.)
  *  - collaboration.css → Yjs cursors

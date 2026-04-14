@@ -3,12 +3,17 @@ import vue from '@vitejs/plugin-vue'
 import path from 'path'
 
 // https://vitejs.dev/config/
-export default defineConfig({
+export default defineConfig(({ command }) => ({
     envDir: '..',
     plugins: [vue()],
     resolve: {
         alias: {
             '@': path.resolve(__dirname, './src'),
+            ...(command === 'build'
+                ? {
+                    '@vue/devtools-api': path.resolve(__dirname, './src/shims/vue-devtools-api.ts'),
+                }
+                : {}),
         },
     },
     server: {
@@ -19,6 +24,7 @@ export default defineConfig({
     },
     build: {
         rollupOptions: {
+            maxParallelFileOps: 32,
             output: {
                 manualChunks: {
                     vue: ['vue', 'vue-router'],
@@ -29,4 +35,4 @@ export default defineConfig({
             }
         }
     }
-})
+}))
