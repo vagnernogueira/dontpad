@@ -45,6 +45,7 @@ participantes.
 
 - Node.js 20+
 - npm 10+
+- GNU Make
 - Podman
 - `podman-compose` (ou uso dos comandos do `Makefile`)
 
@@ -66,30 +67,28 @@ Defina no `.env` ao menos:
 ### Como Compilar
 
 ```bash
-# frontend
-cd frontend
-npm install
-npm run build
-npm run shadcn:info
+# instala as dependências dos dois pacotes
+make install
 
-# backend
-cd ../backend
-npm install
-npm run build
+# executa os testes existentes e gera as imagens do backend e frontend
+make build
+```
+
+Para verificações específicas do frontend que não possuem alvo dedicado no `Makefile`, continue usando os scripts do pacote:
+
+```bash
+cd frontend
+npm run shadcn:info
 ```
 
 ### Como Executar
 
 ```bash
 # Terminal 1 (backend)
-cd backend
-npm install
-npm run dev
+make dev-backend
 
 # Terminal 2 (frontend)
-cd frontend
-npm install
-npm run dev
+make dev-frontend
 ```
 
 ### Como Executar em Produção (On-Premises)
@@ -139,8 +138,13 @@ make stop
 
 ### Como Executar os Testes
 
-Atualmente não há suíte de testes automatizada padronizada na raiz do projeto.
-Quando aplicável, rode validações por pacote:
+Os testes existentes dos dois pacotes podem ser executados pela raiz do projeto com:
+
+```bash
+make test
+```
+
+Quando precisar de validações que ainda não possuem alvo dedicado no `Makefile`, rode por pacote:
 
 ```bash
 cd backend && npm run lint
