@@ -5,7 +5,7 @@
  *  - base.css          → Tailwind directives, CSS variables, root styles
  *  - codemirror.css    → CodeMirror editor chrome
  *  - plugins.css       → CM plugin widgets (code blocks, links, images, etc.)
- *  - collaboration.css → Yjs cursors and collaborator avatars
+ *  - collaboration.css → Yjs cursors
  *  - responsive.css    → Mobile / tablet media queries
  */
 
