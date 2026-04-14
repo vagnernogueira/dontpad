@@ -1,19 +1,20 @@
 <template>
   <div class="flex flex-col items-center justify-center h-full max-w-2xl mx-auto text-center px-4">
-    <h1 class="text-5xl font-bold mb-4 text-gray-800">Dontpad</h1>
-    
-    <div class="w-full bg-white p-8 rounded-xl shadow-lg">
+    <h1 class="mb-4 text-5xl font-bold text-foreground">Dontpad</h1>
+
+    <Card class="w-full shadow-lg">
+      <CardContent class="p-8">
       <form class="flex w-full flex-col gap-2 sm:flex-row sm:items-stretch" @submit.prevent="goToDocument">
-        <div class="flex min-w-0 flex-1 overflow-hidden rounded-md border border-gray-300">
-          <span class="flex items-center whitespace-nowrap bg-gray-100 px-3 text-gray-400 border-r border-gray-300">
+        <div class="flex min-w-0 flex-1 overflow-hidden rounded-md border border-input bg-background shadow-sm transition-shadow focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
+          <span class="flex items-center whitespace-nowrap border-r border-input bg-muted px-3 text-sm text-muted-foreground">
             {{ baseUrl }}/
           </span>
-          <input
+          <Input
             ref="docNameInput"
             v-model="docName"
             type="text"
             placeholder="documento"
-            class="min-w-0 flex-1 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-gray-800"
+            class="min-w-0 flex-1 rounded-none border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
             required
           />
         </div>
@@ -24,7 +25,8 @@
           🔗
         </Button>
       </form>
-    </div>
+      </CardContent>
+    </Card>
 
   </div>
 </template>
@@ -33,14 +35,16 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
 import { trimTrailingSlashes } from '../cm-utils/document-name'
 
 const router = useRouter()
 const docName = ref('')
-const docNameInput = ref<HTMLInputElement | null>(null)
+const docNameInput = ref<{ $el: HTMLInputElement } | null>(null)
 
 onMounted(() => {
-  docNameInput.value?.focus()
+  docNameInput.value?.$el?.focus()
 })
 
 const baseUrl = computed(() => {
