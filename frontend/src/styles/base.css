@@ -1,6 +1,5 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@config "../../tailwind.config.js";
 
 :root {
   /* Project tokens — preserved alongside midnight-bloom theme */
@@ -26,6 +25,19 @@ body,
 }
 
 @layer base {
+  *,
+  ::before,
+  ::after,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, var(--border, currentColor));
+  }
+
+  button:not(:disabled),
+  [role='button']:not(:disabled) {
+    cursor: pointer;
+  }
+
   .theme {
     --font-sans: Montserrat, sans-serif;
     --font-mono: Source Code Pro, monospace;

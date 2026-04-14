@@ -32,7 +32,7 @@
       </div>
     </header>
 
-    <div class="z-10 flex items-center gap-1 overflow-x-auto overflow-y-hidden border-b border-border bg-background px-2 py-btn text-sm text-muted-foreground shadow-sm sm:gap-1.5 sm:px-4">
+    <div class="z-10 flex items-center gap-1 overflow-x-auto overflow-y-hidden border-b border-border bg-background px-2 py-btn text-sm text-muted-foreground shadow-xs sm:gap-1.5 sm:px-4">
       <template v-if="session.hasAccess.value">
         <div class="flex items-center gap-2 shrink-0">
           <Label for="explorer-search" class="text-xs font-medium text-gray-600 shrink-0">Nm</Label>
@@ -113,7 +113,7 @@
 
     <main class="flex-1 overflow-auto bg-gray-50 p-4 sm:p-6">
       <section v-if="!session.hasAccess.value" class="mx-auto mt-10 w-full max-w-sm">
-        <Card class="shadow">
+        <Card class="shadow-sm">
           <CardHeader class="space-y-2">
             <CardTitle class="text-base text-gray-800">Acesso protegido</CardTitle>
             <CardDescription class="text-sm text-gray-600">
@@ -153,7 +153,7 @@
           <AlertDescription>Carregando documentos...</AlertDescription>
         </Alert>
 
-        <div class="overflow-hidden rounded-lg bg-white shadow">
+        <div class="overflow-hidden rounded-lg bg-white shadow-sm">
           <Table>
             <TableHeader class="bg-gray-100 text-left text-gray-700">
               <TableRow class="border-gray-200 hover:bg-transparent">

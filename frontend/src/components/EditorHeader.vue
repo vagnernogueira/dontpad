@@ -22,7 +22,7 @@
       </Button>
       <Separator orientation="vertical" class="h-5 mx-1 bg-gray-700 shrink-0" />
       -->
-      <span :class="['w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full shadow-sm', status === 'connected' ? 'bg-emerald-400' : 'bg-red-400']"></span>
+      <span :class="['w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full shadow-xs', status === 'connected' ? 'bg-emerald-400' : 'bg-red-400']"></span>
       <span class="hidden sm:inline">{{ status === 'connected' ? 'Sincronizado' : 'Offline' }}</span>
     </div>
   </header>

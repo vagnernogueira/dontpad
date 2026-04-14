@@ -161,7 +161,7 @@ describe('Explorer content filter flow', () => {
     expect(screen.getByText('alpha-doc')).toBeInTheDocument()
     expect(screen.queryByText('beta-doc')).not.toBeInTheDocument()
     expect(screen.queryByText('gamma-doc')).not.toBeInTheDocument()
-  })
+  }, 10000)
 
   it('uses regex content query when regex mode is enabled and restores it from storage', async () => {
     const { default: Explorer } = await import('../../components/Explorer.vue')

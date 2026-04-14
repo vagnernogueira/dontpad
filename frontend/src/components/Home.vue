@@ -5,7 +5,7 @@
     <Card class="w-full shadow-lg">
       <CardContent class="p-8">
       <form class="flex w-full flex-col gap-2 sm:flex-row sm:items-stretch" @submit.prevent="goToDocument">
-        <div class="flex min-w-0 flex-1 overflow-hidden rounded-md border border-input bg-background shadow-sm transition-shadow focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
+        <div class="flex min-w-0 flex-1 overflow-hidden rounded-md border border-input bg-background shadow-xs transition-shadow focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
           <span class="flex items-center whitespace-nowrap border-r border-input bg-muted px-3 text-sm text-muted-foreground">
             {{ baseUrl }}/
           </span>

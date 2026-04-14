@@ -4,7 +4,7 @@
       v-for="collaborator in collaborators"
       :key="collaborator.profileId || collaborator.clientId"
       type="button"
-      class="group -ml-2 first:ml-0 focus-visible:outline-none"
+      class="group -ml-2 first:ml-0 focus-visible:outline-hidden"
       :class="[
         collaboratorButtonClass(collaborator),
         { 'cursor-default': !collaborator.isSelf },
@@ -15,7 +15,7 @@
     >
       <Avatar
         :class="[
-          'size-8 border-2 border-gray-900 shadow-sm transition-transform group-hover:scale-[1.03] sm:size-9',
+          'size-8 border-2 border-gray-900 shadow-xs transition-transform group-hover:scale-[1.03] sm:size-9',
           collaboratorToneClass(collaborator.color),
           collaborator.isSelf
             ? 'ring-2 ring-emerald-400/70 ring-offset-1 ring-offset-gray-900'
