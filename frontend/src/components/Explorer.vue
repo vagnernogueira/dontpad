@@ -32,7 +32,7 @@
     <div class="toolbar">
       <template v-if="session.hasAccess.value">
         <div class="flex items-center gap-2 shrink-0">
-          <label for="explorer-search" class="text-xs font-medium text-gray-600 shrink-0">Nm</label>
+          <Label for="explorer-search" class="text-xs font-medium text-gray-600 shrink-0">Nm</Label>
           <Input
             id="explorer-search"
             v-model="list.search.value"
@@ -43,7 +43,7 @@
         </div>
 
         <div class="flex items-center gap-2 shrink-0">
-          <label for="explorer-content-search" class="text-xs font-medium text-gray-600 shrink-0">Ct</label>
+          <Label for="explorer-content-search" class="text-xs font-medium text-gray-600 shrink-0">Ct</Label>
           <Input
             id="explorer-content-search"
             v-model="list.contentSearch.value"
@@ -53,15 +53,15 @@
           />
         </div>
 
-        <label for="explorer-regex-mode" class="flex items-center gap-2 shrink-0 text-xs font-medium text-gray-600">
-          <span>Rgx</span>
+        <div class="flex items-center gap-2 shrink-0">
+          <Label for="explorer-regex-mode" class="text-xs font-medium text-gray-600">Rgx</Label>
           <Switch
             id="explorer-regex-mode"
             v-model="list.regexEnabled.value"
             aria-label="Rgx"
             class="data-[state=checked]:bg-gray-800"
           />
-        </label>
+        </div>
 
         <Separator orientation="vertical" class="h-5 mx-1.5 shrink-0" />
 
@@ -101,109 +101,234 @@
           @click="lockSelected"
         >Travar</Button>
       </template>
-      <p v-else class="text-sm text-gray-500 px-1">Informe a senha mestra para habilitar ações do Explorer.</p>
+      <Alert v-else class="border-gray-200 bg-white/90 px-3 py-2 text-gray-600 shadow-none">
+        <AlertDescription class="text-xs sm:text-sm">
+          Informe a senha mestra para habilitar ações do Explorer.
+        </AlertDescription>
+      </Alert>
     </div>
 
     <main class="flex-1 overflow-auto bg-gray-50 p-4 sm:p-6">
-      <section v-if="!session.hasAccess.value" class="mx-auto mt-10 w-full max-w-sm rounded-lg bg-white p-5 shadow">
-        <h2 class="mb-3 text-base font-medium text-gray-800">Acesso protegido</h2>
-        <p class="mb-3 text-sm text-gray-600">Informe a senha mestra para entrar no Explorer.</p>
-        <form class="space-y-3" @submit.prevent="session.unlock">
-          <Input
-            ref="masterPasswordInputEl"
-            v-model="session.masterPasswordInput.value"
-            type="password"
-            class="py-2 focus:ring-gray-800 focus:border-gray-800"
-            placeholder="Senha mestra"
-            autocomplete="off"
-          />
-          <p v-if="session.authError.value" class="text-xs text-red-600">{{ session.authError.value }}</p>
-          <Button type="submit" class="w-full">
-            Entrar
-          </Button>
-        </form>
+      <section v-if="!session.hasAccess.value" class="mx-auto mt-10 w-full max-w-sm">
+        <Card class="shadow">
+          <CardHeader class="space-y-2">
+            <CardTitle class="text-base text-gray-800">Acesso protegido</CardTitle>
+            <CardDescription class="text-sm text-gray-600">
+              Informe a senha mestra para entrar no Explorer.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form class="space-y-3" @submit.prevent="session.unlock">
+              <div class="space-y-2">
+                <Label for="explorer-master-password">Senha mestra</Label>
+                <Input
+                  id="explorer-master-password"
+                  ref="masterPasswordInputEl"
+                  v-model="session.masterPasswordInput.value"
+                  type="password"
+                  class="py-2 focus:ring-gray-800 focus:border-gray-800"
+                  placeholder="Senha mestra"
+                  autocomplete="off"
+                />
+              </div>
+              <Alert v-if="session.authError.value" variant="destructive">
+                <AlertDescription>{{ session.authError.value }}</AlertDescription>
+              </Alert>
+              <Button type="submit" class="w-full">
+                Entrar
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
       </section>
 
       <section v-else class="space-y-4">
-        <p v-if="displayedErrorMessage" class="text-sm text-red-600">{{ displayedErrorMessage }}</p>
-        <p v-else-if="session.isLoading.value" class="text-sm text-gray-500">Carregando documentos...</p>
+        <Alert v-if="displayedErrorMessage" variant="destructive">
+          <AlertDescription>{{ displayedErrorMessage }}</AlertDescription>
+        </Alert>
+        <Alert v-else-if="session.isLoading.value" class="border-gray-200 bg-white text-gray-600">
+          <AlertDescription>Carregando documentos...</AlertDescription>
+        </Alert>
 
-        <div class="overflow-auto rounded-lg bg-white shadow">
-          <table class="min-w-full border-collapse text-sm">
-            <thead class="bg-gray-100 text-left text-gray-700">
-              <tr>
-                <th class="px-3 py-2 font-medium">
-                  <button class="hover:text-gray-900" @click="list.toggleSort('selected')">Seleção</button>
-                </th>
-                <th class="px-3 py-2 font-medium">
-                  <button class="hover:text-gray-900" @click="list.toggleSort('name')">Nome</button>
-                </th>
-                <th class="px-3 py-2 font-medium">
-                  <button class="hover:text-gray-900" @click="list.toggleSort('createdAt')">dt criação</button>
-                </th>
-                <th class="px-3 py-2 font-medium">
-                  <button class="hover:text-gray-900" @click="list.toggleSort('updatedAt')">dt alteração</button>
-                </th>
-                <th class="px-3 py-2 font-medium">
-                  <button class="hover:text-gray-900" @click="list.toggleSort('locked')">travado (S/N)</button>
-                </th>
-                <th class="px-3 py-2 font-medium">
-                  <button class="hover:text-gray-900" @click="list.toggleSort('empty')">vazio (S/N)</button>
-                </th>
-                <th class="px-3 py-2 font-medium">
-                  <button class="hover:text-gray-900" @click="list.toggleSort('open')">aberto (S/N)</button>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-if="!session.isLoading.value && list.sortedDocuments.value.length === 0">
-                <td colspan="7" class="px-3 py-4 text-center text-gray-500">Nenhum documento encontrado.</td>
-              </tr>
+        <div class="overflow-hidden rounded-lg bg-white shadow">
+          <Table>
+            <TableHeader class="bg-gray-100 text-left text-gray-700">
+              <TableRow class="border-gray-200 hover:bg-transparent">
+                <TableHead class="px-3 py-2 font-medium">
+                  <Button :class="sortButtonClass" variant="ghost" size="sm" @click="list.toggleSort('selected')">Seleção</Button>
+                </TableHead>
+                <TableHead class="px-3 py-2 font-medium">
+                  <Button :class="sortButtonClass" variant="ghost" size="sm" @click="list.toggleSort('name')">Nome</Button>
+                </TableHead>
+                <TableHead class="px-3 py-2 font-medium">
+                  <Button :class="sortButtonClass" variant="ghost" size="sm" @click="list.toggleSort('createdAt')">dt criação</Button>
+                </TableHead>
+                <TableHead class="px-3 py-2 font-medium">
+                  <Button :class="sortButtonClass" variant="ghost" size="sm" @click="list.toggleSort('updatedAt')">dt alteração</Button>
+                </TableHead>
+                <TableHead class="px-3 py-2 font-medium">
+                  <Button :class="sortButtonClass" variant="ghost" size="sm" @click="list.toggleSort('locked')">travado (S/N)</Button>
+                </TableHead>
+                <TableHead class="px-3 py-2 font-medium">
+                  <Button :class="sortButtonClass" variant="ghost" size="sm" @click="list.toggleSort('empty')">vazio (S/N)</Button>
+                </TableHead>
+                <TableHead class="px-3 py-2 font-medium">
+                  <Button :class="sortButtonClass" variant="ghost" size="sm" @click="list.toggleSort('open')">aberto (S/N)</Button>
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              <TableRow v-if="!session.isLoading.value && list.sortedDocuments.value.length === 0" class="hover:bg-transparent">
+                <TableCell colspan="7" class="px-3 py-4 text-center text-gray-500">Nenhum documento encontrado.</TableCell>
+              </TableRow>
 
-              <tr
+              <TableRow
                 v-for="document in list.sortedDocuments.value"
                 :key="document.name"
-                class="border-t border-gray-100"
+                :data-state="list.selectedDocumentName.value === document.name ? 'selected' : undefined"
+                class="border-gray-100"
               >
-                <td class="px-3 py-2">
+                <TableCell class="px-3 py-2">
                   <Checkbox
                     :checked="list.selectedDocumentName.value === document.name"
-                    @click="() => list.toggleSelection(document.name)"
+                    @click="list.toggleSelection(document.name)"
                   />
-                </td>
-                <td class="px-3 py-2">
-                  <a
+                </TableCell>
+                <TableCell class="px-3 py-2">
+                  <Button
+                    as="a"
+                    variant="link"
                     :href="toDocumentPath(document.name)"
                     target="_blank"
                     rel="noopener noreferrer"
-                    class="text-gray-800 hover:underline"
+                    :class="documentLinkClass"
                   >
                     {{ document.name }}
-                  </a>
-                </td>
-                <td class="px-3 py-2 text-gray-700">{{ formatDate(document.createdAt) }}</td>
-                <td class="px-3 py-2 text-gray-700">{{ formatDate(document.updatedAt) }}</td>
-                <td class="px-3 py-2 text-gray-700">{{ document.locked ? 'S' : 'N' }}</td>
-                <td class="px-3 py-2 text-gray-700">{{ document.empty ? 'S' : 'N' }}</td>
-                <td class="px-3 py-2 text-gray-700">{{ document.open ? 'S' : 'N' }}</td>
-              </tr>
-            </tbody>
-          </table>
+                  </Button>
+                </TableCell>
+                <TableCell class="px-3 py-2 text-gray-700">{{ formatDate(document.createdAt) }}</TableCell>
+                <TableCell class="px-3 py-2 text-gray-700">{{ formatDate(document.updatedAt) }}</TableCell>
+                <TableCell class="px-3 py-2 text-gray-700">{{ document.locked ? 'S' : 'N' }}</TableCell>
+                <TableCell class="px-3 py-2 text-gray-700">{{ document.empty ? 'S' : 'N' }}</TableCell>
+                <TableCell class="px-3 py-2 text-gray-700">{{ document.open ? 'S' : 'N' }}</TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
         </div>
       </section>
     </main>
+
+    <Dialog :open="renameDialogOpen" @update:open="handleRenameDialogOpenChange">
+      <DialogContent class="sm:max-w-md" @open-auto-focus.prevent="focusRenameDialogInput">
+        <DialogHeader>
+          <DialogTitle>Renomear documento</DialogTitle>
+          <DialogDescription>
+            Defina o novo nome para &quot;{{ renameDialogTargetName }}&quot;.
+          </DialogDescription>
+        </DialogHeader>
+        <div class="space-y-2">
+          <Label for="explorer-rename-document">Novo nome</Label>
+          <Input
+            id="explorer-rename-document"
+            ref="renameDialogInputEl"
+            v-model="renameDialogValue"
+            type="text"
+            autocomplete="off"
+            @keyup.enter="submitRenameDialog"
+          />
+        </div>
+        <Alert v-if="renameDialogError" variant="destructive">
+          <AlertDescription>{{ renameDialogError }}</AlertDescription>
+        </Alert>
+        <DialogFooter class="gap-2">
+          <Button type="button" variant="outline" @click="closeRenameDialog">Cancelar</Button>
+          <Button type="button" @click="submitRenameDialog">Salvar</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+
+    <Dialog :open="lockDialogOpen" @update:open="handleLockDialogOpenChange">
+      <DialogContent class="sm:max-w-md" @open-auto-focus.prevent="focusLockDialogInput">
+        <DialogHeader>
+          <DialogTitle>Travar documento</DialogTitle>
+          <DialogDescription>
+            Informe a senha para travar &quot;{{ lockDialogTargetName }}&quot;.
+          </DialogDescription>
+        </DialogHeader>
+        <div class="space-y-2">
+          <Label for="explorer-lock-password">Senha do documento</Label>
+          <Input
+            id="explorer-lock-password"
+            ref="lockDialogInputEl"
+            v-model="lockDialogPassword"
+            type="password"
+            autocomplete="off"
+            @keyup.enter="submitLockDialog"
+          />
+        </div>
+        <Alert v-if="lockDialogError" variant="destructive">
+          <AlertDescription>{{ lockDialogError }}</AlertDescription>
+        </Alert>
+        <DialogFooter class="gap-2">
+          <Button type="button" variant="outline" @click="closeLockDialog">Cancelar</Button>
+          <Button type="button" @click="submitLockDialog">Travar</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+
+    <AlertDialog :open="removeDialogOpen" @update:open="handleRemoveDialogOpenChange">
+      <AlertDialogContent class="sm:max-w-md">
+        <AlertDialogHeader>
+          <AlertDialogTitle>Remover documento</AlertDialogTitle>
+          <AlertDialogDescription>
+            Remover o documento &quot;{{ removeDialogTargetName }}&quot; permanentemente?
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter class="gap-2">
+          <Button type="button" variant="outline" @click="closeRemoveDialog">Cancelar</Button>
+          <Button type="button" variant="destructive" @click="confirmRemoveDialog">Remover</Button>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { ArrowLeft, RefreshCw } from 'lucide-vue-next'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Separator } from '@/components/ui/separator'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Separator } from '@/components/ui/separator'
 import { Switch } from '@/components/ui/switch'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { createDocumentAPI, type DocumentSummary, type ListSummariesOptions } from '../services/document-api'
 import { getApiBaseUrl } from '../services/config'
 import { downloadMarkdown, downloadPDF } from '../services/export'
@@ -215,6 +340,8 @@ import { useDocumentList } from '../composables/useDocumentList'
 
 const documentAPI = createDocumentAPI(getApiBaseUrl())
 const EXPLORER_DOCUMENTS_CACHE_KEY = 'explorer.documentsCache'
+const sortButtonClass = 'h-auto p-0 text-sm font-medium text-gray-700 hover:bg-transparent hover:text-gray-900'
+const documentLinkClass = 'h-auto justify-start whitespace-normal p-0 text-left font-normal text-gray-800 hover:text-gray-900'
 
 // ── Composables ────────────────────────────────────────────────────
 
@@ -238,6 +365,18 @@ const isDocumentSummary = (item: unknown): item is DocumentSummary => {
 
 const errorMessage = ref('')
 const masterPasswordInputEl = ref<{ $el: HTMLInputElement } | null>(null)
+const renameDialogOpen = ref(false)
+const renameDialogTargetName = ref('')
+const renameDialogValue = ref('')
+const renameDialogError = ref('')
+const renameDialogInputEl = ref<{ $el: HTMLInputElement } | null>(null)
+const lockDialogOpen = ref(false)
+const lockDialogTargetName = ref('')
+const lockDialogPassword = ref('')
+const lockDialogError = ref('')
+const lockDialogInputEl = ref<{ $el: HTMLInputElement } | null>(null)
+const removeDialogOpen = ref(false)
+const removeDialogTargetName = ref('')
 
 const displayedErrorMessage = computed(() => {
   if (list.invalidNameSearchRegex.value) {
@@ -253,6 +392,71 @@ const displayedErrorMessage = computed(() => {
 
 const focusMasterPassword = () => {
   nextTick(() => masterPasswordInputEl.value?.$el?.focus())
+}
+
+const focusRenameDialogInput = () => {
+  nextTick(() => renameDialogInputEl.value?.$el?.focus())
+}
+
+const focusLockDialogInput = () => {
+  nextTick(() => lockDialogInputEl.value?.$el?.focus())
+}
+
+const resetRenameDialog = () => {
+  renameDialogTargetName.value = ''
+  renameDialogValue.value = ''
+  renameDialogError.value = ''
+}
+
+const closeRenameDialog = () => {
+  renameDialogOpen.value = false
+  resetRenameDialog()
+}
+
+const handleRenameDialogOpenChange = (open: boolean) => {
+  renameDialogOpen.value = open
+  if (open) {
+    focusRenameDialogInput()
+    return
+  }
+
+  resetRenameDialog()
+}
+
+const resetLockDialog = () => {
+  lockDialogTargetName.value = ''
+  lockDialogPassword.value = ''
+  lockDialogError.value = ''
+}
+
+const closeLockDialog = () => {
+  lockDialogOpen.value = false
+  resetLockDialog()
+}
+
+const handleLockDialogOpenChange = (open: boolean) => {
+  lockDialogOpen.value = open
+  if (open) {
+    focusLockDialogInput()
+    return
+  }
+
+  resetLockDialog()
+}
+
+const resetRemoveDialog = () => {
+  removeDialogTargetName.value = ''
+}
+
+const closeRemoveDialog = () => {
+  removeDialogOpen.value = false
+  resetRemoveDialog()
+}
+
+const handleRemoveDialogOpenChange = (open: boolean) => {
+  removeDialogOpen.value = open
+  if (open) return
+  resetRemoveDialog()
 }
 
 onMounted(() => {
@@ -307,23 +511,44 @@ const renameSelected = async () => {
   const selectedName = getSelectedDocumentName()
   if (!selectedName) return
 
-  const nextNameRaw = window.prompt('Novo nome do documento:', selectedName)
-  if (!nextNameRaw) return
+  renameDialogTargetName.value = selectedName
+  renameDialogValue.value = selectedName
+  renameDialogError.value = ''
+  renameDialogOpen.value = true
+  focusRenameDialogInput()
+}
+
+const submitRenameDialog = async () => {
+  if (!renameDialogTargetName.value) return
+
+  const nextNameRaw = renameDialogValue.value
+  if (!nextNameRaw) {
+    closeRenameDialog()
+    return
+  }
 
   const nextName = trimTrailingSlashes(nextNameRaw.trim())
   if (!nextName) {
-    errorMessage.value = 'Nome inválido. Remova a barra no final do nome e tente novamente.'
+    renameDialogError.value = 'Nome inválido. Remova a barra no final do nome e tente novamente.'
     return
   }
-  if (nextName === selectedName) return
+  if (nextName === renameDialogTargetName.value) {
+    closeRenameDialog()
+    return
+  }
 
-  const ok = await documentAPI.renameDocument(selectedName, nextName, session.masterPassword.value)
+  const ok = await documentAPI.renameDocument(
+    renameDialogTargetName.value,
+    nextName,
+    session.masterPassword.value,
+  )
   if (!ok) {
-    errorMessage.value = 'Não foi possível renomear o documento.'
+    renameDialogError.value = 'Não foi possível renomear o documento.'
     return
   }
 
   list.selectedDocumentName.value = nextName
+  closeRenameDialog()
   await refreshDocuments()
 }
 
@@ -333,9 +558,20 @@ const removeSelected = async () => {
   const selectedName = getSelectedDocumentName()
   if (!selectedName) return
 
-  if (!window.confirm(`Remover o documento "${selectedName}" permanentemente?`)) return
+  removeDialogTargetName.value = selectedName
+  removeDialogOpen.value = true
+}
 
-  const ok = await documentAPI.removeDocument(selectedName, session.masterPassword.value)
+const confirmRemoveDialog = async () => {
+  errorMessage.value = ''
+  if (!session.ensureMasterPassword()) {
+    closeRemoveDialog()
+    return
+  }
+  if (!removeDialogTargetName.value) return
+
+  const ok = await documentAPI.removeDocument(removeDialogTargetName.value, session.masterPassword.value)
+  closeRemoveDialog()
   if (!ok) {
     errorMessage.value = 'Não foi possível remover o documento.'
     return
@@ -379,17 +615,33 @@ const lockSelected = async () => {
   const selectedName = getSelectedDocumentName()
   if (!selectedName) return
 
-  const password = window.prompt('Senha para travar o documento:')
-  if (!password || !password.trim()) {
-    errorMessage.value = 'Informe uma senha válida para travar.'
+  lockDialogTargetName.value = selectedName
+  lockDialogPassword.value = ''
+  lockDialogError.value = ''
+  lockDialogOpen.value = true
+  focusLockDialogInput()
+}
+
+const submitLockDialog = async () => {
+  errorMessage.value = ''
+  if (!session.ensureMasterPassword()) {
+    closeLockDialog()
+    return
+  }
+  if (!lockDialogTargetName.value) return
+
+  if (!lockDialogPassword.value || !lockDialogPassword.value.trim()) {
+    lockDialogError.value = 'Informe uma senha válida para travar.'
     return
   }
 
-  const ok = await documentAPI.lock(selectedName, password.trim())
+  const ok = await documentAPI.lock(lockDialogTargetName.value, lockDialogPassword.value.trim())
   if (!ok) {
-    errorMessage.value = 'Não foi possível travar o documento.'
+    lockDialogError.value = 'Não foi possível travar o documento.'
     return
   }
+
+  closeLockDialog()
   await refreshDocuments()
 }
 

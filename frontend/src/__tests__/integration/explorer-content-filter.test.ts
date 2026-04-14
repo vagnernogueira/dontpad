@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/vue'
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/vue'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 const listSummariesMock = vi.fn()
@@ -74,6 +74,15 @@ const unlockExplorerIfNeeded = async () => {
   await fireEvent.submit(submitButton.closest('form') as HTMLFormElement)
 }
 
+const selectDocument = async (documentName: string) => {
+  const documentRow = screen.getByText(documentName).closest('tr') as HTMLTableRowElement | null
+  if (!documentRow) {
+    throw new Error(`Row not found for document: ${documentName}`)
+  }
+
+  await fireEvent.click(within(documentRow).getByRole('checkbox'))
+}
+
 describe('Explorer content filter flow', () => {
   beforeEach(() => {
     vi.resetModules()
@@ -104,7 +113,11 @@ describe('Explorer content filter flow', () => {
 
   afterEach(() => {
     cleanup()
-    vi.runOnlyPendingTimers()
+    try {
+      vi.runOnlyPendingTimers()
+    } catch {
+      // Ignore when a test switched back to real timers.
+    }
     vi.useRealTimers()
     vi.clearAllMocks()
   })
@@ -211,5 +224,92 @@ describe('Explorer content filter flow', () => {
     expect(screen.getByText('Expressão regular inválida no filtro de conteúdo.')).toBeInTheDocument()
     expect(listSummariesMock).not.toHaveBeenCalled()
     expect(screen.getByText('alpha-doc')).toBeInTheDocument()
+  })
+
+  it('renames the selected document through the dialog flow', async () => {
+    vi.useRealTimers()
+    renameDocumentMock.mockResolvedValue(true)
+
+    const { default: Explorer } = await import('../../components/Explorer.vue')
+
+    render(Explorer, {
+      global: {
+        stubs: {
+          RouterLink: {
+            template: '<a><slot /></a>'
+          }
+        }
+      }
+    })
+
+    await unlockExplorerIfNeeded()
+    await screen.findByText('alpha-doc')
+
+    await selectDocument('alpha-doc')
+    await fireEvent.click(screen.getByRole('button', { name: 'Renomear' }))
+
+    await fireEvent.update(await screen.findByLabelText('Novo nome'), 'renamed-doc')
+    await fireEvent.click(screen.getByRole('button', { name: 'Salvar' }))
+    await waitFor(() => {
+      expect(renameDocumentMock).toHaveBeenCalledWith('alpha-doc', 'renamed-doc', 'master')
+    })
+  })
+
+  it('locks the selected document through the dialog flow', async () => {
+    vi.useRealTimers()
+    lockMock.mockResolvedValue(true)
+
+    const { default: Explorer } = await import('../../components/Explorer.vue')
+
+    render(Explorer, {
+      global: {
+        stubs: {
+          RouterLink: {
+            template: '<a><slot /></a>'
+          }
+        }
+      }
+    })
+
+    await unlockExplorerIfNeeded()
+    await screen.findByText('alpha-doc')
+
+    await selectDocument('alpha-doc')
+    await fireEvent.click(screen.getByRole('button', { name: 'Travar' }))
+
+    await fireEvent.update(await screen.findByLabelText('Senha do documento'), 'doc-pass')
+    await fireEvent.click(screen.getByRole('button', { name: 'Travar' }))
+    await waitFor(() => {
+      expect(lockMock).toHaveBeenCalledWith('alpha-doc', 'doc-pass')
+    })
+  })
+
+  it('removes the selected document through the confirmation dialog', async () => {
+    vi.useRealTimers()
+    removeDocumentMock.mockResolvedValue(true)
+
+    const { default: Explorer } = await import('../../components/Explorer.vue')
+
+    render(Explorer, {
+      global: {
+        stubs: {
+          RouterLink: {
+            template: '<a><slot /></a>'
+          }
+        }
+      }
+    })
+
+    await unlockExplorerIfNeeded()
+    await screen.findByText('alpha-doc')
+
+    await selectDocument('alpha-doc')
+    await fireEvent.click(screen.getByRole('button', { name: 'Remover' }))
+
+    const confirmationDialog = await screen.findByRole('alertdialog')
+    await fireEvent.click(within(confirmationDialog).getByRole('button', { name: 'Remover' }))
+    await waitFor(() => {
+      expect(removeDocumentMock).toHaveBeenCalledWith('alpha-doc', 'master')
+    })
   })
 })
