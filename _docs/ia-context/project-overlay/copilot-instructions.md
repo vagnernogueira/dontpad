@@ -46,6 +46,8 @@ Não testar via navegador web. Para demandas multi-fase, trabalhar em etapas.
 
 Preservar comportamento atual salvo instrução explícita. Operar no escopo mínimo sem melhorias paralelas. Não inferir fatos sem evidência no código. Declarar suposições quando faltar contexto. Não alterar contrato de API pública sem justificativa. Priorizar mecanismos nativos do CodeMirror. Preferir solução simples sobre abstração prematura.
 
+IMPORTANTE! Para produzir ou elaborar demandas use a skill `_docs/ia-context/skills/generate-demand/SKILL.md`
+
 Conflito de fontes: código-fonte > `_docs/ARCHITECTURE.md` > `README.md` > overlay de projeto > docs auxiliares.
 
 Proibido: inventar endpoints/arquivos/comportamentos · omitir conflito documental · responder sem âncora em evidências · expandir escopo sem solicitação.

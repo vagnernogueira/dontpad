@@ -8,8 +8,11 @@
         <DialogTitle>Inserir Imagem</DialogTitle>
       </DialogHeader>
       <div class="mb-3">
-        <label class="input-label">Texto Alternativo (Alt)</label>
+        <Label for="image-dialog-alt" class="mb-1 block text-sm font-normal text-muted-foreground">
+          Texto Alternativo (Alt)
+        </Label>
         <Input
+          id="image-dialog-alt"
           ref="altInput"
           v-model="alt"
           type="text"
@@ -18,8 +21,11 @@
         />
       </div>
       <div class="mb-4">
-        <label class="input-label">URL da Imagem</label>
+        <Label for="image-dialog-url" class="mb-1 block text-sm font-normal text-muted-foreground">
+          URL da Imagem
+        </Label>
         <Input
+          id="image-dialog-url"
           v-model="url"
           type="text"
           placeholder="https://..."
@@ -27,8 +33,10 @@
         />
       </div>
       <DialogFooter>
-        <button class="btn-dialog-cancel" @click="$emit('close')">Cancelar</button>
-        <button class="btn-dialog-confirm" :disabled="!url" @click="insert">Inserir</button>
+        <Button type="button" variant="ghost" size="sm" class="text-muted-foreground" @click="$emit('close')">
+          Cancelar
+        </Button>
+        <Button type="button" size="sm" :disabled="!url" @click="insert">Inserir</Button>
       </DialogFooter>
     </DialogContent>
   </Dialog>
@@ -36,7 +44,9 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import {
   Dialog,
   DialogContent,

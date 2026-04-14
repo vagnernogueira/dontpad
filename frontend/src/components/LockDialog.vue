@@ -8,8 +8,11 @@
         <DialogTitle>Travar Documento</DialogTitle>
       </DialogHeader>
       <div class="mb-3">
-        <label class="input-label">Senha do Documento</label>
+        <Label for="lock-dialog-password" class="mb-1 block text-sm font-normal text-muted-foreground">
+          Senha do Documento
+        </Label>
         <Input
+          id="lock-dialog-password"
           ref="passwordInput"
           v-model="password"
           type="password"
@@ -19,9 +22,13 @@
       </div>
       <p v-if="error" class="mb-3 text-xs text-red-600">{{ error }}</p>
       <DialogFooter>
-        <button class="btn-dialog-cancel" @click="$emit('close')">Cancelar</button>
-        <button v-if="isLocked" class="btn-dialog-danger" @click="removeLock">Remover senha</button>
-        <button class="btn-dialog-confirm" :disabled="!password.trim()" @click="lock">Travar</button>
+        <Button type="button" variant="ghost" size="sm" class="text-muted-foreground" @click="$emit('close')">
+          Cancelar
+        </Button>
+        <Button v-if="isLocked" type="button" variant="destructive" size="sm" @click="removeLock">
+          Remover senha
+        </Button>
+        <Button type="button" size="sm" :disabled="!password.trim()" @click="lock">Travar</Button>
       </DialogFooter>
     </DialogContent>
   </Dialog>
@@ -29,7 +36,9 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import {
   Dialog,
   DialogContent,

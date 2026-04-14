@@ -1,5 +1,6 @@
 import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/vue'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { nextTick } from 'vue'
 
 const listSummariesMock = vi.fn()
 const verifyAccessMock = vi.fn()
@@ -83,6 +84,12 @@ const selectDocument = async (documentName: string) => {
   await fireEvent.click(within(documentRow).getByRole('checkbox'))
 }
 
+const flushContentSearchDebounce = async () => {
+  await nextTick()
+  await vi.advanceTimersByTimeAsync(300)
+  await nextTick()
+}
+
 describe('Explorer content filter flow', () => {
   beforeEach(() => {
     vi.resetModules()
@@ -145,8 +152,7 @@ describe('Explorer content filter flow', () => {
     expect(screen.queryByText('beta-doc')).not.toBeInTheDocument()
 
     await fireEvent.update(screen.getByLabelText('Ct'), 'needle')
-
-    await vi.advanceTimersByTimeAsync(300)
+    await flushContentSearchDebounce()
 
     await waitFor(() => {
       expect(listSummariesMock).toHaveBeenLastCalledWith('master', { contentContains: 'needle' })
@@ -175,7 +181,7 @@ describe('Explorer content filter flow', () => {
     const regexSwitch = screen.getByRole('switch', { name: 'Rgx' })
     await fireEvent.click(regexSwitch)
     await fireEvent.update(screen.getByLabelText('Ct'), '^another\\s+needle')
-    await vi.advanceTimersByTimeAsync(300)
+    await flushContentSearchDebounce()
 
     await waitFor(() => {
       expect(listSummariesMock).toHaveBeenLastCalledWith('master', { contentMatchesRegex: '^another\\s+needle' })
@@ -219,7 +225,7 @@ describe('Explorer content filter flow', () => {
 
     await fireEvent.click(screen.getByRole('switch', { name: 'Rgx' }))
     await fireEvent.update(screen.getByLabelText('Ct'), '(')
-    await vi.advanceTimersByTimeAsync(300)
+    await flushContentSearchDebounce()
 
     expect(screen.getByText('Expressão regular inválida no filtro de conteúdo.')).toBeInTheDocument()
     expect(listSummariesMock).not.toHaveBeenCalled()

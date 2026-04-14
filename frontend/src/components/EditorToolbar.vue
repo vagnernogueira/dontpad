@@ -1,5 +1,5 @@
 <template>
-  <div class="toolbar">
+  <div class="z-10 flex items-center gap-1 overflow-x-auto overflow-y-hidden border-b border-border bg-background px-2 py-btn text-sm text-muted-foreground shadow-sm sm:gap-1.5 sm:px-4">
     <Button variant="ghost" size="icon" class="h-7 w-7 shrink-0 hover:bg-gray-200 hover:text-gray-900" title="Desfazer" @click="$emit('undo')">
       <Undo2 :size="16" />
     </Button>

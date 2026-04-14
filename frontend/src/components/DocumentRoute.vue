@@ -8,11 +8,17 @@
       </div>
 
       <div v-else-if="requiresPassword" class="h-full flex items-center justify-center px-4">
-        <div class="dialog-card">
-          <h3 class="dialog-title">Documento Protegido</h3>
+        <Card class="w-full max-w-md shadow-xl">
+          <CardHeader class="pb-4">
+            <CardTitle class="text-lg text-gray-800">Documento Protegido</CardTitle>
+          </CardHeader>
+          <CardContent class="space-y-3">
           <div class="mb-3">
-            <label class="input-label">Senha para continuar</label>
+            <Label for="document-route-password" class="mb-1 block text-sm font-normal text-muted-foreground">
+              Senha para continuar
+            </Label>
             <Input
+              id="document-route-password"
               ref="accessPasswordInput"
               v-model="accessPassword"
               type="password"
@@ -21,12 +27,13 @@
             />
           </div>
           <p v-if="errorMessage" class="mb-3 text-xs text-red-600">{{ errorMessage }}</p>
-          <div class="dialog-footer">
-            <button class="btn-dialog-confirm" :disabled="!accessPassword.trim()" @click="retryWithPassword">
+          <div class="flex justify-end">
+            <Button type="button" size="sm" :disabled="!accessPassword.trim()" @click="retryWithPassword">
               Validar
-            </button>
+            </Button>
           </div>
-        </div>
+          </CardContent>
+        </Card>
       </div>
 
       <div v-else-if="errorMessage" class="h-full flex items-center justify-center text-sm text-red-600 px-4 text-center">
@@ -50,7 +57,10 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import Editor from './Editor.vue'
 import * as exportService from '../services/export'
 import { markdownStyles } from '../services/pdf-styles'

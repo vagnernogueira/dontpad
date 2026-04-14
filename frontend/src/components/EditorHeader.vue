@@ -1,7 +1,10 @@
 <template>
-  <header class="page-header">
+  <header class="z-20 flex items-center justify-between bg-gray-900 px-3 py-btn text-gray-100 shadow-md sm:px-5 sm:py-header">
     <div class="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
-      <router-link to="/" class="page-header-link">
+      <router-link
+        to="/"
+        class="flex shrink-0 items-center gap-1 text-base font-bold transition-colors hover:text-white sm:text-lg"
+      >
         <ArrowLeft :size="18" />
         <span class="hidden xs:inline">Início</span>
       </router-link>

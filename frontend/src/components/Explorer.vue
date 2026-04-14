@@ -1,8 +1,11 @@
 <template>
   <div class="flex h-full w-full flex-col text-gray-900">
-    <header class="page-header">
+    <header class="z-20 flex items-center justify-between bg-gray-900 px-3 py-btn text-gray-100 shadow-md sm:px-5 sm:py-header">
       <div class="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
-        <router-link to="/" class="page-header-link">
+        <router-link
+          to="/"
+          class="flex shrink-0 items-center gap-1 text-base font-bold transition-colors hover:text-white sm:text-lg"
+        >
           <ArrowLeft :size="18" />
           <span class="hidden xs:inline">Início</span>
         </router-link>
@@ -29,7 +32,7 @@
       </div>
     </header>
 
-    <div class="toolbar">
+    <div class="z-10 flex items-center gap-1 overflow-x-auto overflow-y-hidden border-b border-border bg-background px-2 py-btn text-sm text-muted-foreground shadow-sm sm:gap-1.5 sm:px-4">
       <template v-if="session.hasAccess.value">
         <div class="flex items-center gap-2 shrink-0">
           <Label for="explorer-search" class="text-xs font-medium text-gray-600 shrink-0">Nm</Label>

@@ -8,8 +8,11 @@
         <DialogTitle>Inserir Link</DialogTitle>
       </DialogHeader>
       <div class="mb-3">
-        <label class="input-label">Texto do Link</label>
+        <Label for="link-dialog-text" class="mb-1 block text-sm font-normal text-muted-foreground">
+          Texto do Link
+        </Label>
         <Input
+          id="link-dialog-text"
           ref="textInput"
           v-model="text"
           type="text"
@@ -18,8 +21,11 @@
         />
       </div>
       <div class="mb-4">
-        <label class="input-label">URL / Link</label>
+        <Label for="link-dialog-url" class="mb-1 block text-sm font-normal text-muted-foreground">
+          URL / Link
+        </Label>
         <Input
+          id="link-dialog-url"
           v-model="url"
           type="text"
           placeholder="https://"
@@ -27,8 +33,10 @@
         />
       </div>
       <DialogFooter>
-        <button class="btn-dialog-cancel" @click="$emit('close')">Cancelar</button>
-        <button class="btn-dialog-confirm" :disabled="!url" @click="insert">Inserir</button>
+        <Button type="button" variant="ghost" size="sm" class="text-muted-foreground" @click="$emit('close')">
+          Cancelar
+        </Button>
+        <Button type="button" size="sm" :disabled="!url" @click="insert">Inserir</Button>
       </DialogFooter>
     </DialogContent>
   </Dialog>
@@ -36,7 +44,9 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import {
   Dialog,
   DialogContent,

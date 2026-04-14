@@ -10,7 +10,9 @@
 
       <!-- Emoji picker -->
       <div class="mb-4">
-        <label class="input-label mb-2">Escolha seu avatar</label>
+        <Label class="mb-2 block text-sm font-normal text-muted-foreground">
+          Escolha seu avatar
+        </Label>
         <div class="grid grid-cols-8 gap-1.5 max-h-40 overflow-y-auto p-1 border border-gray-200 rounded-md bg-gray-50">
           <button
             v-for="animal in ANIMAL_EMOJIS"
@@ -26,8 +28,11 @@
 
       <!-- Name input -->
       <div class="mb-4">
-        <label class="input-label">Nome exibido</label>
+        <Label for="profile-dialog-name" class="mb-1 block text-sm font-normal text-muted-foreground">
+          Nome exibido
+        </Label>
         <Input
+          id="profile-dialog-name"
           ref="nameInput"
           v-model="editName"
           type="text"
@@ -46,8 +51,10 @@
       </div>
 
       <DialogFooter>
-        <button class="btn-dialog-cancel" @click="$emit('close')">Cancelar</button>
-        <button class="btn-dialog-confirm" :disabled="!editName.trim()" @click="save">Salvar</button>
+        <Button type="button" variant="ghost" size="sm" class="text-muted-foreground" @click="$emit('close')">
+          Cancelar
+        </Button>
+        <Button type="button" size="sm" :disabled="!editName.trim()" @click="save">Salvar</Button>
       </DialogFooter>
     </DialogContent>
   </Dialog>
@@ -56,7 +63,9 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { ANIMAL_EMOJIS, type CollaboratorProfile } from '../cm-utils/cursor'
+import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import {
   Dialog,
   DialogContent,

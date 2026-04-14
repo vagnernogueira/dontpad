@@ -8,8 +8,11 @@
         <DialogTitle>Documento Protegido</DialogTitle>
       </DialogHeader>
       <div class="mb-3">
-        <label class="input-label">Senha para abrir</label>
+        <Label for="access-dialog-password" class="mb-1 block text-sm font-normal text-muted-foreground">
+          Senha para abrir
+        </Label>
         <Input
+          id="access-dialog-password"
           ref="passwordInput"
           v-model="password"
           type="password"
@@ -19,8 +22,10 @@
       </div>
       <p v-if="error" class="mb-3 text-xs text-red-600">{{ error }}</p>
       <DialogFooter>
-        <button class="btn-dialog-cancel" @click="$emit('close')">Cancelar</button>
-        <button class="btn-dialog-confirm" :disabled="!password.trim()" @click="unlock">Abrir</button>
+        <Button type="button" variant="ghost" size="sm" class="text-muted-foreground" @click="$emit('close')">
+          Cancelar
+        </Button>
+        <Button type="button" size="sm" :disabled="!password.trim()" @click="unlock">Abrir</Button>
       </DialogFooter>
     </DialogContent>
   </Dialog>
@@ -28,7 +33,9 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import {
   Dialog,
   DialogContent,
