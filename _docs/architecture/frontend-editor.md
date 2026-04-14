@@ -11,7 +11,7 @@ Este módulo documenta a arquitetura do frontend focada no editor colaborativo: 
 ## Arquivos-fonte principais
 
 - `frontend/src/components/*.vue` — 14 componentes Vue
-- `frontend/src/components/ui/` — componentes shadcn-vue (dialog, button)
+- `frontend/src/components/ui/` — 13 diretórios de componentes shadcn-vue (`alert`, `alert-dialog`, `avatar`, `badge`, `button`, `card`, `checkbox`, `dialog`, `input`, `label`, `separator`, `switch`, `table`)
 - `frontend/src/lib/utils.ts` — utilitário `cn()` (clsx + tailwind-merge)
 - `frontend/src/composables/*.ts` — 5 composables Vue 3
 - `frontend/src/cm-commands/*` — 5 arquivos (formatting, history, insertions, table, index)
@@ -19,14 +19,14 @@ Este módulo documenta a arquitetura do frontend focada no editor colaborativo: 
 - `frontend/src/cm-plugins/*` — 17 plugins + barrel index
 - `frontend/src/cm-utils/*` — 6 módulos utilitários + barrel index
 - `frontend/src/services/*` — 5 serviços + barrel index
-- `frontend/src/styles/*.css` — 6 arquivos CSS modulares (inclui camada de componentes)
+- `frontend/src/styles/*.css` — 5 arquivos CSS modulares (inclui camada de componentes)
 
 ## Visão da camada
 
 ```filesystem
 src/
 ├── components/       # 14 componentes Vue
-│   └── ui/           # componentes shadcn-vue (dialog, button)
+│   └── ui/           # componentes shadcn-vue compartilhados (13 diretórios)
 ├── lib/              # utils.ts — cn()
 ├── composables/      # 5 composables (lógica reativa extraída)
 ├── services/         # 5 serviços + barrel index
@@ -34,7 +34,7 @@ src/
 ├── cm-extensions/    # 2 arquivos (editor-theme, index)
 ├── cm-plugins/       # 17 plugins + barrel index
 ├── cm-utils/         # 6 módulos + barrel index
-└── styles/           # 6 arquivos CSS modulares
+└── styles/           # 5 arquivos CSS modulares
 ```
 
 - `DocumentRoute.vue` resolve modos de acesso por query params e delega fallback para edição padrão;
@@ -45,6 +45,7 @@ src/
 - `cm-plugins` encapsula decorações DOM, keymaps e interações;
 - `cm-utils` fornece utilitários puros (parsing, snippet registry, math evaluator);
 - `services` isola infraestrutura (API, export, config, persistence);
+- a base visual usa Tailwind CSS v4 em `src/styles/base.css`, mantendo `tailwind.config.js` referenciado via `@config` para tokens e plugins;
 - `styles` organiza CSS global em módulos por responsabilidade.
 
 ## Componentes e responsabilidades
@@ -175,12 +176,19 @@ CSS global organizado em módulos importados sequencialmente por `index.css`:
 
 | Arquivo | Conteúdo |
 |---|---|
-| `base.css` | Tailwind directives, variáveis CSS `:root` do projeto + variáveis CSS shadcn-vue (`--background`, `--foreground`, `--primary`, `--border`, etc.), estilos de `html`/`body` |
+| `base.css` | Entrada do Tailwind CSS v4 com `@import "tailwindcss"`, `@config "../../tailwind.config.js"`, `@custom-variant dark`, variáveis CSS do projeto/shadcn-vue e estilos de `html`/`body` |
 | `components.css` | Abstrações CSS com `@layer components` e `@apply` (layout, botões, inputs); classes de diálogo (`.dialog-*`) mantidas apenas como fallback |
 | `codemirror.css` | Estilos do CodeMirror (editor chrome, cursor, gutter) |
 | `plugins.css` | Widgets de plugins CM (code blocks, links, images, checkboxes, etc.) |
 | `collaboration.css` | Cursores Yjs e avatares de colaboradores |
 | `responsive.css` | Media queries para mobile/tablet |
+
+### Tailwind CSS v4 (modelo atual)
+
+- `frontend/src/styles/base.css` é o ponto de entrada do Tailwind no frontend e também o arquivo apontado por `frontend/components.json` para a CLI do shadcn-vue.
+- O projeto usa Tailwind CSS v4 em modo híbrido: o CSS é inicializado por `@import "tailwindcss"`, mas `frontend/tailwind.config.js` continua ativo via `@config`.
+- `tailwind.config.js` concentra tokens customizados (`spacing`, `fontFamily`, `colors`, `borderRadius`), breakpoint `xs` e plugins como `tailwindcss-animate`.
+- A documentação não deve tratar este setup como uma configuração v4 puramente CSS-first com todos os tokens migrados para `@theme inline`, porque esse não é o estado atual do repositório.
 
 ### CSS Component Layer (`components.css`)
 
@@ -253,14 +261,25 @@ Regras:
 
 ## shadcn-vue (`src/components/ui/`)
 
-Components copiados via CLI (`npx shadcn-vue@latest add`) para `src/components/ui/`. Não são dependência versionada — pertencem ao projeto e podem ser editados.
+Components copiados via CLI (`npx shadcn-vue@latest add`) para `src/components/ui/`. Não são dependência versionada — pertencem ao projeto e podem ser editados. A verificação operacional atual (`npm run shadcn:info` em `frontend/`) identifica o frontend como `vite`, usa `src/styles/base.css`, `tailwind.config.js` e reporta `tailwindVersion: v4`.
 
 Contexto operacional: a configuração da CLI vive em `frontend/components.json`. Para inspecionar ou adicionar componentes, executar os comandos dentro de `frontend/` com `npx shadcn-vue@latest ...` ou scripts do pacote. Executar `npx shadcn@latest` na raiz do workspace produz falso negativo (`framework: Manual`) porque consulta a ferramenta/diretório errados para este projeto Vue.
 
-| Diretório | Conteúdo | Status |
+| Diretório | Papel principal | Status |
 |---|---|---|
-| `ui/dialog/` | `Dialog`, `DialogContent`, `DialogHeader`, `DialogTitle`, `DialogFooter`, `DialogClose`, `DialogDescription`, `DialogScrollContent`, `DialogTrigger` | Instalado |
-| `ui/button/` | `Button` (com variantes via `class-variance-authority`) | Instalado |
+| `ui/alert/` | Feedback inline com `Alert`, `AlertTitle`, `AlertDescription` | Instalado |
+| `ui/alert-dialog/` | Confirmações bloqueantes e ações destrutivas | Instalado |
+| `ui/avatar/` | Avatares e fallback visual de colaboradores | Instalado |
+| `ui/badge/` | Badges e rótulos visuais compactos | Instalado |
+| `ui/button/` | `Button` com variantes via `class-variance-authority` | Instalado |
+| `ui/card/` | Containers visuais estruturados | Instalado |
+| `ui/checkbox/` | Seleção booleana em formulários | Instalado |
+| `ui/dialog/` | Diálogos, overlay, header/footer e variações de conteúdo | Instalado |
+| `ui/input/` | Campos de texto base | Instalado |
+| `ui/label/` | Labels de formulário | Instalado |
+| `ui/separator/` | Separadores visuais horizontais/verticais | Instalado |
+| `ui/switch/` | Toggle booleano | Instalado |
+| `ui/table/` | Estrutura tabular reutilizável | Instalado |
 
 Dependência headless: `reka-ui` (gerencia focus trap, Escape, `aria-modal`, `role=dialog`, portal DOM).  
 Utilidade de classes: `cn()` em `src/lib/utils.ts` (combina `clsx` + `tailwind-merge`).
@@ -285,5 +304,6 @@ Atualizar este módulo ao alterar:
 - composables e suas interfaces;
 - interfaces públicas de `services/*`;
 - componentes instalados em `src/components/ui/` (shadcn-vue);
+- `frontend/components.json`, `src/styles/base.css` ou `tailwind.config.js` quando mudarem a integração do Tailwind CSS v4;
 - estrutura de arquivos CSS, CSS Component Layer ou design tokens Tailwind;
 - fluxos de acesso, edição ou export.

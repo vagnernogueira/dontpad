@@ -11,7 +11,7 @@ participantes.
 ## Stack de Tecnologias
 
 - **Linguagem:** TypeScript
-- **Frontend:** Vue.js 3, Vite, Tailwind CSS, CodeMirror 6
+- **Frontend:** Vue.js 3, Vite, Tailwind CSS v4, shadcn-vue, CodeMirror 6
 - **Backend:** Node.js, Express, WebSocket (`ws`)
 - **Colaboração em tempo real:** Yjs (`y-websocket`, `y-codemirror.next`)
 - **Banco de dados:** LevelDB via `y-leveldb`
@@ -35,7 +35,9 @@ participantes.
 - **Ícones:** usar `lucide-vue-next` em telas e componentes novos.
 - **Evitar SVG inline:** não adicionar tags `<svg>` diretamente em templates Vue.
 - **Consistência:** ao precisar de novo ícone, importar o componente da biblioteca.
+- **UI base:** o frontend mantém componentes shadcn-vue versionados em `frontend/src/components/ui/`, hoje com `alert`, `alert-dialog`, `avatar`, `badge`, `button`, `card`, `checkbox`, `dialog`, `input`, `label`, `separator`, `switch` e `table`.
 - **shadcn-vue:** executar a CLI a partir de `frontend/`, usando `npx shadcn-vue@latest ...` ou `npm run shadcn:info`. Rodar `npx shadcn@latest` na raiz identifica o workspace como projeto manual e não valida a configuração real do frontend.
+- **Tailwind CSS v4:** o frontend usa `src/styles/base.css` como ponto de entrada com `@import "tailwindcss"`; `tailwind.config.js` continua ativo via `@config` para tokens, breakpoints e plugins.
 
 ## Guia de Onboarding
 

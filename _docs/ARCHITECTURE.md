@@ -69,7 +69,7 @@ Características principais:
 | Colaboração       | Yjs, y-websocket, y-codemirror.next                       |
 | Backend           | Node.js, Express, ws, TypeScript                          |
 | Persistência      | y-leveldb, LevelDB, metadados JSON                        |
-| UI/UX             | Tailwind CSS, shadcn-vue, reka-ui, Lucide Vue Next        |
+| UI/UX             | Tailwind CSS v4 (modelo híbrido com `base.css` + `@config`), shadcn-vue, reka-ui, Lucide Vue Next |
 | Export            | marked, html2pdf.js                                       |
 | Qualidade de código | ESLint v9 (flat config), typescript-eslint v8, eslint-plugin-vue v9, Prettier v3 |
 
@@ -156,12 +156,14 @@ _docs/
 - **Factory Pattern** em services para configuração e testabilidade;
 - **Composables Pattern** para extrair lógica reativa de componentes Vue complexos (`useYjsEditor`, `useDocumentAccess`, `useCollaborators`, `useExplorerSession`, `useDocumentList`);
 - **Component Composition** com sub-componentes focados: `EditorHeader`, `EditorToolbar`, `BaseDialog` (thin wrapper shadcn), `LinkDialog`, `ImageDialog`, `LockDialog`, `AccessDialog`, `ProfileDialog`;
+- **Camada UI shadcn-vue expandida** em `frontend/src/components/ui/`, hoje com `alert`, `alert-dialog`, `avatar`, `badge`, `button`, `card`, `checkbox`, `dialog`, `input`, `label`, `separator`, `switch` e `table` versionados no repositório;
+- **Tailwind CSS v4 em modo híbrido**: `frontend/src/styles/base.css` é o ponto de entrada CSS-first com `@import "tailwindcss"`, enquanto `frontend/tailwind.config.js` segue referenciado via `@config` para tokens, breakpoints e plugins;
 - **CSS Component Layer** via `@layer components` com `@apply` para abstrações reutilizáveis de layout, botões e inputs; camada de diálogos migrada para primitivos **shadcn-vue** (`Dialog`, `DialogContent`, `DialogHeader`, `DialogFooter` via `reka-ui`);
 - **Contexto operacional shadcn-vue**: a configuração vive em `frontend/components.json`; comandos de inspeção/instalação devem rodar em `frontend/` com `npx shadcn-vue@latest ...` (ou scripts equivalentes do pacote), não na raiz com `npx shadcn@latest`;
 - **CRDT (Yjs)** em vez de OT para merge automático e melhor suporte offline;
 - **Lazy loading** para bibliotecas pesadas de export (`marked`, `html2pdf.js`);
 - **LevelDB local** para persistência incremental simples em ambiente self-hosted;
-- **Design tokens Tailwind** para spacing, fontes e cores customizadas (`btn`, `btn-sm`, `header`, `font-ui`, `font-code`, `code-bg`);
+- **Design tokens Tailwind v4** para spacing, fontes e cores customizadas (`btn`, `btn-sm`, `header`, `font-ui`, `font-code`, `code-bg`);
 - **Barrel indexes** em todos os módulos `cm-*`, `services` e `composables` para centralizar exports.
 
 ### 6.3 Estratégia de qualidade de código (lint)
@@ -192,9 +194,12 @@ _docs/
 | `frontend/src/components/EditorHeader.vue`  | Header bar extraída do Editor: navegação, badge do documento, status de conexão e avatares.      |
 | `frontend/src/components/EditorToolbar.vue` | Toolbar de formatação, undo/redo e downloads extraída do Editor.                                 |
 | `frontend/src/components/BaseDialog.vue`    | Thin wrapper shadcn-vue: encapsula `Dialog` + `DialogContent` + `DialogHeader` + `DialogFooter`. |
+| `frontend/src/components/ui/*`              | Componentes shadcn-vue versionados no projeto (`alert`, `alert-dialog`, `avatar`, `badge`, `button`, `card`, `checkbox`, `dialog`, `input`, `label`, `separator`, `switch`, `table`). |
 | `frontend/src/components/*Dialog.vue`       | Diálogos focados: Link, Image, Lock, Access, Profile (usam shadcn `Dialog` diretamente).         |
 | `frontend/src/components/Explorer.vue`      | Gestão administrativa de documentos em `/explorer` (orquestra composables).                      |
 | `frontend/src/components/ToolbarButton.vue` | Componente reutilizável para botões de toolbar com estilo padronizado.                           |
+| `frontend/components.json`                  | Configuração da CLI shadcn-vue, aliases e arquivo CSS principal (`src/styles/base.css`).         |
+| `frontend/src/styles/base.css`              | Entrada CSS do Tailwind v4; importa `tailwindcss`, registra `@custom-variant dark` e referencia `tailwind.config.js` via `@config`. |
 | `frontend/src/styles/components.css`        | Abstrações CSS com `@apply` (`btn-*`, `dialog-*`, `input-*`, `page-header`, `toolbar`).          |
 | `frontend/src/composables/*`                | Composables Vue 3 para lógica reativa extraída dos componentes.                                  |
 | `frontend/src/cm-utils/math-evaluator.ts`   | Parser matemático recursivo descendente (tokenizer + avaliador).                                 |
@@ -215,7 +220,7 @@ _docs/
 | CodeMirror 6          | Editor extensível                                   | Alta        |
 | LevelDB via y-leveldb | Persistência colaborativa                           | Alta        |
 | reka-ui               | Primitivos headless UI (focus trap, aria, keyboard) | Alta        |
-| shadcn-vue            | Componentes UI copiados para `components/ui/`       | Média       |
+| shadcn-vue            | Componentes UI copiados para `components/ui/` e versionados no repositório | Média       |
 | html2pdf.js           | Export PDF frontend                                 | Média       |
 
 Referências externas:
@@ -237,6 +242,11 @@ Referências externas:
   - Principais alterações arquiteturais: base SPA + API/WS, adoção de Yjs/CodeMirror e persistência em LevelDB.
 
 ### 9.2 Changelog do Documento
+
+- **Versão 3.6**
+  - **Data:** 2026-04-14
+  - **Autor:** GitHub Copilot
+  - **Mudanças:** Documentação alinhada ao estado atual do frontend com Tailwind CSS v4 em modelo híbrido (`base.css` + `@config` para `tailwind.config.js`), inventário expandido de `frontend/src/components/ui/` e inclusão de arquivos operacionais relevantes da camada de UI.
 
 - **Versão 3.5**
   - **Data:** 2026-03-23

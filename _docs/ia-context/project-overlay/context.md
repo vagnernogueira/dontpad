@@ -10,9 +10,15 @@
 
 ### Stack principal
 
-- Frontend: Vue 3, TypeScript, Vite, Tailwind, CodeMirror 6, Yjs.
+- Frontend: Vue 3, TypeScript, Vite, Tailwind CSS v4, shadcn-vue, CodeMirror 6, Yjs.
 - Backend: Node.js, TypeScript, Express, WebSocket (`ws`), Yjs.
 - Qualidade de código: ESLint v9 (flat config), typescript-eslint v8, eslint-plugin-vue v9 (frontend), Prettier v3.
+
+### UI frontend atual
+
+- `frontend/src/components/ui/` contém atualmente `alert`, `alert-dialog`, `avatar`, `badge`, `button`, `card`, `checkbox`, `dialog`, `input`, `label`, `separator`, `switch`, `table`.
+- O frontend usa Tailwind CSS v4 em modo híbrido: `frontend/src/styles/base.css` inicializa o framework com `@import "tailwindcss"` e referencia `frontend/tailwind.config.js` via `@config`.
+- `frontend/components.json` aponta `src/styles/base.css` como arquivo CSS principal da CLI `shadcn-vue`.
 
 ### Persistência e sincronização
 
