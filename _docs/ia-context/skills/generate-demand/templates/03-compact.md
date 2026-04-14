@@ -30,6 +30,12 @@ Preencher antes de usar este template:
 - [path1]
 - [path2]
 
+## Planejamento da execução
+
+- Etapa 1: [descreva a primeira etapa ou tarefa]
+- Etapa 2: [descreva a segunda etapa ou tarefa]
+- Etapa 3: [descreva a terceira etapa ou tarefa]
+
 ## Critérios de aceite
 
 - [critério 1]

@@ -49,8 +49,8 @@ Guia rápido de seleção:
 | --- | --- |
 | `templates/01-simple.md` | Ajustes rápidos, tarefas curtas e baixo risco. |
 | `templates/02-ultra-compact.md` | Demandas diretas com escopo claro e poucos arquivos-alvo. |
-| `templates/03-compact.md` | Bugfixes e melhorias pequenas com critérios de aceite explícitos. |
-| `templates/04-full.md` | Demandas complexas, multi-etapas ou com maior risco de regressão. |
+| `templates/03-compact.md` | Bugfixes e melhorias pequenas com critérios de aceite explícitos e planejamento de execução definido. |
+| `templates/04-full.md` | Demandas complexas, multi-etapas ou com maior risco de regressão, com planejamento de execução detalhado. |
 
 ## Output contract
 
@@ -59,6 +59,7 @@ Guia rápido de seleção:
 - Os templates são read-only e servem como base para um novo arquivo.
 - Nome recomendado: `demanda-YYYYMMDD-HHMM-slug.md`.
 - O arquivo final MUST conter a seção `Contexto de execução da IA` preenchida.
+- Se o template escolhido for `templates/03-compact.md` ou `templates/04-full.md`, o arquivo final MUST conter a seção `Planejamento da execução` preenchida com etapas ou fases enumeradas.
 
 ## Template selection logic
 
@@ -67,27 +68,43 @@ Guia rápido de seleção:
 2. `core/skills/generate-demand/templates/02-ultra-compact.md`
    - Tarefa direta com escopo claro e poucos arquivos-alvo.
 3. `core/skills/generate-demand/templates/03-compact.md`
-   - Bugfix/melhoria pequena com critérios de aceite e suposições.
+   - Bugfix/melhoria pequena com critérios de aceite, suposições e planejamento de execução.
 4. `core/skills/generate-demand/templates/04-full.md`
-   - Demanda complexa, multi-etapas, integração entre módulos ou maior risco.
+   - Demanda complexa, multi-etapas, integração entre módulos ou maior risco, exigindo planejamento de execução mais detalhado.
 
 Fallback: em dúvida entre dois níveis, escolher o template mais completo.
+
+## Planning behavior for templates 3 and 4
+
+Ao escolher `templates/03-compact.md` ou `templates/04-full.md`, a skill não deve apenas estruturar a demanda: ela também deve planejar a execução.
+
+Regras para esse planejamento:
+
+- Preencher a seção `Planejamento da execução` com etapas ou fases concretas, em ordem lógica de execução.
+- Enumerar as etapas de forma explícita no conteúdo final.
+- Manter o planejamento dentro do escopo solicitado, sem adicionar entregas paralelas.
+- Se houver um agente de planejamento disponível no ambiente de IA, ele SHOULD ser usado para propor ou refinar as etapas antes de gravar o arquivo final.
+- Se esse agente não estiver disponível, a própria skill MUST elaborar o planejamento com base na demanda recebida.
+- O planejamento deve ser suficiente para orientar a execução posterior da demanda por outra IA ou agente executor.
 
 ## Steps
 
 1. Extrair intenção principal da demanda bruta.
 2. Avaliar complexidade (escopo, risco, dependências, impacto em contrato público).
 3. Selecionar template adequado.
-4. Preencher template preservando o sentido original.
-5. Preencher `Contexto de execução da IA` com referências obrigatórias.
-6. Registrar suposições quando houver lacunas críticas.
-7. Salvar arquivo final em `agent-workspace/planejamento/`.
+4. Se o template escolhido for `templates/03-compact.md` ou `templates/04-full.md`, elaborar o planejamento da execução com etapas ou fases enumeradas; usar agente de planejamento se disponível no ambiente.
+5. Preencher template preservando o sentido original.
+6. Preencher `Contexto de execução da IA` com referências obrigatórias.
+7. Preencher `Planejamento da execução` quando aplicável.
+8. Registrar suposições quando houver lacunas críticas.
+9. Salvar arquivo final em `agent-workspace/planejamento/`.
 
 ## Quality rules
 
 - Não inventar requisitos.
 - Não expandir escopo com melhorias paralelas.
 - Manter critérios de aceite verificáveis.
+- Quando usar os templates 3 ou 4, garantir que o planejamento da execução esteja claro, enumerado e acionável.
 - Garantir que o arquivo final seja auto-suficiente para execução da IA.
 
 ## Final response format
@@ -95,4 +112,5 @@ Fallback: em dúvida entre dois níveis, escolher o template mais completo.
 - Template escolhido + motivo.
 - Caminho do arquivo gerado.
 - Referências de contexto aplicadas.
+- Estratégia de planejamento aplicada (`agente de planejamento` ou `planejamento manual pela skill`).
 - Suposições aplicadas (se houver).

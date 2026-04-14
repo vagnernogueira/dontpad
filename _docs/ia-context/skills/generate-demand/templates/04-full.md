@@ -40,6 +40,13 @@ Preencher antes de usar este template:
 - [path2]
 - [path3]
 
+## Planejamento da execução
+
+- Etapa 1: [descreva a primeira etapa ou tarefa]
+- Etapa 2: [descreva a segunda etapa ou tarefa]
+- Etapa 3: [descreva a terceira etapa ou tarefa]
+- Etapa 4: [descreva a quarta etapa ou tarefa]
+
 ## Critérios de aceite
 
 - [critério funcional 1]
