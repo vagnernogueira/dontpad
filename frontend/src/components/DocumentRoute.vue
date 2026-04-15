@@ -2,15 +2,15 @@
   <Editor v-if="!activeMode" />
 
   <div v-else class="flex flex-col h-full w-full">
-    <main class="flex-1 overflow-auto bg-gray-50">
-      <div v-if="loading" class="h-full flex items-center justify-center text-sm text-gray-500 px-4 text-center">
+    <main class="flex-1 overflow-auto bg-muted">
+      <div v-if="loading" class="h-full flex items-center justify-center px-4 text-center text-sm text-muted-foreground">
         Carregando documento...
       </div>
 
       <div v-else-if="requiresPassword" class="h-full flex items-center justify-center px-4">
         <Card class="w-full max-w-md shadow-xl">
           <CardHeader class="pb-4">
-            <CardTitle class="text-lg text-gray-800">Documento Protegido</CardTitle>
+            <CardTitle class="text-lg text-card-foreground">Documento Protegido</CardTitle>
           </CardHeader>
           <CardContent class="space-y-3">
           <div class="mb-3">
@@ -26,7 +26,7 @@
               @keyup.enter="retryWithPassword"
             />
           </div>
-          <p v-if="errorMessage" class="mb-3 text-xs text-red-600">{{ errorMessage }}</p>
+          <p v-if="errorMessage" class="mb-3 text-xs text-destructive">{{ errorMessage }}</p>
           <div class="flex justify-end">
             <Button type="button" size="sm" :disabled="!accessPassword.trim()" @click="retryWithPassword">
               Validar
@@ -36,7 +36,7 @@
         </Card>
       </div>
 
-      <div v-else-if="errorMessage" class="h-full flex items-center justify-center text-sm text-red-600 px-4 text-center">
+      <div v-else-if="errorMessage" class="h-full flex items-center justify-center px-4 text-center text-sm text-destructive">
         {{ errorMessage }}
       </div>
 
@@ -44,10 +44,10 @@
       <div v-else-if="activeMode === 'view'" class="max-w-4xl mx-auto py-3 px-4" v-html="viewHtml"></div>
 
       <div v-else-if="activeMode === 'raw'" class="max-w-4xl mx-auto py-3 px-4">
-        <pre class="whitespace-pre-wrap break-words text-sm text-gray-800 font-mono">{{ rawContent }}</pre>
+        <pre class="whitespace-pre-wrap break-words font-mono text-sm text-foreground">{{ rawContent }}</pre>
       </div>
 
-      <div v-else-if="activeMode === 'pdf'" class="h-full flex items-center justify-center text-sm text-gray-500 px-4 text-center">
+      <div v-else-if="activeMode === 'pdf'" class="h-full flex items-center justify-center px-4 text-center text-sm text-muted-foreground">
         Download do PDF iniciado.
       </div>
     </main>

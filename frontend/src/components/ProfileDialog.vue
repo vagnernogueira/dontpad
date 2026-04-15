@@ -13,12 +13,12 @@
         <Label class="mb-2 block text-sm font-normal text-muted-foreground">
           Escolha seu avatar
         </Label>
-        <div class="grid grid-cols-8 gap-1.5 max-h-40 overflow-y-auto p-1 border border-gray-200 rounded-md bg-gray-50">
+        <div class="grid max-h-40 grid-cols-8 gap-1.5 overflow-y-auto rounded-md border border-border bg-muted p-1">
           <button
             v-for="animal in ANIMAL_EMOJIS"
             :key="animal"
-            class="w-8 h-8 flex items-center justify-center rounded hover:bg-gray-200 transition-colors text-lg"
-            :class="{ 'bg-emerald-100 ring-2 ring-emerald-500': selectedEmoji === animal }"
+            class="flex h-8 w-8 items-center justify-center rounded text-lg transition-colors hover:bg-accent"
+            :class="{ 'bg-primary text-primary-foreground ring-2 ring-primary': selectedEmoji === animal }"
             @click="selectedEmoji = animal"
           >
             {{ animal }}
@@ -43,7 +43,7 @@
       </div>
 
       <!-- Telemetry info -->
-      <div v-if="profile" class="mb-4 text-xs text-gray-400 space-y-0.5">
+      <div v-if="profile" class="mb-4 space-y-0.5 text-xs text-muted-foreground">
         <p>ID: <span class="font-mono">{{ profile.id.slice(0, 8) }}…</span></p>
         <p>Primeira sessão: {{ formatDate(profile.joinedAt) }}</p>
         <p>Dispositivo: {{ profile.deviceType === 'mobile' ? '📱 Mobile' : '🖥️ Desktop' }}</p>

@@ -1,15 +1,15 @@
 <template>
-  <div class="flex h-full w-full flex-col text-gray-900">
-    <header class="z-20 flex items-center justify-between bg-gray-900 px-3 py-btn text-gray-100 shadow-md sm:px-5 sm:py-header">
+  <div class="flex h-full w-full flex-col text-foreground">
+    <header class="z-20 flex items-center justify-between border-b border-border bg-foreground px-3 py-btn text-background shadow-md sm:px-5 sm:py-header">
       <div class="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
         <router-link
           to="/"
-          class="flex shrink-0 items-center gap-1 text-base font-bold transition-colors hover:text-white sm:text-lg"
+          class="flex shrink-0 items-center gap-1 text-base font-bold transition-colors hover:text-primary sm:text-lg"
         >
           <ArrowLeft :size="18" />
           <span class="hidden xs:inline">Início</span>
         </router-link>
-        <Badge variant="secondary" class="font-mono bg-gray-800 text-gray-300 border-gray-700 rounded-md text-xs sm:text-sm px-2 sm:px-3 py-1 shrink-0">
+        <Badge variant="secondary" class="rounded-md px-2 py-1 font-mono text-xs shrink-0 sm:px-3 sm:text-sm">
           /explorer
         </Badge>
       </div>
@@ -17,7 +17,8 @@
         <Button
           v-if="session.hasAccess.value"
           size="sm"
-          class="bg-gray-800 border border-gray-700 hover:bg-gray-700 text-xs h-auto py-btn sm:py-btn-sm flex items-center gap-1.5"
+          variant="secondary"
+          class="h-auto gap-1.5 py-btn text-xs sm:py-btn-sm"
           @click="refreshDocuments"
         >
           <RefreshCw :size="14" />
@@ -35,34 +36,34 @@
     <div class="z-10 flex items-center gap-1 overflow-x-auto overflow-y-hidden border-b border-border bg-background px-2 py-btn text-sm text-muted-foreground shadow-xs sm:gap-1.5 sm:px-4">
       <template v-if="session.hasAccess.value">
         <div class="flex items-center gap-2 shrink-0">
-          <Label for="explorer-search" class="text-xs font-medium text-gray-600 shrink-0">Nm</Label>
+          <Label for="explorer-search" class="shrink-0 text-xs font-medium text-muted-foreground">Nm</Label>
           <Input
             id="explorer-search"
             v-model="list.search.value"
             type="text"
-            class="w-36 sm:w-40 md:w-44 py-btn sm:py-btn-sm focus:ring-gray-800 focus:border-gray-800 bg-white shrink-0"
+            class="w-36 shrink-0 bg-background py-btn sm:w-40 sm:py-btn-sm md:w-44"
             placeholder="Buscar por nome"
           />
         </div>
 
         <div class="flex items-center gap-2 shrink-0">
-          <Label for="explorer-content-search" class="text-xs font-medium text-gray-600 shrink-0">Ct</Label>
+          <Label for="explorer-content-search" class="shrink-0 text-xs font-medium text-muted-foreground">Ct</Label>
           <Input
             id="explorer-content-search"
             v-model="list.contentSearch.value"
             type="text"
-            class="w-36 sm:w-40 md:w-44 py-btn sm:py-btn-sm focus:ring-gray-800 focus:border-gray-800 bg-white shrink-0"
+            class="w-36 shrink-0 bg-background py-btn sm:w-40 sm:py-btn-sm md:w-44"
             placeholder="Busca por Conteúdo"
           />
         </div>
 
         <div class="flex items-center gap-2 shrink-0">
-          <Label for="explorer-regex-mode" class="text-xs font-medium text-gray-600">Rgx</Label>
+          <Label for="explorer-regex-mode" class="text-xs font-medium text-muted-foreground">Rgx</Label>
           <Switch
             id="explorer-regex-mode"
             v-model="list.regexEnabled.value"
             aria-label="Rgx"
-            class="data-[state=checked]:bg-gray-800"
+            class="data-[state=checked]:bg-primary"
           />
         </div>
 
@@ -104,19 +105,19 @@
           @click="lockSelected"
         >Travar</Button>
       </template>
-      <Alert v-else class="border-gray-200 bg-white/90 px-3 py-2 text-gray-600 shadow-none">
+      <Alert v-else class="border-border bg-card px-3 py-2 text-muted-foreground shadow-none">
         <AlertDescription class="text-xs sm:text-sm">
           Informe a senha mestra para habilitar ações do Explorer.
         </AlertDescription>
       </Alert>
     </div>
 
-    <main class="flex-1 overflow-auto bg-gray-50 p-4 sm:p-6">
+    <main class="flex-1 overflow-auto bg-muted p-4 sm:p-6">
       <section v-if="!session.hasAccess.value" class="mx-auto mt-10 w-full max-w-sm">
         <Card class="shadow-sm">
           <CardHeader class="space-y-2">
-            <CardTitle class="text-base text-gray-800">Acesso protegido</CardTitle>
-            <CardDescription class="text-sm text-gray-600">
+            <CardTitle class="text-base text-card-foreground">Acesso protegido</CardTitle>
+            <CardDescription class="text-sm text-muted-foreground">
               Informe a senha mestra para entrar no Explorer.
             </CardDescription>
           </CardHeader>
@@ -129,7 +130,7 @@
                   ref="masterPasswordInputEl"
                   v-model="session.masterPasswordInput.value"
                   type="password"
-                  class="py-2 focus:ring-gray-800 focus:border-gray-800"
+                  class="py-2"
                   placeholder="Senha mestra"
                   autocomplete="off"
                 />
@@ -149,14 +150,14 @@
         <Alert v-if="displayedErrorMessage" variant="destructive">
           <AlertDescription>{{ displayedErrorMessage }}</AlertDescription>
         </Alert>
-        <Alert v-else-if="session.isLoading.value" class="border-gray-200 bg-white text-gray-600">
+        <Alert v-else-if="session.isLoading.value" class="border-border bg-card text-muted-foreground">
           <AlertDescription>Carregando documentos...</AlertDescription>
         </Alert>
 
-        <div class="overflow-hidden rounded-lg bg-white shadow-sm">
+        <div class="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
           <Table>
-            <TableHeader class="bg-gray-100 text-left text-gray-700">
-              <TableRow class="border-gray-200 hover:bg-transparent">
+            <TableHeader class="bg-muted text-left text-muted-foreground">
+              <TableRow class="border-border hover:bg-transparent">
                 <TableHead class="px-3 py-2 font-medium">
                   <Button :class="sortButtonClass" variant="ghost" size="sm" @click="list.toggleSort('selected')">Seleção</Button>
                 </TableHead>
@@ -182,14 +183,14 @@
             </TableHeader>
             <TableBody>
               <TableRow v-if="!session.isLoading.value && list.sortedDocuments.value.length === 0" class="hover:bg-transparent">
-                <TableCell colspan="7" class="px-3 py-4 text-center text-gray-500">Nenhum documento encontrado.</TableCell>
+                <TableCell colspan="7" class="px-3 py-4 text-center text-muted-foreground">Nenhum documento encontrado.</TableCell>
               </TableRow>
 
               <TableRow
                 v-for="document in list.sortedDocuments.value"
                 :key="document.name"
                 :data-state="list.selectedDocumentName.value === document.name ? 'selected' : undefined"
-                class="border-gray-100"
+                class="border-border"
               >
                 <TableCell class="px-3 py-2">
                   <Checkbox
@@ -209,11 +210,11 @@
                     {{ document.name }}
                   </Button>
                 </TableCell>
-                <TableCell class="px-3 py-2 text-gray-700">{{ formatDate(document.createdAt) }}</TableCell>
-                <TableCell class="px-3 py-2 text-gray-700">{{ formatDate(document.updatedAt) }}</TableCell>
-                <TableCell class="px-3 py-2 text-gray-700">{{ document.locked ? 'S' : 'N' }}</TableCell>
-                <TableCell class="px-3 py-2 text-gray-700">{{ document.empty ? 'S' : 'N' }}</TableCell>
-                <TableCell class="px-3 py-2 text-gray-700">{{ document.open ? 'S' : 'N' }}</TableCell>
+                <TableCell class="px-3 py-2 text-foreground">{{ formatDate(document.createdAt) }}</TableCell>
+                <TableCell class="px-3 py-2 text-foreground">{{ formatDate(document.updatedAt) }}</TableCell>
+                <TableCell class="px-3 py-2 text-foreground">{{ document.locked ? 'S' : 'N' }}</TableCell>
+                <TableCell class="px-3 py-2 text-foreground">{{ document.empty ? 'S' : 'N' }}</TableCell>
+                <TableCell class="px-3 py-2 text-foreground">{{ document.open ? 'S' : 'N' }}</TableCell>
               </TableRow>
             </TableBody>
           </Table>
@@ -343,8 +344,8 @@ import { useDocumentList } from '../composables/useDocumentList'
 
 const documentAPI = createDocumentAPI(getApiBaseUrl())
 const EXPLORER_DOCUMENTS_CACHE_KEY = 'explorer.documentsCache'
-const sortButtonClass = 'h-auto p-0 text-sm font-medium text-gray-700 hover:bg-transparent hover:text-gray-900'
-const documentLinkClass = 'h-auto justify-start whitespace-normal p-0 text-left font-normal text-gray-800 hover:text-gray-900'
+const sortButtonClass = 'h-auto p-0 text-sm font-medium text-muted-foreground hover:bg-transparent hover:text-foreground'
+const documentLinkClass = 'h-auto justify-start whitespace-normal p-0 text-left font-normal text-foreground hover:text-primary'
 
 // ── Composables ────────────────────────────────────────────────────
 

@@ -15,14 +15,14 @@
     >
       <Avatar
         :class="[
-          'size-8 border-2 border-gray-900 shadow-xs transition-transform group-hover:scale-[1.03] sm:size-9',
+          'size-8 border-2 border-background shadow-xs transition-transform group-hover:scale-[1.03] sm:size-9',
           collaboratorToneClass(collaborator.color),
           collaborator.isSelf
-            ? 'ring-2 ring-emerald-400/70 ring-offset-1 ring-offset-gray-900'
-            : 'ring-1 ring-black/10',
+            ? 'ring-2 ring-primary ring-offset-1 ring-offset-foreground'
+            : 'ring-1 ring-background',
         ]"
       >
-        <AvatarFallback class="bg-transparent text-sm leading-none text-gray-950 sm:text-base">
+        <AvatarFallback class="bg-transparent text-sm leading-none text-current sm:text-base">
           {{ collaborator.emoji || '👤' }}
         </AvatarFallback>
       </Avatar>
