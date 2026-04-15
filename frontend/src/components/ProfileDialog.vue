@@ -1,6 +1,7 @@
 <template>
   <Dialog :open="true" @update:open="(v) => !v && $emit('close')">
     <DialogContent
+      motion-preset="top-right"
       class="sm:max-w-sm"
       @open-auto-focus.prevent="nameInput?.$el?.select()"
     >
