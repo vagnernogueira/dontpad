@@ -131,6 +131,19 @@ describe('api integration', () => {
         expect(response.body.summaries.map((summary: { name: string }) => summary.name)).toEqual(['gamma-doc']);
     });
 
+    it('lists only template documents on the public templates endpoint', async () => {
+        const initialDocs = new Map<string, string>();
+        initialDocs.set('_tmpl/release-note', 'template content');
+        initialDocs.set('_tmpl/checklist', '- item');
+        initialDocs.set('regular-doc', 'content');
+        __setTestPersistence(createMockPersistence(initialDocs));
+
+        const response = await request(app).get('/api/document-templates');
+
+        expect(response.status).toBe(200);
+        expect(response.body.templates).toEqual(['_tmpl/checklist', '_tmpl/release-note']);
+    });
+
     it('returns 400 for invalid regex filters', async () => {
         __setTestPersistence(createMockPersistence(new Map([['alpha-doc', 'needle content']])));
 

@@ -21,6 +21,7 @@ Núcleo: colaboração em tempo real, lock por senha, exportação e plugins Cod
 |--------|------|------|
 | GET | `/api/health` | — |
 | GET | `/api/documents` | header `x-docs-password` |
+| GET | `/api/document-templates` | — |
 | GET · POST · DELETE | `/api/document-lock` | — |
 | POST | `/api/document-access` | — |
 

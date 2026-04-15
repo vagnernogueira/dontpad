@@ -247,6 +247,39 @@ describe('DocumentAPI', () => {
     })
   })
 
+  describe('listTemplates', () => {
+    it('returns template names on success', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ templates: ['_tmpl/base', '_tmpl/checklist'] })
+      } as Response)
+
+      const result = await api.listTemplates()
+
+      expect(result).toEqual(['_tmpl/base', '_tmpl/checklist'])
+      expect(mockFetch).toHaveBeenCalledWith('http://localhost:3000/api/document-templates')
+    })
+
+    it('returns empty array when templates payload is invalid', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ templates: 'invalid' })
+      } as Response)
+
+      const result = await api.listTemplates()
+
+      expect(result).toEqual([])
+    })
+
+    it('returns null when template request fails', async () => {
+      mockFetch.mockResolvedValueOnce({ ok: false } as Response)
+
+      const result = await api.listTemplates()
+
+      expect(result).toBeNull()
+    })
+  })
+
   describe('getPublicDocumentContent', () => {
     it('returns content when document loads successfully', async () => {
       mockFetch.mockResolvedValueOnce({

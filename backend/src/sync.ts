@@ -59,6 +59,8 @@ export type ListDocumentSummariesOptions = {
     contentMatchesRegex?: string;
 };
 
+export const TEMPLATE_DIRECTORY_PREFIX = '_tmpl/';
+
 const masterPassword = (process.env.DOCUMENTS_MASTER_PASSWORD || '').trim();
 
 const ensureLockDir = () => {
@@ -298,6 +300,13 @@ const canUseMasterPassword = (password: string) => {
     return !!masterPassword && password === masterPassword;
 };
 
+const extractQueryParamFromReq = (req: IncomingMessage, key: string) => {
+    const rawUrl = req?.url || '';
+    const [, rawQuery = ''] = rawUrl.split('?');
+    const params = new URLSearchParams(rawQuery);
+    return (params.get(key) || '').trim();
+};
+
 export const verifyDocumentPassword = (docName: string, password: string) => {
     const lock = getDocumentLock(docName);
     if (!lock) return true;
@@ -307,11 +316,16 @@ export const verifyDocumentPassword = (docName: string, password: string) => {
 };
 
 const extractPasswordFromReq = (req: IncomingMessage) => {
-    const rawUrl = req?.url || '';
-    const [, rawQuery = ''] = rawUrl.split('?');
-    const params = new URLSearchParams(rawQuery);
-    const password = params.get('password') || '';
-    return password.trim();
+    return extractQueryParamFromReq(req, 'password');
+};
+
+const extractTemplateFromReq = (req: IncomingMessage) => {
+    return extractQueryParamFromReq(req, 'template');
+};
+
+export const isTemplateDocumentName = (docName: string): boolean => {
+    const normalized = normalizeDocName(docName).trim();
+    return normalized.startsWith(TEMPLATE_DIRECTORY_PREFIX) && normalized.length > TEMPLATE_DIRECTORY_PREFIX.length;
 };
 
 export const listDocumentNames = async (): Promise<string[]> => {
@@ -320,6 +334,62 @@ export const listDocumentNames = async (): Promise<string[]> => {
         ? names.filter((name: unknown): name is string => typeof name === 'string' && name.length > 0).sort((a, b) => a.localeCompare(b))
         : [];
 }
+
+export const listTemplateNames = async (): Promise<string[]> => {
+    const names = await listDocumentNames();
+    return names.filter(isTemplateDocumentName);
+}
+
+const writeDocumentContent = async (docName: string, content: string, timestamp = new Date().toISOString()) => {
+    const normalized = normalizeDocName(docName);
+    const ydoc = await getPersistence().getYDoc(normalized);
+    const ytext = ydoc.getText('codemirror');
+
+    ydoc.transact(() => {
+        if (ytext.length > 0) {
+            ytext.delete(0, ytext.length);
+        }
+
+        if (content.length > 0) {
+            ytext.insert(0, content);
+        }
+    });
+
+    await getPersistence().storeUpdate(normalized, Y.encodeStateAsUpdate(ydoc));
+    ensureDocumentMetadata(normalized, timestamp);
+    touchDocumentUpdatedAt(normalized, timestamp);
+};
+
+export const applyTemplateContentIfDocumentEmpty = async (
+    docName: string,
+    templateDocName: string
+): Promise<{ applied: boolean; reason: string }> => {
+    const normalizedDocName = normalizeDocName(docName).trim();
+    const normalizedTemplateName = normalizeDocName(templateDocName).trim();
+
+    if (!normalizedDocName) {
+        return { applied: false, reason: 'document_id_required' };
+    }
+
+    if (!isTemplateDocumentName(normalizedTemplateName)) {
+        return { applied: false, reason: 'invalid_template_document' };
+    }
+
+    const templateNames = await listTemplateNames();
+    if (!templateNames.includes(normalizedTemplateName)) {
+        return { applied: false, reason: 'template_document_not_found' };
+    }
+
+    const currentContent = await getDocumentContent(normalizedDocName);
+    if (currentContent.trim().length > 0) {
+        return { applied: false, reason: 'document_not_empty' };
+    }
+
+    const templateContent = await getDocumentContent(normalizedTemplateName);
+    await writeDocumentContent(normalizedDocName, templateContent);
+
+    return { applied: true, reason: 'applied' };
+};
 
 export const getDocumentContent = async (docName: string): Promise<string> => {
     const normalized = normalizeDocName(docName);
@@ -602,7 +672,7 @@ const getYWebsocketUtils = (): YWebsocketUtilsModule => {
     return yWebsocketUtils;
 };
 
-export default function setupWSConnection(conn: WebSocket, req: IncomingMessage) {
+export default async function setupWSConnection(conn: WebSocket, req: IncomingMessage) {
     // Extract docName from URL path (e.g. /ws/my-doc -> my-doc)
     // If connection is straight to root we can assign a default or handle it
     const rawPath = (req.url || '').slice(1).split('?')[0] || 'default-doc';
@@ -617,6 +687,15 @@ export default function setupWSConnection(conn: WebSocket, req: IncomingMessage)
         if (!verifyDocumentPassword(docName, password)) {
             conn.close(4403, 'forbidden');
             return;
+        }
+    }
+
+    const templateDocName = extractTemplateFromReq(req);
+    if (templateDocName) {
+        try {
+            await applyTemplateContentIfDocumentEmpty(docName, templateDocName);
+        } catch (error) {
+            console.error('Failed to apply document template', error);
         }
     }
 

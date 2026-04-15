@@ -28,6 +28,7 @@ participantes.
 - Bloqueio de documento por senha com bypass administrativo por senha mestre.
 - Explorer administrativo em `/explorer`, protegido por senha mestra.
 - Gestão centralizada de documentos com ordenação, filtro e ações por item.
+- Criação de documentos a partir de templates reais em `/_tmpl/`, com opção `blank` como padrão.
 - Acesso por URL com query params para modos `pdf`, `view` e `raw` sem abrir a interface de edição nesses modos.
 
 ## Convenções de Frontend
@@ -109,6 +110,13 @@ VITE_BACKEND_WS_URL=wss://dontpad.vagnernogueira.com/api
 - A tela lista documentos com: seleção, nome, data de criação, data de alteração, travado (S/N), vazio (S/N), aberto (S/N).
 - Suporta ordenação por coluna, busca por nome e seleção única.
 - Ações disponíveis para o documento selecionado: renomear, remover, download markdown, download PDF e travar.
+
+## Templates de Documentos
+
+- A Home lista uma opção virtual `blank` e os templates reais encontrados em `/_tmpl/`.
+- `blank` permanece como seleção padrão e preserva o fluxo atual de criação de documento vazio.
+- Ao abrir um documento com template selecionado, o conteúdo do template só é copiado se o documento de destino for novo ou estiver vazio.
+- Se o documento de destino já tiver conteúdo, o template é ignorado e o documento existente é aberto normalmente.
 
 ## Acesso por URL (query params)
 

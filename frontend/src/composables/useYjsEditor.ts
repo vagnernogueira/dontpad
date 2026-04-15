@@ -32,6 +32,7 @@ export interface YjsEditorOptions {
   wsBaseUrl: string
   documentId: string
   password: string
+  templateId?: string
   profile: CollaboratorProfile
   spellcheckEnabled: boolean
 }
@@ -61,9 +62,17 @@ export function useYjsEditor() {
 
     const ydoc = new Y.Doc()
 
-    const provider = options.password
+    const providerParams: Record<string, string> = {}
+    if (options.password) {
+      providerParams.password = options.password
+    }
+    if (options.templateId?.trim()) {
+      providerParams.template = options.templateId.trim()
+    }
+
+    const provider = Object.keys(providerParams).length > 0
       ? new WebsocketProvider(options.wsBaseUrl, options.documentId, ydoc, {
-          params: { password: options.password },
+          params: providerParams,
         })
       : new WebsocketProvider(options.wsBaseUrl, options.documentId, ydoc)
 

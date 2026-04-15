@@ -2,7 +2,7 @@ import express from 'express';
 import http from 'http';
 import { WebSocketServer } from 'ws';
 import setupWSConnection from './sync';
-import { listDocumentNames, listDocumentSummaries, getDocumentContent, renameDocument, deleteDocument } from './sync';
+import { listDocumentNames, listDocumentSummaries, listTemplateNames, getDocumentContent, renameDocument, deleteDocument } from './sync';
 import { isDocumentLocked, setDocumentPassword, verifyDocumentAccess, verifyDocumentsMasterPassword } from './sync';
 import { removeDocumentPassword } from './sync';
 import cors from 'cors';
@@ -38,6 +38,16 @@ app.get('/api/documents', async (req, res) => {
 
         console.error('Failed to list documents', error);
         res.status(500).json({ error: 'failed_to_list_documents' });
+    }
+});
+
+app.get('/api/document-templates', async (_req, res) => {
+    try {
+        const templates = await listTemplateNames();
+        res.json({ templates });
+    } catch (error) {
+        console.error('Failed to list document templates', error);
+        res.status(500).json({ error: 'failed_to_list_document_templates' });
     }
 });
 
@@ -214,7 +224,7 @@ app.get('/api/client-info', (req, res) => {
 const wss = new WebSocketServer({ server });
 
 wss.on('connection', (conn, req) => {
-    setupWSConnection(conn, req);
+    void setupWSConnection(conn, req);
 });
 
 const PORT = process.env.PORT || 1234;

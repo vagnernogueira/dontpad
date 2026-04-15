@@ -5,7 +5,10 @@ import {
     __resetTestState,
     __setTestStoragePaths,
     __setTestPersistence,
+    applyTemplateContentIfDocumentEmpty,
     getDocumentContent,
+    isTemplateDocumentName,
+    listTemplateNames,
     listDocumentSummaries,
     matchesContentContains,
     matchesContentRegex,
@@ -207,6 +210,64 @@ describe('listDocumentSummaries', () => {
         __setTestPersistence(mockPersistence);
 
         await expect(listDocumentSummaries({ contentMatchesRegex: '(' })).rejects.toThrow('invalid_content_regex');
+    });
+});
+
+describe('template helpers', () => {
+    let mockPersistence: ReturnType<typeof createMockPersistence>;
+
+    beforeEach(() => {
+        __setTestStoragePaths({
+            lockFilePath: path.join(tempDir, `locks-${Date.now()}.json`),
+            metadataFilePath: path.join(tempDir, `meta-${Date.now()}.json`)
+        });
+        __resetTestState();
+        __clearTestPersistence();
+    });
+
+    it('detects template document names under the template directory', () => {
+        expect(isTemplateDocumentName('_tmpl/base')).toBe(true);
+        expect(isTemplateDocumentName('_tmpl/nested/doc')).toBe(true);
+        expect(isTemplateDocumentName('notes/base')).toBe(false);
+        expect(isTemplateDocumentName('_tmpl')).toBe(false);
+    });
+
+    it('lists only documents from the template directory', async () => {
+        const initialDocs = new Map<string, string>();
+        initialDocs.set('_tmpl/base', 'template');
+        initialDocs.set('_tmpl/checklist', 'template');
+        initialDocs.set('notes/base', 'not a template');
+        mockPersistence = createMockPersistence(initialDocs);
+        __setTestPersistence(mockPersistence);
+
+        const templates = await listTemplateNames();
+
+        expect(templates).toEqual(['_tmpl/base', '_tmpl/checklist']);
+    });
+
+    it('copies template content into a new empty document', async () => {
+        const initialDocs = new Map<string, string>();
+        initialDocs.set('_tmpl/base', '# Template content');
+        mockPersistence = createMockPersistence(initialDocs);
+        __setTestPersistence(mockPersistence);
+
+        const result = await applyTemplateContentIfDocumentEmpty('draft-doc', '_tmpl/base');
+
+        expect(result).toEqual({ applied: true, reason: 'applied' });
+        await expect(getDocumentContent('draft-doc')).resolves.toBe('# Template content');
+    });
+
+    it('ignores template application when target document already has content', async () => {
+        const initialDocs = new Map<string, string>();
+        initialDocs.set('_tmpl/base', '# Template content');
+        initialDocs.set('draft-doc', 'Existing content');
+        mockPersistence = createMockPersistence(initialDocs);
+        __setTestPersistence(mockPersistence);
+
+        const result = await applyTemplateContentIfDocumentEmpty('draft-doc', '_tmpl/base');
+
+        expect(result).toEqual({ applied: false, reason: 'document_not_empty' });
+        await expect(getDocumentContent('draft-doc')).resolves.toBe('Existing content');
     });
 });
 

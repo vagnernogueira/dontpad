@@ -52,6 +52,7 @@ O DontPad é uma aplicação full-stack para edição colaborativa de documentos
 Características principais:
 
 - edição colaborativa em tempo real;
+- criação de documentos a partir de templates em `/_tmpl/` pela Home;
 - proteção por senha de documentos;
 - Explorer administrativo em `/explorer` com senha mestra;
 - exportação para Markdown e PDF;
@@ -147,6 +148,7 @@ _docs/
 
 - colaboração em tempo real usa Yjs (CRDT) como fonte de consistência;
 - acesso administrativo exige `x-docs-password` válido;
+- templates de documentos são listados por endpoint público dedicado e só podem ser aplicados automaticamente em documento novo ou vazio;
 - acesso por URL parametrizada (`pdf/view/raw`) usa endpoint dedicado de conteúdo e respeita lock por documento;
 - documentos lockados exigem senha para acesso e handshake WS.
 
@@ -189,6 +191,7 @@ _docs/
 
 | Arquivo                                     | Descrição                                                                                        |
 | ------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `frontend/src/components/Home.vue`          | Landing page com criação de documentos e seleção de templates vindos de `/_tmpl/`.              |
 | `frontend/src/components/DocumentRoute.vue` | Resolução de modos por query params e fallback para edição.                                      |
 | `frontend/src/components/Editor.vue`        | Componente principal do editor colaborativo (orquestra composables).                             |
 | `frontend/src/components/EditorHeader.vue`  | Header bar extraída do Editor: navegação, badge do documento, status de conexão e avatares.      |
@@ -242,6 +245,11 @@ Referências externas:
   - Principais alterações arquiteturais: base SPA + API/WS, adoção de Yjs/CodeMirror e persistência em LevelDB.
 
 ### 9.2 Changelog do Documento
+
+- **Versão 3.7**
+  - **Data:** 2026-04-15
+  - **Autor:** GitHub Copilot
+  - **Mudanças:** Documentação alinhada ao suporte a templates de documentos na Home, com seleção baseada em `/_tmpl/`, novo endpoint público `GET /api/document-templates` e aplicação automática apenas para documento novo ou vazio.
 
 - **Versão 3.6**
   - **Data:** 2026-04-14

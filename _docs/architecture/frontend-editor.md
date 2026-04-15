@@ -53,7 +53,10 @@ src/
 ### `Home.vue`
 
 - Landing page inicial;
-- Entrada para criação/acesso por `documentId`.
+- Entrada para criação/acesso por `documentId`;
+- Lista templates reais carregados por `document-api.ts` a partir de `GET /api/document-templates`;
+- Mantém a opção virtual `blank` como primeira linha e seleção padrão;
+- Encaminha o template selecionado para a rota do documento apenas quando a escolha for diferente de `blank`.
 
 ### `Editor.vue`
 
@@ -61,6 +64,7 @@ src/
 - Delega header para `EditorHeader.vue`;
 - Delega toolbar para `EditorToolbar.vue`;
 - Delega diálogos para componentes focados (`LinkDialog`, `ImageDialog`, `LockDialog`, `AccessDialog`, `ProfileDialog`);
+- Consome o query param transitório `template`, repassa o valor para a conexão colaborativa e remove o param da URL após a inicialização;
 - Delega regras para comandos/plugins/services.
 
 ### `EditorHeader.vue`
@@ -137,7 +141,7 @@ Assinatura padrão: `(view: EditorView, ...args) => boolean`.
 
 | Composable | Descrição |
 |---|---|
-| `useYjsEditor(documentId, password)` | Setup/teardown de Yjs, CodeMirror, awareness e status de conexão |
+| `useYjsEditor(documentId, password, templateId?)` | Setup/teardown de Yjs, CodeMirror, awareness, status de conexão e envio opcional do template inicial no handshake WS |
 | `useDocumentAccess(documentId, api)` | Lock, acesso, password management |
 | `useCollaborators(provider, profile)` | Tracking de participantes via awareness |
 | `useExplorerSession(api)` | Autenticação e ciclo de vida da sessão do Explorer |
@@ -162,7 +166,7 @@ Todos os módulos são re-exportados pelo barrel `cm-utils/index.ts`.
 
 ## Services (`src/services`)
 
-- `document-api.ts`: lock/unlock/access, operações administrativas e leitura pública para modos parametrizados (`getPublicDocumentContent`);
+- `document-api.ts`: lock/unlock/access, operações administrativas, listagem pública de templates (`listTemplates`) e leitura pública para modos parametrizados (`getPublicDocumentContent`);
 - `config.ts`: resolução de URLs HTTP/WS por ambiente;
 - `export.ts`: download Markdown/PDF com lazy loading;
 - `persistence.ts`: wrapper type-safe para `localStorage`;
@@ -230,6 +234,14 @@ Tokens customizados registrados em `tailwind.config.js`:
 3. Em modo especial, carrega conteúdo por API e aplica `pdf`, `view` ou `raw`;
 4. Se o documento estiver travado, exige senha antes de liberar conteúdo;
 5. Sem modo especial, delega para `Editor.vue`, que mantém o fluxo padrão de edição colaborativa.
+
+### Criação a partir de template
+
+1. `Home.vue` carrega a lista pública de templates e mantém `blank` como seleção inicial;
+2. Ao submeter o formulário com um template real selecionado, a navegação inclui `?template=<nome-do-template>`;
+3. `Editor.vue` lê esse valor e o envia para `useYjsEditor` como parâmetro opcional da conexão colaborativa;
+4. Após a inicialização, o query param é removido da URL para evitar reaplicação em refreshs internos;
+5. O backend decide se o conteúdo do template pode ou não ser copiado para o documento de destino.
 
 ### Acesso por URL parametrizada
 

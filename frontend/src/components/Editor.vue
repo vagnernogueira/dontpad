@@ -77,8 +77,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
-import { useRoute } from 'vue-router'
+import { computed, ref, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import EditorHeader from './EditorHeader.vue'
 import ProfileDialog from './ProfileDialog.vue'
 import EditorToolbar from './EditorToolbar.vue'
@@ -113,12 +113,17 @@ const { myProfile, collaborators, bind: bindCollaborators, saveProfile } = useCo
 
 // ── Local state ────────────────────────────────────────────────────
 const route = useRoute()
+const router = useRouter()
 const documentId = ref(route.params.documentId as string || 'default')
 const editorContainer = ref<HTMLElement | null>(null)
 const pdfContainer = ref<HTMLElement | null>(null)
 const isSpellcheckEnabled = ref(persistence.get('spellcheck', true))
 const caseTransformIndex = ref(0)
 const actionError = ref('')
+const requestedTemplateId = computed(() => {
+  const value = route.query.template
+  return typeof value === 'string' && value.trim() ? value.trim() : ''
+})
 
 // Dialog state
 const showLinkDialog = ref(false)
@@ -135,6 +140,7 @@ const initEditor = () => {
     wsBaseUrl,
     documentId: documentId.value,
     password: access.documentAccessPassword.value,
+    templateId: requestedTemplateId.value || undefined,
     profile: myProfile.value,
     spellcheckEnabled: isSpellcheckEnabled.value,
   }, {
@@ -142,6 +148,20 @@ const initEditor = () => {
   })
 
   bindCollaborators(inst.provider)
+  void consumeTemplateQuery()
+}
+
+const consumeTemplateQuery = async () => {
+  if (!requestedTemplateId.value) return
+
+  const nextQuery = { ...route.query }
+  delete nextQuery.template
+
+  await router.replace({
+    path: route.path,
+    query: nextQuery,
+    hash: route.hash,
+  })
 }
 
 const openEditorAfterAccess = async () => {

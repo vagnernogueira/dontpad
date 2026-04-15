@@ -28,7 +28,7 @@ Este módulo cobre execução backend, contratos HTTP/WS, persistência CRDT, lo
 
 - Boot de `Express` com `cors()` e `express.json()`;
 - Criação de servidor HTTP e acoplamento WebSocket;
-- Exposição das rotas de saúde, listagem, conteúdo administrativo, conteúdo público por URL parametrizada, rename, delete, lock e access;
+- Exposição das rotas de saúde, listagem, templates públicos, conteúdo administrativo, conteúdo público por URL parametrizada, rename, delete, lock e access;
 - Delegação da validação de acesso e persistência para `sync.ts`.
 
 ### `sync.ts`
@@ -37,7 +37,7 @@ Este módulo cobre execução backend, contratos HTTP/WS, persistência CRDT, lo
 - Gestão de lock e metadados (memória + disco);
 - Controle de estado de documento aberto por sessões WS;
 - Hash de senha com `scrypt` + comparação `timingSafeEqual`;
-- Wrapper de `setupWSConnection` com gate de autorização para docs lockados.
+- Wrapper de `setupWSConnection` com gate de autorização para docs lockados e aplicação opcional de template na primeira conexão.
 
 ## Contratos HTTP
 
@@ -48,6 +48,13 @@ Endpoints administrativos exigem header `x-docs-password` (senha mestra válida)
 - `GET /api/document-content?documentId=...`
 - `POST /api/documents/rename`
 - `DELETE /api/documents`
+
+Endpoint público de templates:
+
+- `GET /api/document-templates`
+	- retorna apenas documentos sob `/_tmpl/`;
+	- não exige `x-docs-password`;
+	- resposta: `{ templates: string[] }`.
 
 Endpoint de conteúdo para modos por URL parametrizada (sem `x-docs-password`):
 
@@ -68,6 +75,8 @@ Endpoints de lock/acesso:
 - Frontend conecta no endpoint base de `VITE_BACKEND_WS_URL`;
 - Nome do documento é derivado do path;
 - Para documento lockado, handshake exige `password` na query;
+- Handshake pode receber `template` na query para solicitar cópia inicial de conteúdo;
+- O template só é aplicado se o documento de destino estiver vazio e o nome solicitado existir sob `/_tmpl/`;
 - Senha inválida fecha conexão com código `4403`.
 
 ## Fluxos críticos
@@ -78,6 +87,14 @@ Endpoints de lock/acesso:
 2. `server.ts` repassa para `setupWSConnection`;
 3. `sync.ts` normaliza `docName` e valida lock/senha;
 4. conexão é aceita ou recusada (`4403`).
+
+### Aplicação de template
+
+1. Cliente pode conectar em `/api/<doc>?template=_tmpl/<template>`;
+2. `sync.ts` valida se o nome informado pertence ao diretório de templates;
+3. O backend verifica se o documento de destino está vazio;
+4. Se estiver vazio, copia o conteúdo do template para o documento antes de prosseguir com a sessão colaborativa;
+5. Se o documento já tiver conteúdo, a sessão segue normalmente sem sobrescrever dados existentes.
 
 ### Persistência incremental
 

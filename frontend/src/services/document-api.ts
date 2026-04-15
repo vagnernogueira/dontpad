@@ -35,6 +35,10 @@ export interface PublicDocumentContentResult {
   error?: string
 }
 
+export interface DocumentTemplateListResult {
+  templates: string[]
+}
+
 /**
  * API client for document operations
  */
@@ -188,6 +192,29 @@ class DocumentAPI {
       })
     } catch (error) {
       console.error('Failed to list document summaries:', error)
+      return null
+    }
+  }
+
+  /**
+   * List publicly available document templates under /_tmpl/
+   */
+  async listTemplates(): Promise<string[] | null> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/document-templates`)
+
+      if (!response.ok) {
+        return null
+      }
+
+      const payload = await response.json() as Partial<DocumentTemplateListResult>
+      if (!Array.isArray(payload.templates)) {
+        return []
+      }
+
+      return payload.templates.filter((item): item is string => typeof item === 'string' && item.trim().length > 0)
+    } catch (error) {
+      console.error('Failed to list document templates:', error)
       return null
     }
   }

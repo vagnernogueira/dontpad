@@ -19,6 +19,7 @@
 - `frontend/src/components/ui/` contém atualmente `alert`, `alert-dialog`, `avatar`, `badge`, `button`, `card`, `checkbox`, `dialog`, `input`, `label`, `separator`, `switch`, `table`.
 - O frontend usa Tailwind CSS v4 em modo híbrido: `frontend/src/styles/base.css` inicializa o framework com `@import "tailwindcss"` e referencia `frontend/tailwind.config.js` via `@config`.
 - `frontend/components.json` aponta `src/styles/base.css` como arquivo CSS principal da CLI `shadcn-vue`.
+- `frontend/src/components/Home.vue` lista templates reais de `/_tmpl/`, mantém `blank` como padrão e só encaminha template ao abrir o documento quando a seleção não é vazia.
 
 ### Persistência e sincronização
 
@@ -30,6 +31,7 @@
 
 - `GET /api/health`
 - `GET /api/documents` (protegida por `x-docs-password`)
+- `GET /api/document-templates`
 - `GET /api/document-lock`
 - `POST /api/document-lock`
 - `DELETE /api/document-lock`
