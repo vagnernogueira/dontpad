@@ -53,7 +53,7 @@
             v-model="list.contentSearch.value"
             type="text"
             class="w-36 shrink-0 bg-background py-btn sm:w-40 sm:py-btn-sm md:w-44"
-            placeholder="Busca por Conteúdo"
+            placeholder="Busca por conteúdo"
           />
         </div>
 
