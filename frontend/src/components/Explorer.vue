@@ -194,8 +194,8 @@
               >
                 <TableCell class="px-3 py-2">
                   <Checkbox
-                    :checked="list.selectedDocumentName.value === document.name"
-                    @click="list.toggleSelection(document.name)"
+                    :model-value="list.selectedDocumentName.value === document.name"
+                    @update:model-value="list.setSelection(document.name, $event === true)"
                   />
                 </TableCell>
                 <TableCell class="px-3 py-2">

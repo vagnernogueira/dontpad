@@ -125,6 +125,17 @@ export function useDocumentList(documents: () => DocumentSummary[]) {
     selectedDocumentName.value = selectedDocumentName.value === name ? null : name
   }
 
+  function setSelection(name: string, checked: boolean) {
+    if (checked) {
+      selectedDocumentName.value = name
+      return
+    }
+
+    if (selectedDocumentName.value === name) {
+      selectedDocumentName.value = null
+    }
+  }
+
   function clearSelectionIfMissing(available: DocumentSummary[]) {
     if (selectedDocumentName.value && !available.some(d => d.name === selectedDocumentName.value)) {
       selectedDocumentName.value = null
@@ -181,6 +192,7 @@ export function useDocumentList(documents: () => DocumentSummary[]) {
     invalidContentSearchRegex,
     toggleSort,
     toggleSelection,
+    setSelection,
     clearSelectionIfMissing,
     restoreFromStorage,
   }

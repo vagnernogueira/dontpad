@@ -261,6 +261,39 @@ describe('Explorer content filter flow', () => {
     })
   })
 
+  it('keeps only the latest selected checkbox checked', async () => {
+    vi.useRealTimers()
+
+    const { default: Explorer } = await import('../../components/Explorer.vue')
+
+    render(Explorer, {
+      global: {
+        stubs: {
+          RouterLink: {
+            template: '<a><slot /></a>'
+          }
+        }
+      }
+    })
+
+    await unlockExplorerIfNeeded()
+    await screen.findByText('alpha-doc')
+
+    await selectDocument('alpha-doc')
+    const alphaRow = screen.getByText('alpha-doc').closest('tr') as HTMLTableRowElement
+    const betaRow = screen.getByText('beta-doc').closest('tr') as HTMLTableRowElement
+
+    expect(within(alphaRow).getByRole('checkbox')).toHaveAttribute('aria-checked', 'true')
+    expect(within(betaRow).getByRole('checkbox')).toHaveAttribute('aria-checked', 'false')
+
+    await selectDocument('beta-doc')
+
+    await waitFor(() => {
+      expect(within(alphaRow).getByRole('checkbox')).toHaveAttribute('aria-checked', 'false')
+      expect(within(betaRow).getByRole('checkbox')).toHaveAttribute('aria-checked', 'true')
+    })
+  })
+
   it('locks the selected document through the dialog flow', async () => {
     vi.useRealTimers()
     lockMock.mockResolvedValue(true)
