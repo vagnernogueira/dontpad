@@ -8,6 +8,7 @@ ENV VITE_BACKEND_HTTP_URL=$VITE_BACKEND_HTTP_URL
 ENV VITE_BACKEND_WS_URL=$VITE_BACKEND_WS_URL
 
 COPY package*.json .dockerignore .containerignore ./
+COPY vendor/y-leveldb-empty ./vendor/y-leveldb-empty
 RUN npm ci --legacy-peer-deps
 
 WORKDIR /tmp/frontend-src
