@@ -1,19 +1,34 @@
 import * as Y from 'yjs';
-// @ts-expect-error y-websocket does not provide typed export for this internal path
-import { setupWSConnection as originalSetupWSConnection } from 'y-websocket/bin/utils';
+import type { IncomingMessage } from 'http';
+import type WebSocket from 'ws';
 import { LeveldbPersistence } from 'y-leveldb';
 import path from 'path';
 import fs from 'fs';
 import crypto from 'crypto';
 
-// Note: y-websocket doesn't type export its setup function well, so we use any
-const setupWSConnectionOriginal = originalSetupWSConnection as any;
-
 // Use y-leveldb as a backend for storing Yjs documents. We will store it in the db folder.
 const dbPath = process.env.YJS_DB_PATH || path.resolve(__dirname, '../db/yjs-data');
 let lockFilePath = process.env.DOCUMENT_LOCKS_FILE || path.resolve(__dirname, '../db/document-locks.json');
 let metadataFilePath = process.env.DOCUMENT_METADATA_FILE || path.resolve(__dirname, '../db/document-metadata.json');
-let persistence: LeveldbPersistence | null = null;
+let persistence: SyncPersistence | null = null;
+
+type YWebsocketPersistenceAdapter = {
+    bindState: (docName: string, ydoc: Y.Doc) => Promise<void>;
+    writeState: (docName: string, ydoc: Y.Doc) => Promise<void>;
+};
+
+type YWebsocketUtilsModule = {
+    setupWSConnection: (conn: WebSocket, req: IncomingMessage, options: { docName: string }) => void;
+    setPersistence: (persistence: YWebsocketPersistenceAdapter) => void;
+};
+
+type SyncPersistence = LeveldbPersistence & {
+    getAllDocNames: () => Promise<unknown>;
+    getYDoc: (docName: string) => Promise<Y.Doc>;
+    storeUpdate: (docName: string, update: Uint8Array) => Promise<unknown> | unknown;
+    clearDocument?: (docName: string) => Promise<unknown> | unknown;
+    clearDoc?: (docName: string) => Promise<unknown> | unknown;
+};
 
 type DocumentLockRecord = {
     salt: string;
@@ -129,7 +144,7 @@ const getPersistence = () => {
     }
     if (!persistence) {
         fs.mkdirSync(dbPath, { recursive: true });
-        persistence = new LeveldbPersistence(dbPath);
+        persistence = new LeveldbPersistence(dbPath) as SyncPersistence;
     }
     return persistence;
 };
@@ -267,13 +282,13 @@ const removeOpenSessions = (docName: string) => {
 };
 
 const clearDocumentFromPersistence = async (docName: string) => {
-    const persistenceAny = getPersistence() as any;
-    if (typeof persistenceAny.clearDocument === 'function') {
-        await persistenceAny.clearDocument(docName);
+    const currentPersistence = getPersistence();
+    if (typeof currentPersistence.clearDocument === 'function') {
+        await currentPersistence.clearDocument(docName);
         return;
     }
-    if (typeof persistenceAny.clearDoc === 'function') {
-        await persistenceAny.clearDoc(docName);
+    if (typeof currentPersistence.clearDoc === 'function') {
+        await currentPersistence.clearDoc(docName);
         return;
     }
     throw new Error('clear_document_not_supported');
@@ -291,7 +306,7 @@ export const verifyDocumentPassword = (docName: string, password: string) => {
     return equalsHash(candidateHash, lock.passwordHash);
 };
 
-const extractPasswordFromReq = (req: any) => {
+const extractPasswordFromReq = (req: IncomingMessage) => {
     const rawUrl = req?.url || '';
     const [, rawQuery = ''] = rawUrl.split('?');
     const params = new URLSearchParams(rawQuery);
@@ -300,7 +315,7 @@ const extractPasswordFromReq = (req: any) => {
 };
 
 export const listDocumentNames = async (): Promise<string[]> => {
-    const names = await (getPersistence() as any).getAllDocNames();
+    const names = await getPersistence().getAllDocNames();
     return Array.isArray(names)
         ? names.filter((name: unknown): name is string => typeof name === 'string' && name.length > 0).sort((a, b) => a.localeCompare(b))
         : [];
@@ -519,12 +534,22 @@ export const __resetTestState = () => {
     documentsMetadata = {};
     activeDocumentSessions.clear();
     persistence = null;
+    yWebsocketUtils = null;
+    yWebsocketPersistenceConfigured = false;
+    testWebsocketUtils = null;
 };
 
-let testPersistence: any = null;
+let testPersistence: SyncPersistence | null = null;
+let testWebsocketUtils: YWebsocketUtilsModule | null = null;
+let yWebsocketUtils: YWebsocketUtilsModule | null = null;
+let yWebsocketPersistenceConfigured = false;
 
-export const __setTestPersistence = (mock: any) => {
+export const __setTestPersistence = (mock: SyncPersistence) => {
     testPersistence = mock;
+};
+
+export const __setTestWebsocketUtils = (mock: YWebsocketUtilsModule | null) => {
+    testWebsocketUtils = mock;
 };
 
 export const __getTestPersistence = () => testPersistence;
@@ -533,11 +558,7 @@ export const __clearTestPersistence = () => {
     testPersistence = null;
 };
 
-// y-websocket looks at 'setPersistence' on its util object
-// @ts-expect-error y-websocket does not provide typed export for this internal path
-import * as utils from 'y-websocket/bin/utils';
-
-(utils as any).setPersistence({
+const yWebsocketPersistenceAdapter: YWebsocketPersistenceAdapter = {
     bindState: async (docName: string, ydoc: Y.Doc) => {
         // Here you listen to sync events and write documents to the database.
         const persistence = getPersistence();
@@ -561,12 +582,30 @@ import * as utils from 'y-websocket/bin/utils';
         // For LevelDB we can just trust the incrementally stored updates.
         return Promise.resolve();
     }
-});
+};
 
-export default function setupWSConnection(conn: any, req: any) {
+const getYWebsocketUtils = (): YWebsocketUtilsModule => {
+    if (testWebsocketUtils) {
+        return testWebsocketUtils;
+    }
+
+    if (!yWebsocketUtils) {
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
+        yWebsocketUtils = require('y-websocket/bin/utils') as YWebsocketUtilsModule;
+    }
+
+    if (!yWebsocketPersistenceConfigured) {
+        yWebsocketUtils.setPersistence(yWebsocketPersistenceAdapter);
+        yWebsocketPersistenceConfigured = true;
+    }
+
+    return yWebsocketUtils;
+};
+
+export default function setupWSConnection(conn: WebSocket, req: IncomingMessage) {
     // Extract docName from URL path (e.g. /ws/my-doc -> my-doc)
     // If connection is straight to root we can assign a default or handle it
-    const rawPath = req.url.slice(1).split('?')[0] || 'default-doc';
+    const rawPath = (req.url || '').slice(1).split('?')[0] || 'default-doc';
     const normalizedPath = rawPath
         .replace(/^api\//, '')
         .replace(/^ws\//, '')
@@ -586,5 +625,5 @@ export default function setupWSConnection(conn: any, req: any) {
         decrementOpenSession(docName);
     });
 
-    setupWSConnectionOriginal(conn, req, { docName });
+    getYWebsocketUtils().setupWSConnection(conn, req, { docName });
 }

@@ -5,28 +5,28 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 
-vi.mock('y-websocket/bin/utils', async () => {
-    const actual = await vi.importActual<typeof import('y-websocket/bin/utils')>('y-websocket/bin/utils');
-
-    return {
-        ...actual,
-        setupWSConnection: (conn: WebSocket) => {
-            conn.send('connected');
-        }
-    };
-});
-
 const syncModule = await import('../../sync');
 const setupWSConnection = syncModule.default;
-const { __resetTestState, __setTestStoragePaths, setDocumentPassword } = syncModule;
+const { __resetTestState, __setTestStoragePaths, __setTestWebsocketUtils, setDocumentPassword } = syncModule;
 
 const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'dontpad-ws-test-'));
+
+const setupMockWebsocketUtils = () => {
+    __setTestWebsocketUtils({
+        setupWSConnection: (conn: WebSocket) => {
+            conn.send('connected');
+        },
+        setPersistence: vi.fn()
+    });
+};
 
 describe('websocket lock enforcement', () => {
     let server: http.Server;
     let address = '';
 
     beforeAll(async () => {
+        setupMockWebsocketUtils();
+
         server = http.createServer();
         const wss = new WebSocketServer({ server });
         wss.on('connection', (conn, req) => {
@@ -42,6 +42,8 @@ describe('websocket lock enforcement', () => {
     });
 
     afterAll(async () => {
+        __setTestWebsocketUtils(null);
+
         await new Promise<void>((resolve, reject) => {
             server.close(error => {
                 if (error) {
@@ -59,6 +61,7 @@ describe('websocket lock enforcement', () => {
             metadataFilePath: path.join(tempDir, `meta-${Date.now()}.json`)
         });
         __resetTestState();
+        setupMockWebsocketUtils();
     });
 
     it('connects to unlocked document', async () => {
