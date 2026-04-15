@@ -55,17 +55,18 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, ref, watch } from 'vue'
+import { computed, defineAsyncComponent, nextTick, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import Editor from './Editor.vue'
 import * as exportService from '../services/export'
 import { markdownStyles } from '../services/pdf-styles'
 import { createDocumentAPI } from '../services/document-api'
 import { getApiBaseUrl } from '../services/config'
+
+const Editor = defineAsyncComponent(() => import('./Editor.vue'))
 
 type SpecialMode = 'pdf' | 'view' | 'raw'
 
@@ -129,21 +130,25 @@ const loadSpecialMode = async () => {
     return
   }
 
-  if (mode === 'raw') {
-    rawContent.value = result.content
-    loading.value = false
-    return
-  }
+  try {
+    if (mode === 'raw') {
+      rawContent.value = result.content
+      return
+    }
 
-  if (mode === 'view') {
-    const html = await exportService.markdownToHtml(result.content)
-    viewHtml.value = `${markdownStyles}<div class="markdown-body">${html}</div>`
-    loading.value = false
-    return
-  }
+    if (mode === 'view') {
+      viewHtml.value = await exportService.renderMarkdownDocument(result.content, markdownStyles)
+      return
+    }
 
-  await exportService.downloadPDF(result.content, documentId.value)
-  loading.value = false
+    await exportService.downloadPDF(result.content, documentId.value)
+  } catch {
+    errorMessage.value = mode === 'pdf'
+      ? 'Nao foi possivel gerar o PDF.'
+      : 'Nao foi possivel renderizar o documento.'
+  } finally {
+    loading.value = false
+  }
 }
 
 const retryWithPassword = async () => {

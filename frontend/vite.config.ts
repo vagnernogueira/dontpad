@@ -30,7 +30,8 @@ export default defineConfig(({ command }) => ({
                     vue: ['vue', 'vue-router'],
                     yjs: ['yjs', 'y-websocket', 'y-codemirror.next'],
                     codemirror: ['codemirror', '@codemirror/state', '@codemirror/view', '@codemirror/language', '@codemirror/lang-markdown'],
-                    pdf: ['marked', 'html2pdf.js']
+                    markdown: ['marked', 'dompurify'],
+                    pdf: ['html2pdf.js']
                 }
             }
         }

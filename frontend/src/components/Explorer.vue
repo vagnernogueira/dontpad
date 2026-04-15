@@ -609,7 +609,11 @@ const downloadSelectedPDF = async () => {
     errorMessage.value = 'Não foi possível carregar o conteúdo para download PDF.'
     return
   }
-  await downloadPDF(content, selectedName)
+  try {
+    await downloadPDF(content, selectedName)
+  } catch {
+    errorMessage.value = 'Não foi possível gerar o PDF.'
+  }
 }
 
 const lockSelected = async () => {

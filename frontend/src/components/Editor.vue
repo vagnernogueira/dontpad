@@ -23,6 +23,8 @@
       @download-pdf="downloadPDF"
     />
 
+    <p v-if="actionError" class="px-4 py-2 text-sm text-red-600">{{ actionError }}</p>
+
     <!-- Hidden element for PDF rendering -->
     <div v-show="false">
       <div ref="pdfContainer" class="pdf-export-container p-8 text-black bg-white"></div>
@@ -116,6 +118,7 @@ const editorContainer = ref<HTMLElement | null>(null)
 const pdfContainer = ref<HTMLElement | null>(null)
 const isSpellcheckEnabled = ref(persistence.get('spellcheck', true))
 const caseTransformIndex = ref(0)
+const actionError = ref('')
 
 // Dialog state
 const showLinkDialog = ref(false)
@@ -272,15 +275,21 @@ const onProfileSave = (data: { name: string; emoji: string }) => {
 // ── Downloads ──────────────────────────────────────────────────────
 
 const downloadMarkdown = () => {
+  actionError.value = ''
   const v = getView()
   if (!v) return
   exportService.downloadMarkdown(v.state.doc.toString(), documentId.value)
 }
 
 const downloadPDF = async () => {
+  actionError.value = ''
   const v = getView()
   if (!v) return
-  await exportService.downloadPDF(v.state.doc.toString(), documentId.value)
+  try {
+    await exportService.downloadPDF(v.state.doc.toString(), documentId.value)
+  } catch {
+    actionError.value = 'Nao foi possivel gerar o PDF.'
+  }
 }
 
 // ── Lifecycle ──────────────────────────────────────────────────────
