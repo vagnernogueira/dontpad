@@ -162,6 +162,7 @@ _docs/
 - **Tailwind CSS v4 em modo híbrido**: `frontend/src/styles/base.css` é o ponto de entrada CSS-first com `@import "tailwindcss"`, enquanto `frontend/tailwind.config.js` segue referenciado via `@config` para tokens, breakpoints e plugins;
 - **CSS Component Layer** via `@layer components` com `@apply` para abstrações reutilizáveis de layout, botões e inputs; camada de diálogos migrada para primitivos **shadcn-vue** (`Dialog`, `DialogContent`, `DialogHeader`, `DialogFooter` via `reka-ui`);
 - **Contexto operacional shadcn-vue**: a configuração vive em `frontend/components.json`; comandos de inspeção/instalação devem rodar em `frontend/` com `npx shadcn-vue@latest ...` (ou scripts equivalentes do pacote), não na raiz com `npx shadcn@latest`;
+- **Orquestração explícita de foco do editor**: o fluxo de montagem do CodeMirror e a restauração de seleção após diálogos usam helpers dedicados em `frontend/src/cm-utils/initial-editor-focus.ts`, evitando depender do retorno automático de foco do browser ou do `Dialog`;
 - **CRDT (Yjs)** em vez de OT para merge automático e melhor suporte offline;
 - **Lazy loading** para bibliotecas pesadas de export (`marked`, `html2pdf.js`);
 - **LevelDB local** para persistência incremental simples em ambiente self-hosted;
@@ -193,7 +194,8 @@ _docs/
 | ------------------------------------------- | ------------------------------------------------------------------------------------------------ |
 | `frontend/src/components/Home.vue`          | Landing page com criação de documentos e seleção de templates vindos de `/_tmpl/`.              |
 | `frontend/src/components/DocumentRoute.vue` | Resolução de modos por query params e fallback para edição.                                      |
-| `frontend/src/components/Editor.vue`        | Componente principal do editor colaborativo (orquestra composables).                             |
+| `frontend/src/components/Editor.vue`        | Componente principal do editor colaborativo; orquestra composables, diálogos e a restauração de seleção/foco do CodeMirror. |
+| `frontend/src/composables/useYjsEditor.ts`  | Inicialização e teardown do Yjs + CodeMirror, incluindo autofocus inicial do cursor na posição zero após montar o `EditorView`. |
 | `frontend/src/components/EditorHeader.vue`  | Header bar extraída do Editor: navegação, badge do documento, status de conexão e avatares.      |
 | `frontend/src/components/EditorToolbar.vue` | Toolbar de formatação, undo/redo e downloads extraída do Editor.                                 |
 | `frontend/src/components/BaseDialog.vue`    | Thin wrapper shadcn-vue: encapsula `Dialog` + `DialogContent` + `DialogHeader` + `DialogFooter`. |
@@ -205,8 +207,10 @@ _docs/
 | `frontend/src/styles/base.css`              | Entrada CSS do Tailwind v4; importa `tailwindcss`, registra `@custom-variant dark` e referencia `tailwind.config.js` via `@config`. |
 | `frontend/src/styles/components.css`        | Abstrações CSS com `@apply` (`btn-*`, `dialog-*`, `input-*`, `page-header`, `toolbar`).          |
 | `frontend/src/composables/*`                | Composables Vue 3 para lógica reativa extraída dos componentes.                                  |
+| `frontend/src/cm-utils/initial-editor-focus.ts` | Helper local do editor para foco inicial em linha 1/coluna 1 e captura/restauração explícita da seleção ao abrir e fechar diálogos. |
 | `frontend/src/cm-utils/math-evaluator.ts`   | Parser matemático recursivo descendente (tokenizer + avaliador).                                 |
 | `frontend/src/cm-utils/snippet-registry.ts` | Registry compartilhado de snippets e prefixes para tab-keymap e snippet plugins.                 |
+| `frontend/src/__tests__/unit/initial-editor-focus.test.ts` | Testes unitários do fluxo de foco inicial e restauração de seleção do editor.                    |
 | `frontend/src/services/document-api.ts`     | Cliente HTTP para lock/access e ações administrativas.                                           |
 | `backend/src/server.ts`                     | Bootstrap backend (Express + WS + rotas API).                                                    |
 | `backend/src/sync.ts`                       | Persistência CRDT, lock e autenticação WS.                                                       |
@@ -245,6 +249,11 @@ Referências externas:
   - Principais alterações arquiteturais: base SPA + API/WS, adoção de Yjs/CodeMirror e persistência em LevelDB.
 
 ### 9.2 Changelog do Documento
+
+- **Versão 3.8**
+  - **Data:** 2026-04-16
+  - **Autor:** GitHub Copilot
+  - **Mudanças:** Documentação alinhada ao autofocus inicial do CodeMirror, à restauração explícita da seleção do editor após fechar diálogos e aos novos arquivos `frontend/src/cm-utils/initial-editor-focus.ts` e `frontend/src/__tests__/unit/initial-editor-focus.test.ts`.
 
 - **Versão 3.7**
   - **Data:** 2026-04-15

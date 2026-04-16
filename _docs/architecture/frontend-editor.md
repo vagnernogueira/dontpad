@@ -17,9 +17,10 @@ Este módulo documenta a arquitetura do frontend focada no editor colaborativo: 
 - `frontend/src/cm-commands/*` — 5 arquivos (formatting, history, insertions, table, index)
 - `frontend/src/cm-extensions/*` — 2 arquivos (editor-theme, index)
 - `frontend/src/cm-plugins/*` — 17 plugins + barrel index
-- `frontend/src/cm-utils/*` — 6 módulos utilitários + barrel index
+- `frontend/src/cm-utils/*` — 7 módulos utilitários (inclui helper local de foco/seleção do editor)
 - `frontend/src/services/*` — 5 serviços + barrel index
 - `frontend/src/styles/*.css` — 5 arquivos CSS modulares (inclui camada de componentes)
+- `frontend/src/__tests__/unit/*` — testes unitários Vitest para utilitários e serviços do frontend
 
 ## Visão da camada
 
@@ -33,7 +34,7 @@ src/
 ├── cm-commands/      # 5 arquivos (formatting, history, insertions, table, index)
 ├── cm-extensions/    # 2 arquivos (editor-theme, index)
 ├── cm-plugins/       # 17 plugins + barrel index
-├── cm-utils/         # 6 módulos + barrel index
+├── cm-utils/         # 7 módulos utilitários
 └── styles/           # 5 arquivos CSS modulares
 ```
 
@@ -65,6 +66,7 @@ src/
 - Delega toolbar para `EditorToolbar.vue`;
 - Delega diálogos para componentes focados (`LinkDialog`, `ImageDialog`, `LockDialog`, `AccessDialog`, `ProfileDialog`);
 - Consome o query param transitório `template`, repassa o valor para a conexão colaborativa e remove o param da URL após a inicialização;
+- Captura a seleção atual do CodeMirror antes de abrir diálogos controlados pelo editor e decide entre restaurar a posição anterior ou preservar a nova seleção após inserções;
 - Delega regras para comandos/plugins/services.
 
 ### `EditorHeader.vue`
@@ -100,7 +102,7 @@ src/
 | `AccessDialog.vue` | Solicitar senha para abrir documento protegido |
 | `ProfileDialog.vue` | Edição de perfil do colaborador (emoji, nome, telemetria) |
 
-Todos usam **diretamente** os primitivos shadcn-vue (`Dialog`, `DialogContent`, `DialogHeader`, `DialogTitle`, `DialogFooter` de `@/components/ui/dialog`) — não dependem de `BaseDialog.vue`. O foco inicial em cada diálogo é gerenciado via `@open-auto-focus.prevent` no `DialogContent`, eliminando o padrão anterior de `onMounted` + `nextTick`. Focus trap, Escape e `aria-modal` são gerenciados automaticamente por `reka-ui`.
+Todos usam **diretamente** os primitivos shadcn-vue (`Dialog`, `DialogContent`, `DialogHeader`, `DialogTitle`, `DialogFooter` de `@/components/ui/dialog`) — não dependem de `BaseDialog.vue`. O foco inicial em cada diálogo é gerenciado via `@open-auto-focus.prevent` no `DialogContent`, eliminando o padrão anterior de `onMounted` + `nextTick`. O fechamento também usa `@close-auto-focus.prevent`, para que o retorno do foco fique sob controle do `Editor.vue` e da lógica de restauração de seleção. Focus trap, Escape e `aria-modal` são gerenciados automaticamente por `reka-ui`.
 
 ### `DocumentRoute.vue`
 
@@ -141,7 +143,7 @@ Assinatura padrão: `(view: EditorView, ...args) => boolean`.
 
 | Composable | Descrição |
 |---|---|
-| `useYjsEditor(documentId, password, templateId?)` | Setup/teardown de Yjs, CodeMirror, awareness, status de conexão e envio opcional do template inicial no handshake WS |
+| `useYjsEditor(documentId, password, templateId?)` | Setup/teardown de Yjs, CodeMirror, awareness, status de conexão, autofocus inicial do cursor em linha 1/coluna 1 e envio opcional do template inicial no handshake WS |
 | `useDocumentAccess(documentId, api)` | Lock, acesso, password management |
 | `useCollaborators(provider, profile)` | Tracking de participantes via awareness |
 | `useExplorerSession(api)` | Autenticação e ciclo de vida da sessão do Explorer |
@@ -158,11 +160,16 @@ Detalhamento completo no módulo [plugins-codemirror.md](./plugins-codemirror.md
 - `word-boundaries.ts`: expansão inteligente de seleção por palavra;
 - `cursor.ts`: nomes/cores de awareness colaborativo;
 - `markdown-parsing.ts`: helpers de parsing Markdown;
+- `initial-editor-focus.ts`: helper local do ciclo de vida do editor para autofocus inicial e captura/restauração explícita da seleção em fluxos com diálogos;
 - `snippet-registry.ts`: registry compartilhado de snippets, prefixes e `getWordBeforeCursor` (consumido por `tab-keymap.ts` e `snippet.ts`);
 - `math-evaluator.ts`: tokenizer + parser recursivo descendente para expressões matemáticas (extraído de `cm-plugins/math.ts`);
 - `document-name.ts`: normalização de nomes de documento.
 
-Todos os módulos são re-exportados pelo barrel `cm-utils/index.ts`.
+Os módulos compartilhados continuam re-exportados pelo barrel `cm-utils/index.ts`. O arquivo `initial-editor-focus.ts` permanece importado diretamente por `Editor.vue` e `useYjsEditor.ts`, pois encapsula um helper específico do ciclo de foco/seleção do editor.
+
+## Testes unitários relevantes
+
+- `frontend/src/__tests__/unit/initial-editor-focus.test.ts`: valida autofocus inicial em `anchor/head = 0`, restauração de seleção explícita e o guard clause que evita focar uma view já desmontada.
 
 ## Services (`src/services`)
 
@@ -264,6 +271,14 @@ Regras:
 3. update é propagado por WebSocket;
 4. demais clientes recebem merge automático (CRDT).
 
+### Foco inicial e restauração após diálogos
+
+1. `useYjsEditor.ts` cria o `EditorView` e agenda `focusEditorAtStart(view)` para aplicar foco e cursor na posição zero após a montagem do DOM;
+2. `Editor.vue` captura a seleção corrente antes de abrir `LinkDialog`, `ImageDialog`, `LockDialog` ou `ProfileDialog`;
+3. Os diálogos impedem o auto-retorno de foco do `DialogContent` com `@close-auto-focus.prevent`;
+4. Ao cancelar ou concluir um diálogo sem inserir conteúdo no documento, `Editor.vue` reaplica a seleção salva e refoca o editor;
+5. Ao inserir link ou imagem, o comando atualiza o documento e o editor é refocado preservando a seleção corrente resultante, posicionada após o conteúdo inserido.
+
 ### Export PDF
 
 1. Usuário aciona export;
@@ -312,6 +327,7 @@ Atualizar este módulo ao alterar:
 
 - contratos entre `Editor.vue` e `cm-*`;
 - props/eventos de `EditorHeader.vue` ou `EditorToolbar.vue`;
+- comportamento de foco/seleção entre `Editor.vue`, `useYjsEditor.ts` e diálogos associados;
 - inicialização do editor/Yjs;
 - composables e suas interfaces;
 - interfaces públicas de `services/*`;
