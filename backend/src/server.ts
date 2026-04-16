@@ -6,6 +6,7 @@ import { listDocumentNames, listDocumentSummaries, listTemplateNames, getDocumen
 import { isDocumentLocked, setDocumentPassword, verifyDocumentAccess, verifyDocumentsMasterPassword } from './sync';
 import { removeDocumentPassword } from './sync';
 import cors from 'cors';
+import { buildDocumentsBackupArchive } from './document-backup';
 
 const app = express();
 app.use(cors());
@@ -140,6 +141,24 @@ app.delete('/api/documents', async (req, res) => {
     } catch (error) {
         console.error('Failed to delete document', error);
         res.status(500).json({ error: 'failed_to_delete_document' });
+    }
+});
+
+app.get('/api/documents/backup', async (req, res) => {
+    try {
+        const providedPassword = typeof req.headers['x-docs-password'] === 'string' ? req.headers['x-docs-password'] : '';
+        if (!verifyDocumentsMasterPassword(providedPassword)) {
+            res.status(403).json({ error: 'invalid_password' });
+            return;
+        }
+
+        const archive = await buildDocumentsBackupArchive();
+        res.setHeader('Content-Type', 'application/zip');
+        res.setHeader('Content-Disposition', 'attachment; filename="dontpad-backup.zip"');
+        res.send(archive);
+    } catch (error) {
+        console.error('Failed to build document backup', error);
+        res.status(500).json({ error: 'failed_to_build_document_backup' });
     }
 });
 

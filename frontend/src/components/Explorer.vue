@@ -14,16 +14,26 @@
         </Badge>
       </div>
       <div class="flex items-center gap-1 shrink-0">
-        <Button
-          v-if="session.hasAccess.value"
-          size="sm"
-          variant="secondary"
-          class="h-auto gap-1.5 py-btn text-xs sm:py-btn-sm"
-          @click="refreshDocuments"
-        >
-          <RefreshCw :size="14" />
-          Atualizar
-        </Button>
+        <template v-if="session.hasAccess.value">
+          <Button
+            size="sm"
+            variant="secondary"
+            class="h-auto gap-1.5 py-btn text-xs sm:py-btn-sm"
+            @click="refreshDocuments"
+          >
+            <RefreshCw :size="14" />
+            Atualizar
+          </Button>
+          <Button
+            size="sm"
+            variant="secondary"
+            class="h-auto gap-1.5 py-btn text-xs sm:py-btn-sm"
+            @click="downloadGeneralBackup"
+          >
+            <Archive :size="14" />
+            Backup geral
+          </Button>
+        </template>
         <!-- dark mode toggle: temporariamente desativado
         <Button variant="ghost" size="icon" class="text-gray-300 hover:text-white hover:bg-white/10 h-7 w-7" :aria-label="isDark ? 'Ativar modo claro' : 'Ativar modo escuro'" @click="toggle">
           <Sun v-if="isDark" :size="16" />
@@ -299,7 +309,7 @@
 
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
-import { ArrowLeft, RefreshCw } from 'lucide-vue-next'
+import { Archive, ArrowLeft, RefreshCw } from 'lucide-vue-next'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import {
   AlertDialog,
@@ -335,7 +345,7 @@ import {
 } from '@/components/ui/dialog'
 import { createDocumentAPI, type DocumentSummary, type ListSummariesOptions } from '../services/document-api'
 import { getApiBaseUrl } from '../services/config'
-import { downloadMarkdown, downloadPDF } from '../services/export'
+import { downloadMarkdown, downloadPDF, downloadZip } from '../services/export'
 import { trimTrailingSlashes } from '../cm-utils/document-name'
 import persistence from '../services/persistence'
 import { useExplorerSession } from '../composables/useExplorerSession'
@@ -615,6 +625,19 @@ const downloadSelectedPDF = async () => {
   } catch {
     errorMessage.value = 'Não foi possível gerar o PDF.'
   }
+}
+
+const downloadGeneralBackup = async () => {
+  errorMessage.value = ''
+  if (!session.ensureMasterPassword()) return
+
+  const archive = await documentAPI.downloadBackupArchive(session.masterPassword.value)
+  if (archive === null) {
+    errorMessage.value = 'Não foi possível gerar o backup geral.'
+    return
+  }
+
+  downloadZip(archive, 'dontpad-backup')
 }
 
 const lockSelected = async () => {

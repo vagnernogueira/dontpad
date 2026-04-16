@@ -7,6 +7,17 @@
 
 import { markdownStyles } from './pdf-styles'
 
+const triggerDownload = (blob: Blob, filename: string): void => {
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = filename
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  URL.revokeObjectURL(url)
+}
+
 /**
  * Export document content as Markdown file
  * @param content - The markdown content to export
@@ -14,14 +25,11 @@ import { markdownStyles } from './pdf-styles'
  */
 export function downloadMarkdown(content: string, filename: string): void {
   const blob = new Blob([content], { type: 'text/markdown;charset=utf-8' })
-  const url = URL.createObjectURL(blob)
-  const link = document.createElement('a')
-  link.href = url
-  link.download = `${filename}.md`
-  document.body.appendChild(link)
-  link.click()
-  document.body.removeChild(link)
-  URL.revokeObjectURL(url)
+  triggerDownload(blob, `${filename}.md`)
+}
+
+export function downloadZip(blob: Blob, filename: string): void {
+  triggerDownload(blob, `${filename}.zip`)
 }
 
 /**
@@ -59,6 +67,7 @@ export async function downloadPDF(
 
 export default {
   downloadMarkdown,
+  downloadZip,
   markdownToHtml,
   renderMarkdownDocument,
   downloadPDF

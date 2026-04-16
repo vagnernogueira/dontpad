@@ -247,6 +247,36 @@ describe('DocumentAPI', () => {
     })
   })
 
+  describe('downloadBackupArchive', () => {
+    it('returns a blob on success', async () => {
+      const blob = new Blob(['zip-content'], { type: 'application/zip' })
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        blob: async () => blob
+      } as Response)
+
+      const result = await api.downloadBackupArchive('master')
+
+      expect(result).toBe(blob)
+      expect(mockFetch).toHaveBeenCalledWith(
+        'http://localhost:3000/api/documents/backup',
+        expect.objectContaining({
+          headers: {
+            'x-docs-password': 'master'
+          }
+        })
+      )
+    })
+
+    it('returns null when request fails', async () => {
+      mockFetch.mockResolvedValueOnce({ ok: false } as Response)
+
+      const result = await api.downloadBackupArchive('wrong-pass')
+
+      expect(result).toBeNull()
+    })
+  })
+
   describe('listTemplates', () => {
     it('returns template names on success', async () => {
       mockFetch.mockResolvedValueOnce({

@@ -246,6 +246,28 @@ class DocumentAPI {
   }
 
   /**
+   * Download a zip archive with all non-empty documents (requires master password)
+   */
+  async downloadBackupArchive(masterPassword: string): Promise<Blob | null> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/documents/backup`, {
+        headers: {
+          'x-docs-password': masterPassword
+        }
+      })
+
+      if (!response.ok) {
+        return null
+      }
+
+      return await response.blob()
+    } catch (error) {
+      console.error('Failed to download document backup:', error)
+      return null
+    }
+  }
+
+  /**
    * Load raw markdown content by document id for public URL modes.
    * If the document is locked, a valid document password is required.
    */

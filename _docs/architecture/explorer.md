@@ -60,6 +60,11 @@ Regras:
 - busca por nome com `contains`;
 - clique no nome abre o documento em nova aba.
 
+## Ações na toolbar
+
+- atualizar lista;
+- backup geral em `.zip` com documentos Markdown não vazios.
+
 ## Ações por item
 
 - renomear;
@@ -73,6 +78,7 @@ Regras:
 Todos endpoints administrativos exigem `x-docs-password` válido.
 
 - `GET /api/documents`
+- `GET /api/documents/backup`
 - `GET /api/document-content?documentId=...`
 - `POST /api/documents/rename`
 - `DELETE /api/documents`

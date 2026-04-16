@@ -8,6 +8,7 @@ const getLockStatusMock = vi.fn()
 const lockMock = vi.fn()
 const unlockMock = vi.fn()
 const getDocumentContentMock = vi.fn()
+const downloadBackupArchiveMock = vi.fn()
 const getPublicDocumentContentMock = vi.fn()
 const renameDocumentMock = vi.fn()
 const removeDocumentMock = vi.fn()
@@ -20,6 +21,7 @@ vi.mock('../../services/document-api', () => ({
     lock: lockMock,
     unlock: unlockMock,
     getDocumentContent: getDocumentContentMock,
+    downloadBackupArchive: downloadBackupArchiveMock,
     getPublicDocumentContent: getPublicDocumentContentMock,
     renameDocument: renameDocumentMock,
     removeDocument: removeDocumentMock,
@@ -33,6 +35,7 @@ vi.mock('../../services/config', () => ({
 vi.mock('../../services/export', () => ({
   downloadMarkdown: vi.fn(),
   downloadPDF: vi.fn(),
+  downloadZip: vi.fn(),
 }))
 
 const initialSummaries = [
@@ -101,6 +104,7 @@ describe('Explorer content filter flow', () => {
     lockMock.mockReset()
     unlockMock.mockReset()
     getDocumentContentMock.mockReset()
+    downloadBackupArchiveMock.mockReset()
     getPublicDocumentContentMock.mockReset()
     renameDocumentMock.mockReset()
     removeDocumentMock.mockReset()
@@ -162,6 +166,23 @@ describe('Explorer content filter flow', () => {
     expect(screen.queryByText('beta-doc')).not.toBeInTheDocument()
     expect(screen.queryByText('gamma-doc')).not.toBeInTheDocument()
   }, 10000)
+
+  it('does not show the backup action before explorer unlock', async () => {
+    const { default: Explorer } = await import('../../components/Explorer.vue')
+
+    render(Explorer, {
+      global: {
+        stubs: {
+          RouterLink: {
+            template: '<a><slot /></a>'
+          }
+        }
+      }
+    })
+
+    expect(screen.queryByRole('button', { name: 'Backup geral' })).not.toBeInTheDocument()
+    expect(screen.getByText('Informe a senha mestra para entrar no Explorer.')).toBeInTheDocument()
+  })
 
   it('uses regex content query when regex mode is enabled and restores it from storage', async () => {
     const { default: Explorer } = await import('../../components/Explorer.vue')
@@ -258,6 +279,37 @@ describe('Explorer content filter flow', () => {
     await fireEvent.click(screen.getByRole('button', { name: 'Salvar' }))
     await waitFor(() => {
       expect(renameDocumentMock).toHaveBeenCalledWith('alpha-doc', 'renamed-doc', 'master')
+    })
+  })
+
+  it('downloads the general backup through the toolbar action', async () => {
+    vi.useRealTimers()
+    const backupBlob = new Blob(['zip-data'], { type: 'application/zip' })
+    downloadBackupArchiveMock.mockResolvedValue(backupBlob)
+
+    const { downloadZip } = await import('../../services/export')
+    const downloadZipMock = vi.mocked(downloadZip)
+
+    const { default: Explorer } = await import('../../components/Explorer.vue')
+
+    render(Explorer, {
+      global: {
+        stubs: {
+          RouterLink: {
+            template: '<a><slot /></a>'
+          }
+        }
+      }
+    })
+
+    await unlockExplorerIfNeeded()
+    await screen.findByText('alpha-doc')
+
+    await fireEvent.click(screen.getByRole('button', { name: 'Backup geral' }))
+
+    await waitFor(() => {
+      expect(downloadBackupArchiveMock).toHaveBeenCalledWith('master')
+      expect(downloadZipMock).toHaveBeenCalledWith(backupBlob, 'dontpad-backup')
     })
   })
 

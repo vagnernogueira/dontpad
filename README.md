@@ -109,7 +109,7 @@ VITE_BACKEND_WS_URL=wss://dontpad.vagnernogueira.com/api
 - A rota não cria documento automaticamente.
 - A tela lista documentos com: seleção, nome, data de criação, data de alteração, travado (S/N), vazio (S/N), aberto (S/N).
 - Suporta ordenação por coluna, busca por nome e seleção única.
-- Ações disponíveis para o documento selecionado: renomear, remover, download markdown, download PDF e travar.
+- Ações disponíveis na toolbar do Explorer: atualizar, backup geral, renomear, remover, download markdown, download PDF e travar.
 
 ## Templates de Documentos
 

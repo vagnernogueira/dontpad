@@ -6,6 +6,7 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import * as Y from 'yjs';
+import JSZip from 'jszip';
 
 const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'dontpad-api-test-'));
 
@@ -154,5 +155,36 @@ describe('api integration', () => {
 
         expect(response.status).toBe(400);
         expect(response.body).toEqual({ error: 'invalid_content_regex' });
+    });
+
+    it('creates a zip backup with only non-empty documents and preserved paths', async () => {
+        const initialDocs = new Map<string, string>();
+        initialDocs.set('alpha-doc', 'Alpha content');
+        initialDocs.set('me/todo', 'Nested todo');
+        initialDocs.set('empty-doc', '');
+        __setTestPersistence(createMockPersistence(initialDocs));
+
+        const response = await request(app)
+            .get('/api/documents/backup')
+            .buffer(true)
+            .parse((res, callback) => {
+                const chunks: Buffer[] = [];
+                res.on('data', chunk => {
+                    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+                });
+                res.on('end', () => callback(null, Buffer.concat(chunks)));
+            });
+
+        expect(response.status).toBe(200);
+        expect(response.headers['content-type']).toContain('application/zip');
+        expect(response.headers['content-disposition']).toContain('attachment; filename="dontpad-backup.zip"');
+
+        const zip = await JSZip.loadAsync(response.body as Buffer);
+        const fileNames = Object.keys(zip.files).filter(name => !zip.files[name].dir).sort();
+
+        expect(fileNames).toEqual(['alpha-doc.md', 'me/todo.md']);
+        await expect(zip.file('alpha-doc.md')?.async('string')).resolves.toBe('Alpha content');
+        await expect(zip.file('me/todo.md')?.async('string')).resolves.toBe('Nested todo');
+        expect(zip.file('empty-doc.md')).toBeNull();
     });
 });
