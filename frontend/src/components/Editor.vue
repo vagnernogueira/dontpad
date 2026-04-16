@@ -5,7 +5,7 @@
       :document-id="documentId"
       :collaborators="collaborators"
       :status="yjsEditor.status.value"
-      @edit-profile="showProfileDialog = true"
+      @edit-profile="openProfileDialog"
     />
 
     <!-- Toolbar -->
@@ -40,7 +40,7 @@
     <ProfileDialog
       v-if="showProfileDialog"
       :profile="myProfile"
-      @close="showProfileDialog = false"
+      @close="closeProfileDialog"
       @save="onProfileSave"
     />
 
@@ -78,6 +78,7 @@
 
 <script setup lang="ts">
 import { computed, ref, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
+import type { EditorSelectionSnapshot } from '../cm-utils/initial-editor-focus'
 import { useRoute, useRouter } from 'vue-router'
 import EditorHeader from './EditorHeader.vue'
 import ProfileDialog from './ProfileDialog.vue'
@@ -91,6 +92,7 @@ import AccessDialog from './AccessDialog.vue'
 import { useYjsEditor } from '../composables/useYjsEditor'
 import { useDocumentAccess } from '../composables/useDocumentAccess'
 import { useCollaborators } from '../composables/useCollaborators'
+import { captureEditorSelection, focusEditorSelection } from '../cm-utils/initial-editor-focus'
 
 // Commands
 import { applyFormat as applyFormatCommand, insertLink as insertLinkCommand, insertImage as insertImageCommand, transformCase } from '../cm-commands'
@@ -130,6 +132,7 @@ const showLinkDialog = ref(false)
 const showImageDialog = ref(false)
 const showProfileDialog = ref(false)
 const dialogInitialText = ref('')
+const savedEditorSelection = ref<EditorSelectionSnapshot | null>(null)
 
 // ── Editor lifecycle ───────────────────────────────────────────────
 
@@ -179,6 +182,29 @@ const ensureDocumentAccess = () => {
 const getView = () => yjsEditor.getInstance()?.view ?? null
 const getUndoManager = () => yjsEditor.getInstance()?.undoManager ?? null
 
+const rememberEditorSelection = () => {
+  const view = getView()
+  savedEditorSelection.value = view ? captureEditorSelection(view) : null
+}
+
+const restoreEditorSelection = async () => {
+  await nextTick()
+
+  const view = getView()
+  if (!view) return
+
+  focusEditorSelection(view, savedEditorSelection.value ?? captureEditorSelection(view))
+}
+
+const focusEditorAtCurrentSelection = async () => {
+  await nextTick()
+
+  const view = getView()
+  if (!view) return
+
+  focusEditorSelection(view, captureEditorSelection(view))
+}
+
 // Undo/Redo
 const undo = () => { getUndoManager()?.undo(); getView()?.focus() }
 const redo = () => { getUndoManager()?.redo(); getView()?.focus() }
@@ -224,6 +250,7 @@ const getSelectionText = (): string => {
 
 const openLinkDialog = () => {
   if (!getView()) return
+  rememberEditorSelection()
   dialogInitialText.value = getSelectionText()
   showLinkDialog.value = true
 }
@@ -231,11 +258,12 @@ const openLinkDialog = () => {
 const onLinkInsert = (text: string, url: string) => {
   const v = getView()
   if (v) insertLinkCommand(v, text, url)
-  closeDialogs()
+  void closeDialogs(true)
 }
 
 const openImageDialog = () => {
   if (!getView()) return
+  rememberEditorSelection()
   dialogInitialText.value = getSelectionText()
   showImageDialog.value = true
 }
@@ -243,29 +271,43 @@ const openImageDialog = () => {
 const onImageInsert = (alt: string, url: string) => {
   const v = getView()
   if (v) insertImageCommand(v, alt, url)
-  closeDialogs()
+  void closeDialogs(true)
+}
+
+const openProfileDialog = () => {
+  rememberEditorSelection()
+  showProfileDialog.value = true
 }
 
 // ── Lock dialog ────────────────────────────────────────────────────
 
 const openLockDialog = () => {
+  rememberEditorSelection()
   access.lockError.value = ''
   access.showLockDialog.value = true
 }
 
-const onLockDocument = (password: string) => {
+const onLockDocument = async (password: string) => {
   access.lockPassword.value = password
-  access.lockDocument(documentId.value)
+  await access.lockDocument(documentId.value)
+
+  if (!access.showLockDialog.value) {
+    await restoreEditorSelection()
+  }
 }
 
-const onRemoveLock = (password: string) => {
+const onRemoveLock = async (password: string) => {
   access.lockPassword.value = password
-  access.removeLock(documentId.value)
+  await access.removeLock(documentId.value)
+
+  if (!access.showLockDialog.value) {
+    await restoreEditorSelection()
+  }
 }
 
-const closeLockDialog = () => {
+const closeLockDialog = async () => {
   access.closeLockDialog()
-  getView()?.focus()
+  await restoreEditorSelection()
 }
 
 // ── Access dialog ──────────────────────────────────────────────────
@@ -277,19 +319,30 @@ const onUnlockDocument = async (password: string) => {
 
 const closeAccessDialog = () => access.closeAccessDialog()
 
-const closeDialogs = () => {
+const closeDialogs = async (preserveCurrentSelection: boolean = false) => {
   showLinkDialog.value = false
   showImageDialog.value = false
   access.closeLockDialog()
-  getView()?.focus()
+
+  if (preserveCurrentSelection) {
+    await focusEditorAtCurrentSelection()
+    return
+  }
+
+  await restoreEditorSelection()
 }
 
 // ── Profile ────────────────────────────────────────────────────────
 
-const onProfileSave = (data: { name: string; emoji: string }) => {
+const onProfileSave = async (data: { name: string; emoji: string }) => {
   saveProfile(data)
   showProfileDialog.value = false
-  getView()?.focus()
+  await restoreEditorSelection()
+}
+
+const closeProfileDialog = async () => {
+  showProfileDialog.value = false
+  await restoreEditorSelection()
 }
 
 // ── Downloads ──────────────────────────────────────────────────────

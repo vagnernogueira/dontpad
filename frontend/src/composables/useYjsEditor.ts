@@ -26,6 +26,7 @@ import { spellcheckPlugin } from '../cm-plugins/spellcheck'
 import { editorKeymaps } from '../cm-plugins/keymaps'
 import { editorTheme } from '../cm-extensions'
 import type { CollaboratorProfile } from '../cm-utils/cursor'
+import { focusEditorAtStart } from '../cm-utils/initial-editor-focus'
 import { getProfileAwarenessState } from '../cm-utils/cursor'
 
 export interface YjsEditorOptions {
@@ -117,6 +118,7 @@ export function useYjsEditor() {
     })
 
     const view = new EditorView({ state, parent: container })
+    focusEditorAtStart(view)
 
     instance = { ydoc, provider, view, undoManager, spellcheckCompartment, themeCompartment }
     return instance

@@ -4,6 +4,7 @@
       motion-preset="top-right"
       class="sm:max-w-sm"
       @open-auto-focus.prevent="nameInput?.$el?.select()"
+      @close-auto-focus.prevent
     >
       <DialogHeader>
         <DialogTitle>Meu Perfil</DialogTitle>

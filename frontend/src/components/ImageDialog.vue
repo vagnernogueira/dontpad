@@ -3,6 +3,7 @@
     <DialogContent
       class="sm:max-w-md"
       @open-auto-focus.prevent="altInput?.$el?.select()"
+      @close-auto-focus.prevent
     >
       <DialogHeader>
         <DialogTitle>Inserir Imagem</DialogTitle>

@@ -3,6 +3,7 @@
     <DialogContent
       class="sm:max-w-md"
       @open-auto-focus.prevent="passwordInput?.$el?.focus()"
+      @close-auto-focus.prevent
     >
       <DialogHeader>
         <DialogTitle>Travar Documento</DialogTitle>
