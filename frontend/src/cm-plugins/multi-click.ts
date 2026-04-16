@@ -24,19 +24,14 @@
 import { ViewPlugin, EditorView } from "@codemirror/view"
 import { EditorSelection } from "@codemirror/state"
 
-/**
- * Constantes que definem comportamento e limites do multi-click
- */
-const MULTI_CLICK_CONFIG = {
-  /** Tempo máximo em ms entre cliques para contar como sequência */
-  CLICK_TIMEOUT: 400,
-  
-  /** Distância máxima em pixels entre cliques para contar como mesma posição */
-  CLICK_DISTANCE: 5,
-  
-  /** Número máximo de cliques a processar (limita a 4: triple e quadruple) */
-  MAX_CLICK_COUNT: 5
-} as const
+/** Distância máxima em pixels para considerar que um click virou arraste */
+const SINGLE_CLICK_DRAG_THRESHOLD = 5
+
+interface PendingSingleClick {
+    pos: number
+    clientX: number
+    clientY: number
+}
 
 /**
  * Helper function to find paragraph boundaries
@@ -69,86 +64,120 @@ function findParagraphBounds(view: EditorView, pos: number): { from: number, to:
     return { from: startLine.from, to: endLine.to }
 }
 
+function isPositionInsideSelection(view: EditorView, pos: number): boolean {
+    return view.state.selection.ranges.some((range) => !range.empty && pos >= range.from && pos <= range.to)
+}
+
+function hasPointerMovedBeyondThreshold(event: PointerEvent, pending: PendingSingleClick): boolean {
+    const movedX = event.clientX - pending.clientX
+    const movedY = event.clientY - pending.clientY
+    return Math.hypot(movedX, movedY) > SINGLE_CLICK_DRAG_THRESHOLD
+}
+
+function stopEvent(event: MouseEvent | PointerEvent) {
+    event.preventDefault()
+    event.stopPropagation()
+    event.stopImmediatePropagation?.()
+}
+
 /**
  * Plugin do CodeMirror para múltiplos cliques
  * Usa handlers locais ao editor para melhor controle de escopo
  */
 export const multiClickPlugin = ViewPlugin.fromClass(
     class {
-        lastClickTime = 0
-        lastClickPos = -1
-        clickCount = 0
+        pendingSingleClick: PendingSingleClick | null = null
 
         constructor(readonly view: EditorView) {
-            // Usar pointerdown no root do editor para capturar todas as pressões individuais
-            // antes de handlers internos consumirem os eventos de click.
-            view.dom.addEventListener('pointerdown', this.handleClick, true)
+            view.dom.addEventListener('mousedown', this.handleMouseDown, true)
+            view.dom.addEventListener('pointermove', this.handlePointerMove, true)
+            view.dom.addEventListener('pointerup', this.handlePointerUp, true)
+            view.dom.addEventListener('pointercancel', this.clearPendingSingleClick, true)
         }
 
-        handleClick = (event: PointerEvent) => {
-            // ✅ IMPORTANTE: Ignorar quando Ctrl/Cmd está pressionado
-            // Deixar o plugin ctrl-click (navegação) lidar com esses eventos
-            if (event.ctrlKey || event.metaKey) {
+        clearPendingSingleClick = () => {
+            this.pendingSingleClick = null
+        }
+
+        handleMouseDown = (event: MouseEvent) => {
+            if (event.ctrlKey || event.metaKey || event.button !== 0) {
+                this.pendingSingleClick = null
                 return
             }
 
-            // Ignorar botão direito e botão do meio
-            if (event.button !== 0) return
-
-            const now = Date.now()
             const pos = this.view.posAtCoords({ x: event.clientX, y: event.clientY })
-            
-            if (pos === null) return
-
-            // Reset se:
-            // 1. Tempo entre cliques > CLICK_TIMEOUT
-            // 2. Distância entre cliques > CLICK_DISTANCE  
-            // 3. Click count já alcançou máximo
-            const timeSinceLastClick = now - this.lastClickTime
-            const distanceSinceLastClick = Math.abs(pos - this.lastClickPos)
-            
-            if (timeSinceLastClick > MULTI_CLICK_CONFIG.CLICK_TIMEOUT || 
-                distanceSinceLastClick > MULTI_CLICK_CONFIG.CLICK_DISTANCE ||
-                this.clickCount >= MULTI_CLICK_CONFIG.MAX_CLICK_COUNT) {
-                this.clickCount = 1
-            } else {
-                this.clickCount++
+            if (pos === null) {
+                this.pendingSingleClick = null
+                return
             }
 
-            this.lastClickTime = now
-            this.lastClickPos = pos
+            if (event.detail === 1) {
+                if (event.shiftKey) {
+                    this.pendingSingleClick = null
+                    return
+                }
 
-            // ✅ FIX: Processar imediatamente (não usar setTimeout)
-            // Triple click (3 clicks) - seleciona linha inteira
-            if (this.clickCount === 3) {
-                event.preventDefault()
-                event.stopPropagation()
+                this.pendingSingleClick = isPositionInsideSelection(this.view, pos)
+                    ? {
+                        pos,
+                        clientX: event.clientX,
+                        clientY: event.clientY,
+                    }
+                    : null
+                return
+            }
+
+            this.pendingSingleClick = null
+
+            if (event.detail === 3) {
+                stopEvent(event)
 
                 const line = this.view.state.doc.lineAt(pos)
                 this.view.dispatch({
                     selection: EditorSelection.single(line.from, line.to)
                 })
-                return  // Importante: impedir processamento adicional
+                this.view.focus()
+                return
             }
 
-            // Quadruple click (4 clicks) - seleciona parágrafo inteiro
-            if (this.clickCount === 4) {
-                event.preventDefault()
-                event.stopPropagation()
+            if (event.detail === 4) {
+                stopEvent(event)
 
                 const { from, to } = findParagraphBounds(this.view, pos)
                 this.view.dispatch({
                     selection: EditorSelection.single(from, to)
                 })
-                return  // Importante: impedir processamento adicional
+                this.view.focus()
             }
+        }
 
-            // Para 1 e 2 clicks: deixar CodeMirror processar normalmente
+        handlePointerMove = (event: PointerEvent) => {
+            if (!this.pendingSingleClick) return
+
+            if (hasPointerMovedBeyondThreshold(event, this.pendingSingleClick)) {
+                this.pendingSingleClick = null
+            }
+        }
+
+        handlePointerUp = (event: PointerEvent) => {
+            const pendingSingleClick = this.pendingSingleClick
+            this.pendingSingleClick = null
+
+            if (!pendingSingleClick || event.button !== 0) return
+            if (event.shiftKey || event.ctrlKey || event.metaKey) return
+            if (hasPointerMovedBeyondThreshold(event, pendingSingleClick)) return
+
+            this.view.dispatch({
+                selection: EditorSelection.single(pendingSingleClick.pos)
+            })
+            this.view.focus()
         }
 
         destroy() {
-            // Limpa listener local (pointerdown)
-            this.view.dom.removeEventListener('pointerdown', this.handleClick, true)
+            this.view.dom.removeEventListener('mousedown', this.handleMouseDown, true)
+            this.view.dom.removeEventListener('pointermove', this.handlePointerMove, true)
+            this.view.dom.removeEventListener('pointerup', this.handlePointerUp, true)
+            this.view.dom.removeEventListener('pointercancel', this.clearPendingSingleClick, true)
         }
     }
 )
