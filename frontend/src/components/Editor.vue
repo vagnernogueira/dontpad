@@ -11,6 +11,7 @@
     <!-- Toolbar -->
     <EditorToolbar
       :spellcheck-enabled="isSpellcheckEnabled"
+      :editor-zoom="editorZoom"
       @undo="undo"
       @redo="redo"
       @format="applyFormat"
@@ -19,6 +20,7 @@
       @open-image="openImageDialog"
       @open-lock="openLockDialog"
       @toggle-spellcheck="toggleSpellcheck"
+      @set-editor-zoom="setEditorZoom"
       @download-md="downloadMarkdown"
       @download-pdf="downloadPDF"
     />
@@ -92,6 +94,7 @@ import AccessDialog from './AccessDialog.vue'
 import { useYjsEditor } from '../composables/useYjsEditor'
 import { useDocumentAccess } from '../composables/useDocumentAccess'
 import { useCollaborators } from '../composables/useCollaborators'
+import { useEditorZoom } from '../composables/useEditorZoom'
 import { captureEditorSelection, focusEditorSelection } from '../cm-utils/initial-editor-focus'
 
 // Commands
@@ -112,6 +115,7 @@ const documentAPI = createDocumentAPI(apiBaseUrl)
 const yjsEditor = useYjsEditor()
 const access = useDocumentAccess(documentAPI)
 const { myProfile, collaborators, bind: bindCollaborators, saveProfile } = useCollaborators(apiBaseUrl)
+const { zoom: editorZoom, setZoom: setEditorZoom } = useEditorZoom()
 
 // ── Local state ────────────────────────────────────────────────────
 const route = useRoute()
@@ -135,6 +139,12 @@ const dialogInitialText = ref('')
 const savedEditorSelection = ref<EditorSelectionSnapshot | null>(null)
 
 // ── Editor lifecycle ───────────────────────────────────────────────
+
+const applyEditorZoom = () => {
+  if (!editorContainer.value) return
+
+  editorContainer.value.style.setProperty('--editor-content-zoom', `${editorZoom.value / 100}`)
+}
 
 const initEditor = () => {
   if (!editorContainer.value) return
@@ -170,6 +180,7 @@ const consumeTemplateQuery = async () => {
 const openEditorAfterAccess = async () => {
   access.hasDocumentAccess.value = true
   await nextTick()
+  applyEditorZoom()
   initEditor()
 }
 
@@ -370,6 +381,14 @@ const downloadPDF = async () => {
 onMounted(() => ensureDocumentAccess())
 
 onBeforeUnmount(() => yjsEditor.destroy())
+
+watch(editorZoom, () => {
+  applyEditorZoom()
+})
+
+watch(editorContainer, () => {
+  applyEditorZoom()
+})
 
 watch(() => route.params.documentId, (newId) => {
   if (newId && typeof newId === 'string' && newId !== documentId.value) {

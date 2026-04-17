@@ -11,6 +11,7 @@
   
   /* Slightly smaller font on very small screens */
   .cm-editor {
+    --editor-content-font-size-base: 15px;
     font-size: 15px;
   }
 }

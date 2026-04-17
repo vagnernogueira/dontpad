@@ -1,5 +1,6 @@
 /* Base CodeMirror Tweaks */
 .cm-editor {
+  --editor-content-font-size-base: 16px;
   height: 100% !important;
   font-size: 16px;
   line-height: 1.6;
@@ -13,8 +14,11 @@
   font-family: var(--font-ui) !important;
   font-variant-ligatures: common-ligatures contextual discretionary-ligatures;
   font-feature-settings: "liga" 1, "calt" 1;
+  font-size: calc(var(--editor-content-font-size-base, 16px) * var(--editor-content-zoom, 1));
   padding: 20px 20px !important;
   width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
   color: var(--cm-editor-text, #1f2328) !important;
   caret-color: var(--cm-editor-caret, #1f2328);
   /* Center paper effect */
@@ -54,6 +58,8 @@
 
 .cm-line {
   color: inherit;
+  max-width: 100%;
+  overflow-wrap: anywhere;
 }
 
 .cm-selectionLayer {

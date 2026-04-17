@@ -33,7 +33,7 @@
         "lucide-vue-next": "^0.575.0",
         "markdown-it": "^14.1.1",
         "marked": "^17.0.3",
-        "reka-ui": "^2.9.2",
+        "reka-ui": "^2.9.6",
         "tailwind-merge": "^3.5.0",
         "vue": "^3.4.21",
         "vue-router": "^4.3.0",
