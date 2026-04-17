@@ -6,7 +6,7 @@
  * needed by the rest of the Editor component.
  */
 
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import * as Y from 'yjs'
 import { WebsocketProvider } from 'y-websocket'
 import { Compartment, EditorState } from '@codemirror/state'
@@ -24,7 +24,8 @@ import { multiClickPlugin } from '../cm-plugins/multi-click'
 import { plainUrlPlugin } from '../cm-plugins/plain-url'
 import { spellcheckPlugin } from '../cm-plugins/spellcheck'
 import { editorKeymaps } from '../cm-plugins/keymaps'
-import { editorTheme } from '../cm-extensions'
+import { getEditorTheme } from '../cm-extensions'
+import { useColorMode } from './useColorMode'
 import type { CollaboratorProfile } from '../cm-utils/cursor'
 import { focusEditorAtStart } from '../cm-utils/initial-editor-focus'
 import { getProfileAwarenessState } from '../cm-utils/cursor'
@@ -49,7 +50,18 @@ export interface YjsEditorInstance {
 
 export function useYjsEditor() {
   const status = ref<string>('disconnected')
+  const { isDark } = useColorMode()
   let instance: YjsEditorInstance | null = null
+
+  watch(isDark, (darkModeEnabled) => {
+    if (!instance) {
+      return
+    }
+
+    instance.view.dispatch({
+      effects: instance.themeCompartment.reconfigure(getEditorTheme(darkModeEnabled)),
+    })
+  })
 
   function init(
     container: HTMLElement,
@@ -104,7 +116,7 @@ export function useYjsEditor() {
         spellcheckCompartment.of(spellcheckPlugin(options.spellcheckEnabled)),
         EditorView.lineWrapping,
         markdown({ extensions: [Strikethrough, { remove: ['IndentedCode', 'SetextHeading'] }] }),
-        themeCompartment.of(editorTheme),
+        themeCompartment.of(getEditorTheme(isDark.value)),
         listCustomPlugin,
         checkboxClickPlugin,
         codeBlockPlugin,

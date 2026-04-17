@@ -43,6 +43,7 @@ async function loadComposableModule() {
 afterEach(() => {
   vi.unstubAllGlobals()
   vi.resetModules()
+  window.localStorage.clear()
   document.documentElement.className = ''
   document.documentElement.style.colorScheme = ''
 })
@@ -75,5 +76,37 @@ describe('useColorMode', () => {
     expect(document.documentElement.classList.contains('dark')).toBe(false)
     expect(document.documentElement.style.colorScheme).toBe('light')
     expect(useColorMode().isDark.value).toBe(false)
+  })
+
+  it('prefers the persisted choice over the system preference', async () => {
+    installMatchMediaMock(false)
+    window.localStorage.setItem('dontpad:colorMode', 'dark')
+    const { initializeColorMode, useColorMode } = await loadComposableModule()
+
+    initializeColorMode()
+
+    expect(document.documentElement.classList.contains('dark')).toBe(true)
+    expect(document.documentElement.style.colorScheme).toBe('dark')
+    expect(useColorMode().isDark.value).toBe(true)
+  })
+
+  it('toggles manually and persists the explicit user preference', async () => {
+    const mediaQuery = installMatchMediaMock(true)
+    const { initializeColorMode, useColorMode } = await loadComposableModule()
+
+    initializeColorMode()
+
+    const colorMode = useColorMode()
+    colorMode.toggle()
+
+    expect(window.localStorage.getItem('dontpad:colorMode')).toBe('light')
+    expect(document.documentElement.classList.contains('dark')).toBe(false)
+    expect(document.documentElement.style.colorScheme).toBe('light')
+    expect(colorMode.isDark.value).toBe(false)
+
+    mediaQuery.dispatch(true)
+
+    expect(document.documentElement.classList.contains('dark')).toBe(false)
+    expect(colorMode.isDark.value).toBe(false)
   })
 })

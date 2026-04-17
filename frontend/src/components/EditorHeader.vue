@@ -15,13 +15,11 @@
     <div class="flex shrink-0 items-center gap-1 text-xs sm:gap-2 sm:text-sm text-background">
       <CollaboratorAvatars :collaborators="collaborators" @edit-profile="$emit('edit-profile')" />
       <Separator orientation="vertical" class="mx-1 h-5 shrink-0 bg-white/15" />
-      <!-- dark mode toggle: temporariamente desativado
-      <Button variant="ghost" size="icon" class="text-gray-300 hover:text-white hover:bg-white/10 h-7 w-7" :aria-label="isDark ? 'Ativar modo claro' : 'Ativar modo escuro'" @click="toggle">
+      <Button variant="ghost" size="icon" class="h-7 w-7 text-background/80 hover:bg-white/10 hover:text-background" :aria-label="isDark ? 'Ativar modo claro' : 'Ativar modo escuro'" @click="toggle">
         <Sun v-if="isDark" :size="16" />
         <Moon v-else :size="16" />
       </Button>
-      <Separator orientation="vertical" class="h-5 mx-1 bg-gray-700 shrink-0" />
-      -->
+      <Separator orientation="vertical" class="mx-1 h-5 shrink-0 bg-white/15" />
       <span :class="['h-2 w-2 rounded-full shadow-xs sm:h-2.5 sm:w-2.5', status === 'connected' ? 'bg-primary' : 'bg-destructive']"></span>
       <span class="hidden sm:inline">{{ status === 'connected' ? 'Sincronizado' : 'Offline' }}</span>
     </div>
@@ -29,10 +27,14 @@
 </template>
 
 <script setup lang="ts">
-import { ArrowLeft } from 'lucide-vue-next'
+import { ArrowLeft, Moon, Sun } from 'lucide-vue-next'
 import CollaboratorAvatars, { type CollaboratorInfo } from './CollaboratorAvatars.vue'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
+import { useColorMode } from '../composables/useColorMode'
+
+const { isDark, toggle } = useColorMode()
 
 defineProps<{
   documentId: string

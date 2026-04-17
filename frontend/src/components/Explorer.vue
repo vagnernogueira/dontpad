@@ -34,12 +34,10 @@
             Backup geral
           </Button>
         </template>
-        <!-- dark mode toggle: temporariamente desativado
-        <Button variant="ghost" size="icon" class="text-gray-300 hover:text-white hover:bg-white/10 h-7 w-7" :aria-label="isDark ? 'Ativar modo claro' : 'Ativar modo escuro'" @click="toggle">
+        <Button variant="ghost" size="icon" class="h-7 w-7 text-background/80 hover:bg-white/10 hover:text-background" :aria-label="isDark ? 'Ativar modo claro' : 'Ativar modo escuro'" @click="toggle">
           <Sun v-if="isDark" :size="16" />
           <Moon v-else :size="16" />
         </Button>
-        -->
       </div>
     </header>
 
@@ -309,7 +307,7 @@
 
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
-import { Archive, ArrowLeft, RefreshCw } from 'lucide-vue-next'
+import { Archive, ArrowLeft, Moon, RefreshCw, Sun } from 'lucide-vue-next'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import {
   AlertDialog,
@@ -348,9 +346,11 @@ import { getApiBaseUrl } from '../services/config'
 import { downloadMarkdown, downloadPDF, downloadZip } from '../services/export'
 import { trimTrailingSlashes } from '../cm-utils/document-name'
 import persistence from '../services/persistence'
+import { useColorMode } from '../composables/useColorMode'
 import { useExplorerSession } from '../composables/useExplorerSession'
 import { useDocumentList } from '../composables/useDocumentList'
 
+const { isDark, toggle } = useColorMode()
 
 const documentAPI = createDocumentAPI(getApiBaseUrl())
 const EXPLORER_DOCUMENTS_CACHE_KEY = 'explorer.documentsCache'
