@@ -43,15 +43,24 @@ export const markdownHighlightStyle = HighlightStyle.define([
  * Custom editor visual theme
  */
 export const editorVisualTheme = EditorView.theme({
-  "&": { height: "100%" },
+  "&": {
+    height: "100%",
+    color: "#1f2328",
+    backgroundColor: "#f7f9fa",
+    colorScheme: "light"
+  },
   ".cm-scroller": { overflow: "auto" },
+  ".cm-content": {
+    color: "#1f2328",
+    caretColor: "#1f2328"
+  },
   // Desabilita estilo de código para blocos indentados (4 espaços)
   // Mantém apenas blocos delimitados por ``` (code fences)
   ".cm-line.cm-codeBlock": {
     background: "transparent !important",
     fontFamily: "inherit !important",
     fontSize: "inherit !important",
-    color: "inherit !important"
+    color: "#1f2328 !important"
   },
   ".cm-header, .cm-heading, .cm-heading1, .cm-heading2, .cm-heading3, .cm-formatting-header, .cm-formatting-heading": {
     textDecoration: "none !important",

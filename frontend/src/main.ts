@@ -3,8 +3,9 @@ import { createRouter, createWebHistory } from 'vue-router'
 import './index.css'
 import App from './App.vue'
 import { trimTrailingSlashes } from './cm-utils/document-name'
+import { initializeColorMode } from './composables/useColorMode'
 
-document.documentElement.classList.remove('dark')
+initializeColorMode()
 
 const routes = [
     { path: '/', component: () => import('./components/Home.vue') },
