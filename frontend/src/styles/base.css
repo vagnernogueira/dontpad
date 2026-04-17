@@ -110,7 +110,7 @@ body,
   height: 100%;
   margin: 0;
   padding: 0;
-  font-family: var(--font-ui);
+  font-family: var(--font-sans);
   font-variant-ligatures: common-ligatures contextual discretionary-ligatures;
   font-feature-settings: "liga" 1, "calt" 1;
   background-color: var(--background);

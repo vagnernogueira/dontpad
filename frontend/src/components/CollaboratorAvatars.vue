@@ -18,7 +18,7 @@
           'size-8 border-2 border-background shadow-xs transition-transform group-hover:scale-[1.03] sm:size-9',
           collaboratorToneClass(collaborator.color),
           collaborator.isSelf
-            ? 'ring-2 ring-primary ring-offset-1 ring-offset-foreground'
+            ? 'ring-2 ring-primary ring-offset-1 ring-offset-background'
             : 'ring-1 ring-background',
         ]"
       >
