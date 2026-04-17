@@ -1,6 +1,6 @@
 <template>
   <header class="z-20 flex items-center justify-between border-b border-border bg-background px-3 py-btn text-foreground shadow-md sm:px-5 sm:py-header">
-    <div class="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
+    <div class="flex items-center gap-0 min-w-0 flex-1 sm:gap-0">
       <router-link
         to="/"
         class="flex shrink-0 items-center gap-1 transition-colors hover:text-primary"
@@ -8,7 +8,7 @@
         <ArrowLeft :size="18" />
         <span class="hidden rounded-md border border-transparent px-2 py-1 text-xs font-medium xs:inline sm:px-3 sm:text-sm">Início</span>
       </router-link>
-      <Badge variant="secondary" class="max-w-[120px] shrink-0 truncate rounded-md border-primary/20 px-2 py-1 font-mono text-xs sm:max-w-none sm:px-3 sm:text-sm">
+      <Badge variant="secondary" class="mr-2 max-w-[120px] shrink-0 truncate rounded-md border-primary/20 px-2 py-1 font-mono text-xs sm:mr-4 sm:max-w-none sm:px-3 sm:text-sm">
         /{{ documentId }}
       </Badge>
     </div>
