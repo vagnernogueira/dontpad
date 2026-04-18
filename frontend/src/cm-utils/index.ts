@@ -48,6 +48,8 @@ export {
   type WordInfo,
 } from './snippet-registry'
 
+export { insertSnippet, resolveSnippetVariables } from './snippet-expansion'
+
 export {
   evaluateMathExpression,
   formatResult,

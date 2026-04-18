@@ -10,10 +10,12 @@ export { applyFormat, formatInline, formatLinePrefix, transformCase } from './fo
 export { insertLink, insertImage, insertEmoji } from './insertions'
 export { createUndoCommand, createRedoCommand } from './history'
 export { normalizeMarkdownTable } from './table'
+export { deleteCurrentLine } from './editor'
 
 // Import commands for registry
 import { formatInline, formatLinePrefix, transformCase } from './formatting'
 import { normalizeMarkdownTable } from './table'
+import { deleteCurrentLine } from './editor'
 
 // Type definitions for the registry
 import type { EditorView } from '@codemirror/view'
@@ -50,4 +52,5 @@ export const commands = {
   transformToLowerCase: (view: EditorView) => transformCase(view, 'lower'),
   transformToCamelCase: (view: EditorView) => transformCase(view, 'camel'),
   normalizeTable: (view: EditorView) => normalizeMarkdownTable(view),
+  deleteLine: (view: EditorView) => deleteCurrentLine(view),
 }

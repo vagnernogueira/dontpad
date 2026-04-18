@@ -24,6 +24,7 @@ import { multiClickPlugin } from '../cm-plugins/multi-click'
 import { plainUrlPlugin } from '../cm-plugins/plain-url'
 import { spellcheckPlugin } from '../cm-plugins/spellcheck'
 import { editorKeymaps } from '../cm-plugins/keymaps'
+import { createCommandPaletteKeymap } from '../cm-plugins/command-palette-keymap'
 import { getEditorTheme } from '../cm-extensions'
 import { useColorMode } from './useColorMode'
 import type { CollaboratorProfile } from '../cm-utils/cursor'
@@ -37,6 +38,7 @@ export interface YjsEditorOptions {
   templateId?: string
   profile: CollaboratorProfile
   spellcheckEnabled: boolean
+  onOpenCommandPalette?: () => void
 }
 
 export interface YjsEditorInstance {
@@ -123,6 +125,7 @@ export function useYjsEditor() {
         horizontalRulePlugin,
         plainUrlPlugin,
         yCollab(ytext, provider.awareness, { undoManager }),
+        ...(options.onOpenCommandPalette ? [createCommandPaletteKeymap(options.onOpenCommandPalette)] : []),
         ...editorKeymaps,
         markdownPreviewPlugin,
         multiClickPlugin,

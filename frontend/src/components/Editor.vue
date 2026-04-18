@@ -28,6 +28,13 @@
 
     <p v-if="actionError" class="px-4 py-2 text-sm text-red-600">{{ actionError }}</p>
 
+    <EditorCommandPalette
+      :open="showCommandPalette"
+      :items="commandMenuItems"
+      @close="closeCommandPalette"
+      @select="onCommandPaletteSelect"
+    />
+
     <!-- Hidden element for PDF rendering -->
     <div v-show="false">
       <div ref="pdfContainer" class="pdf-export-container p-8 text-black bg-white"></div>
@@ -92,6 +99,7 @@ import { useRoute, useRouter } from 'vue-router'
 import EditorHeader from './EditorHeader.vue'
 import ProfileDialog from './ProfileDialog.vue'
 import EditorToolbar from './EditorToolbar.vue'
+import EditorCommandPalette from './EditorCommandPalette.vue'
 import LinkDialog from './LinkDialog.vue'
 import ImageDialog from './ImageDialog.vue'
 import EmojiPickerDialog from './EmojiPickerDialog.vue'
@@ -104,10 +112,13 @@ import { useDocumentAccess } from '../composables/useDocumentAccess'
 import { useCollaborators } from '../composables/useCollaborators'
 import { useEditorZoom } from '../composables/useEditorZoom'
 import { captureEditorSelection, focusEditorSelection } from '../cm-utils/initial-editor-focus'
+import { buildEditorCommandMenu } from './editor-command-menu'
 
 // Commands
-import { applyFormat as applyFormatCommand, insertEmoji as insertEmojiCommand, insertLink as insertLinkCommand, insertImage as insertImageCommand, transformCase } from '../cm-commands'
+import { applyFormat as applyFormatCommand, commands as registeredCommands, insertEmoji as insertEmojiCommand, insertImage as insertImageCommand, insertLink as insertLinkCommand, transformCase } from '../cm-commands'
 import { spellcheckPlugin } from '../cm-plugins/spellcheck'
+import { findSnippet } from '../cm-utils/snippet-registry'
+import { insertSnippet as insertSnippetCommand } from '../cm-utils/snippet-expansion'
 
 import * as persistence from '../services/persistence'
 import * as exportService from '../services/export'
@@ -144,6 +155,7 @@ const showLinkDialog = ref(false)
 const showImageDialog = ref(false)
 const showEmojiDialog = ref(false)
 const showProfileDialog = ref(false)
+const showCommandPalette = ref(false)
 const dialogInitialText = ref('')
 const savedEditorSelection = ref<EditorSelectionSnapshot | null>(null)
 
@@ -165,6 +177,7 @@ const initEditor = () => {
     templateId: requestedTemplateId.value || undefined,
     profile: myProfile.value,
     spellcheckEnabled: isSpellcheckEnabled.value,
+    onOpenCommandPalette: openCommandPalette,
   }, {
     onAccessDenied: () => access.handleAccessDenied(ref(null)),
   })
@@ -225,9 +238,78 @@ const focusEditorAtCurrentSelection = async () => {
   focusEditorSelection(view, captureEditorSelection(view))
 }
 
+const openCommandPalette = () => {
+  if (!getView() || showCommandPalette.value) return
+  rememberEditorSelection()
+  showCommandPalette.value = true
+}
+
+const closeCommandPalette = async (restoreSelection: boolean = true) => {
+  showCommandPalette.value = false
+
+  if (restoreSelection) {
+    await restoreEditorSelection()
+  }
+}
+
 // Undo/Redo
 const undo = () => { getUndoManager()?.undo(); getView()?.focus() }
 const redo = () => { getUndoManager()?.redo(); getView()?.focus() }
+
+const runRegisteredCommand = (commandName: string) => {
+  if (commandName === 'undo') {
+    undo()
+    return
+  }
+
+  if (commandName === 'redo') {
+    redo()
+    return
+  }
+
+  const view = getView()
+  const command = registeredCommands[commandName as keyof typeof registeredCommands]
+
+  if (view && command) {
+    command(view)
+  }
+}
+
+const insertSnippetFromPalette = (prefix: string) => {
+  const view = getView()
+  const snippet = findSnippet(prefix)
+
+  if (view && snippet) {
+    insertSnippetCommand(view, snippet)
+  }
+}
+
+const commandMenuItems = computed(() => buildEditorCommandMenu({
+  spellcheckEnabled: isSpellcheckEnabled.value,
+  runCommand: runRegisteredCommand,
+  applyFormat,
+  cycleCaseTransform: transformCaseClick,
+  openLinkDialog,
+  openImageDialog,
+  openEmojiDialog,
+  openLockDialog,
+  toggleSpellcheck,
+  setEditorZoom,
+  downloadMarkdown,
+  downloadPDF,
+  insertSnippet: insertSnippetFromPalette,
+}))
+
+const onCommandPaletteSelect = (itemId: string) => {
+  const item = commandMenuItems.value.find((candidate) => candidate.id === itemId)
+
+  if (!item) {
+    return
+  }
+
+  void closeCommandPalette(false)
+  item.execute()
+}
 
 const toggleSpellcheck = () => {
   isSpellcheckEnabled.value = !isSpellcheckEnabled.value

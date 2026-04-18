@@ -12,45 +12,11 @@
  */
 
 import { keymap } from "@codemirror/view"
-import { EditorView } from "@codemirror/view"
+import { deleteCurrentLine } from '../cm-commands'
 
 export const deleteLineKeymap = keymap.of([
     {
         key: 'Ctrl-l',
-        run: (editorView: EditorView) => {
-            const { state } = editorView
-            const selection = state.selection.main
-            const pos = selection.from
-            const line = state.doc.lineAt(pos)
-            
-            // Calculate the range to delete
-            // If this is not the last line, include the newline character after the line
-            // If this is the last line, include the newline before (if it exists)
-            let deleteFrom = line.from
-            let deleteTo = line.to
-            
-            if (line.number < state.doc.lines) {
-                // Not the last line: delete line + newline after it
-                deleteTo = line.to + 1
-            } else if (line.number > 1) {
-                // Last line and not the only line: delete newline before + line
-                deleteFrom = line.from - 1
-            }
-            
-            // Calculate new cursor position
-            // Place cursor at the beginning of the next line, or at the beginning of the previous line if we deleted the last line
-            let newPos = deleteFrom
-            if (deleteFrom > 0 && line.number === state.doc.lines && line.number > 1) {
-                // If we deleted the last line, put cursor at the end of the previous line
-                newPos = deleteFrom
-            }
-            
-            editorView.dispatch({
-                changes: { from: deleteFrom, to: deleteTo },
-                selection: { anchor: newPos }
-            })
-            
-            return true
-        }
+        run: deleteCurrentLine
     }
 ])
