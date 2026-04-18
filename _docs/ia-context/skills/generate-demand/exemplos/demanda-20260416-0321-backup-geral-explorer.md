@@ -2,12 +2,11 @@
 
 ## Contexto de execução da IA
 
-- Pacote de contexto: _docs/ia-context/
+- Pacote de contexto: _docs/ia-context/README.md
 - Regras globais: _docs/ia-context/core/rules.md
 - Regras do projeto: _docs/ia-context/project-overlay/rules.md
 - Contexto do projeto: _docs/ia-context/project-overlay/context.md
 - Workflow base: _docs/ia-context/core/workflow.md
-- Overrides de workflow (se houver): _docs/ia-context/project-overlay/workflow-overrides.md
 - Contrato de saída: _docs/ia-context/core/output-contracts.md
 
 ## Demanda
@@ -62,10 +61,7 @@ Permitir que o usuário exporte, a partir do Explorer, um backup completo dos do
 
 ## Planejamento da execução
 
-- Etapa 1: Mapear o fluxo atual do Explorer e do backend para definir onde a geração do backup deve entrar, incluindo autenticação, lista de documentos, leitura de conteúdo e regra de exclusão de vazios.
-- Etapa 2: Implementar o serviço/rota de backup no backend para montar o zip com arquivos Markdown, preservando paths e filtrando documentos vazios, com cobertura de testes para composição do arquivo e respostas da API.
-- Etapa 3: Adicionar no frontend o método de API necessário e o botão na toolbar do Explorer, disparando o download do zip e tratando estados de erro de forma consistente com as demais ações.
-- Etapa 4: Validar a funcionalidade com testes automatizados e ajustar mensagens/contratos apenas se necessário para garantir o download correto e a preservação da estrutura esperada.
+> Planejamento pendente. Use a skill demand-execution-planning para preencher ou revisar esta seção.
 
 ## Critérios de aceite
 
@@ -101,6 +97,10 @@ Permitir que o usuário exporte, a partir do Explorer, um backup completo dos do
 
 implementação
 
+## Memorial de execução
+
+> Memorial pendente. Ao final da execução ou atendimento da demanda, adicione a descrição da execução, a lista de arquivos alterados, os impactos identificados ou esperados, as validações executadas e as validações recomendadas.
+
 ## Sugestão de commit final
 
-- Mensagem sugerida: `feat(explorer): adiciona backup geral de documentos em zip`
+> Mensagem de commit pendente. Use a skill conventional-commits para sugerir a mensagem final.

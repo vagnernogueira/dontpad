@@ -7,7 +7,6 @@
 - Regras do projeto: `_docs/ia-context/project-overlay/rules.md`
 - Contexto do projeto: `_docs/ia-context/project-overlay/context.md`
 - Workflow base: `_docs/ia-context/core/workflow.md`
-- Overrides de workflow (se houver): `_docs/ia-context/project-overlay/workflow-overrides.md`
 - Contrato de saída: `_docs/ia-context/core/output-contracts.md`
 
 ## Instruções
@@ -20,6 +19,14 @@
 
 Ajustar o texto do botão de limpeza do filtro no Explorer para usar a label `Limpar filtro` em vez do texto atual, preservando o comportamento existente do clique e sem alterar layout, ícone, atalhos ou qualquer outra ação do componente. A mudança deve ficar restrita ao frontend e apenas ao ponto em que a label é renderizada.
 
+## Planejamento da execução
+
+> Planejamento pendente. Use a skill demand-execution-planning para preencher ou revisar esta seção.
+
+## Memorial de execução
+
+> Memorial pendente. Ao final da execução ou atendimento da demanda, adicione o resumo da execução, a lista de arquivos alterados e as validações recomendadas.
+
 ## Sugestão de commit final
 
-- Mensagem sugerida: `fix(explorer): ajusta label do botão de limpar filtro`
+> Mensagem de commit pendente. Use a skill conventional-commits para sugerir a mensagem final.
