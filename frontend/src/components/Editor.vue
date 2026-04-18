@@ -35,6 +35,15 @@
       @select="onCommandPaletteSelect"
     />
 
+    <MarkdownLintDialog
+      :open="isMarkdownLintDialogOpen"
+      :issues="markdownLintIssues"
+      :message="markdownLintStatusMessage"
+      :error-message="markdownLintErrorMessage"
+      @close="closeMarkdownLintDialog"
+      @apply-hotfix="onMarkdownLintHotfix"
+    />
+
     <!-- Hidden element for PDF rendering -->
     <div v-show="false">
       <div ref="pdfContainer" class="pdf-export-container p-8 text-black bg-white"></div>
@@ -100,6 +109,7 @@ import EditorHeader from './EditorHeader.vue'
 import ProfileDialog from './ProfileDialog.vue'
 import EditorToolbar from './EditorToolbar.vue'
 import EditorCommandPalette from './EditorCommandPalette.vue'
+import MarkdownLintDialog from './MarkdownLintDialog.vue'
 import LinkDialog from './LinkDialog.vue'
 import ImageDialog from './ImageDialog.vue'
 import EmojiPickerDialog from './EmojiPickerDialog.vue'
@@ -110,6 +120,7 @@ import AccessDialog from './AccessDialog.vue'
 import { useYjsEditor } from '../composables/useYjsEditor'
 import { useDocumentAccess } from '../composables/useDocumentAccess'
 import { useCollaborators } from '../composables/useCollaborators'
+import { useMarkdownLint } from '../composables/useMarkdownLint'
 import { useEditorZoom } from '../composables/useEditorZoom'
 import { captureEditorSelection, focusEditorSelection } from '../cm-utils/initial-editor-focus'
 import { buildEditorCommandMenu } from './editor-command-menu'
@@ -124,6 +135,7 @@ import * as persistence from '../services/persistence'
 import * as exportService from '../services/export'
 import { createDocumentAPI } from '../services/document-api'
 import { getApiBaseUrl, getWsBaseUrl } from '../services/config'
+import type { MarkdownLintIssue } from '../services/markdown-lint'
 
 // ── Services ───────────────────────────────────────────────────────
 const apiBaseUrl = getApiBaseUrl()
@@ -134,6 +146,15 @@ const documentAPI = createDocumentAPI(apiBaseUrl)
 const yjsEditor = useYjsEditor()
 const access = useDocumentAccess(documentAPI)
 const { myProfile, collaborators, bind: bindCollaborators, saveProfile } = useCollaborators(apiBaseUrl)
+const {
+  isDialogOpen: isMarkdownLintDialogOpen,
+  issues: markdownLintIssues,
+  statusMessage: markdownLintStatusMessage,
+  errorMessage: markdownLintErrorMessage,
+  openForView: openMarkdownLintForView,
+  closeDialog: closeMarkdownLint,
+  applyHotfix: applyMarkdownLintHotfix,
+} = useMarkdownLint()
 const { zoom: editorZoom, setZoom: setEditorZoom } = useEditorZoom()
 
 // ── Local state ────────────────────────────────────────────────────
@@ -178,6 +199,7 @@ const initEditor = () => {
     profile: myProfile.value,
     spellcheckEnabled: isSpellcheckEnabled.value,
     onOpenCommandPalette: openCommandPalette,
+    onOpenMarkdownLint: openMarkdownLintDialog,
   }, {
     onAccessDenied: () => access.handleAccessDenied(ref(null)),
   })
@@ -252,6 +274,30 @@ const closeCommandPalette = async (restoreSelection: boolean = true) => {
   }
 }
 
+const openMarkdownLintDialog = () => {
+  const view = getView()
+  if (!view) return
+
+  if (!isMarkdownLintDialogOpen.value) {
+    rememberEditorSelection()
+  }
+
+  openMarkdownLintForView(view)
+}
+
+const closeMarkdownLintDialog = async () => {
+  closeMarkdownLint()
+  await restoreEditorSelection()
+}
+
+const onMarkdownLintHotfix = (issue: MarkdownLintIssue) => {
+  const view = getView()
+  if (!view) return
+
+  applyMarkdownLintHotfix(view, issue)
+  savedEditorSelection.value = captureEditorSelection(view)
+}
+
 // Undo/Redo
 const undo = () => { getUndoManager()?.undo(); getView()?.focus() }
 const redo = () => { getUndoManager()?.redo(); getView()?.focus() }
@@ -289,6 +335,7 @@ const commandMenuItems = computed(() => buildEditorCommandMenu({
   runCommand: runRegisteredCommand,
   applyFormat,
   cycleCaseTransform: transformCaseClick,
+  openMarkdownLintDialog,
   openLinkDialog,
   openImageDialog,
   openEmojiDialog,
@@ -484,7 +531,10 @@ const downloadPDF = async () => {
 
 onMounted(() => ensureDocumentAccess())
 
-onBeforeUnmount(() => yjsEditor.destroy())
+onBeforeUnmount(() => {
+  closeMarkdownLint()
+  yjsEditor.destroy()
+})
 
 watch(editorZoom, () => {
   applyEditorZoom()
@@ -497,6 +547,7 @@ watch(editorContainer, () => {
 watch(() => route.params.documentId, (newId) => {
   if (newId && typeof newId === 'string' && newId !== documentId.value) {
     documentId.value = newId
+    closeMarkdownLint()
     yjsEditor.destroy()
     ensureDocumentAccess()
   }

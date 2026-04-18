@@ -6,6 +6,7 @@ function createHandlers() {
     runCommand: vi.fn(),
     applyFormat: vi.fn(),
     cycleCaseTransform: vi.fn(),
+    openMarkdownLintDialog: vi.fn(),
     openLinkDialog: vi.fn(),
     openImageDialog: vi.fn(),
     openEmojiDialog: vi.fn(),
@@ -27,17 +28,21 @@ describe('buildEditorCommandMenu', () => {
     })
 
     const deleteLine = items.find((item) => item.id === 'delete-line')
+    const markdownLint = items.find((item) => item.id === 'open-markdown-lint')
     const normalizeTable = items.find((item) => item.id === 'normalize-table')
     const dateSnippet = items.find((item) => item.id === 'snippet-dt')
 
     expect(deleteLine?.shortcut).toBe('Ctrl+L')
+    expect(markdownLint?.shortcut).toBe('Ctrl+Alt+L')
     expect(normalizeTable?.shortcut).toBe('Alt+Shift+T')
     expect(dateSnippet?.shortcut).toBe('dt + Tab')
 
     deleteLine?.execute()
+    markdownLint?.execute()
     dateSnippet?.execute()
 
     expect(handlers.runCommand).toHaveBeenCalledWith('deleteLine')
+    expect(handlers.openMarkdownLintDialog).toHaveBeenCalledTimes(1)
     expect(handlers.insertSnippet).toHaveBeenCalledWith('dt')
   })
 

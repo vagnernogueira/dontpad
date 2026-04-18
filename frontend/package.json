@@ -34,6 +34,7 @@
         "html2pdf.js": "^0.14.0",
         "lucide-vue-next": "^0.575.0",
         "markdown-it": "^14.1.1",
+        "markdownlint": "^0.40.0",
         "marked": "^17.0.3",
         "reka-ui": "^2.9.6",
         "tailwind-merge": "^3.5.0",

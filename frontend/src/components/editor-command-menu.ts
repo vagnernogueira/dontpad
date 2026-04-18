@@ -17,6 +17,7 @@ interface BuildEditorCommandMenuOptions {
   runCommand: (commandName: string) => void
   applyFormat: (prefix: string, suffix?: string) => void
   cycleCaseTransform: () => void
+  openMarkdownLintDialog: () => void
   openLinkDialog: () => void
   openImageDialog: () => void
   openEmojiDialog: () => void
@@ -65,6 +66,16 @@ export function buildEditorCommandMenu(options: BuildEditorCommandMenuOptions): 
       keywords: ['tabela', 'markdown'],
       kind: 'action',
       execute: () => options.runCommand('normalizeTable'),
+    },
+    {
+      id: 'open-markdown-lint',
+      group: 'Edicao',
+      label: 'Lint de Markdown',
+      description: 'Analisa o documento atual e abre a lista de inconformidades encontradas.',
+      shortcut: 'Ctrl+Alt+L',
+      keywords: ['markdownlint', 'lint', 'hotfix', 'diagnostico'],
+      kind: 'dialog',
+      execute: options.openMarkdownLintDialog,
     },
     {
       id: 'spellcheck-toggle',
