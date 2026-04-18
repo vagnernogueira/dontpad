@@ -9,7 +9,6 @@
 - Regras do projeto: _docs/ia-context/project-overlay/rules.md
 - Contexto do projeto: _docs/ia-context/project-overlay/context.md
 - Workflow base: _docs/ia-context/core/workflow.md
-- Overrides de workflow: _docs/ia-context/project-overlay/workflow-overrides.md
 - Contrato de saída: _docs/ia-context/core/output-contracts.md
 
 ## Demanda
@@ -40,9 +39,7 @@ Restaurar a coerência entre seleção lógica e seleção visual da tabela do E
 
 ## Planejamento da execução
 
-- Etapa 1: Identificar onde a seleção única é armazenada e como a tabela/checkbox consome esse estado.
-- Etapa 2: Ajustar o binding do checkbox e/ou o handler de interação para que somente o item selecionado permaneça marcado.
-- Etapa 3: Validar que a seleção anterior é desmarcada quando um novo item é escolhido e que não há regressão no restante do Explorer.
+> Planejamento pendente. Use a skill demand-execution-planning para preencher ou revisar esta seção.
 
 ## Critérios de aceite
 
@@ -67,6 +64,10 @@ Restaurar a coerência entre seleção lógica e seleção visual da tabela do E
 
 implementação
 
+## Memorial de execução
+
+> Memorial pendente. Ao final da execução ou atendimento da demanda, adicione o resumo da execução, a lista de arquivos alterados, os impactos identificados ou esperados, as validações executadas e as validações recomendadas.
+
 ## Sugestão de commit final
 
-- Mensagem sugerida: `fix(explorer): corrige seleção única visual nos checkboxes`
+> Mensagem de commit pendente. Use a skill conventional-commits para sugerir a mensagem final.

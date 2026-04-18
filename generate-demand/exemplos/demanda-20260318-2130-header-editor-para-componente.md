@@ -7,7 +7,6 @@
 - Regras do projeto: `_docs/ia-context/project-overlay/rules.md`
 - Contexto do projeto: `_docs/ia-context/project-overlay/context.md`
 - Workflow base: `_docs/ia-context/core/workflow.md`
-- Overrides de workflow: `_docs/ia-context/project-overlay/workflow-overrides.md`
 - Contrato de saída: `_docs/ia-context/core/output-contracts.md`
 
 ## Entrada mínima
@@ -39,6 +38,14 @@
 
 - **Tipo de saída:** implementação
 
+## Planejamento da execução
+
+> Planejamento pendente. Use a skill demand-execution-planning para preencher ou revisar esta seção.
+
+## Memorial de execução
+
+> Memorial pendente. Ao final da execução ou atendimento da demanda, adicione o resumo da execução, a lista de arquivos alterados e as validações recomendadas.
+
 ## Sugestão de commit final
 
-- Mensagem sugerida: `refactor(editor): extrai header para componente dedicado`
+> Mensagem de commit pendente. Use a skill conventional-commits para sugerir a mensagem final.
