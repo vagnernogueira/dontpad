@@ -22,5 +22,11 @@
     "branch": "main",
     "source_path": "skills/skill-creator",
     "target_dir": "skill-creator"
+  },
+  {
+    "source_repo": "https://github.com/dgalarza/claude-code-workflows.git",
+    "branch": "main",
+    "source_path": "plugins/conventional-commits/skills/conventional-commits",
+    "target_dir": "conventional-commits"
   }
 ]

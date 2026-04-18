@@ -30,6 +30,10 @@
 	Skill para inicializar e validar a configuração dos players de IA de um projeto que já segue a estrutura `ia-context`, incluindo Claude Code, Gemini, Copilot, OpenAgents e OpenCode.
 	Origem: própria deste repositório.
 
+8. `demand-execution-planning`
+	Skill para planejar a execução de uma demanda já estruturada ou revisar esse planejamento, escrevendo a seção `Planejamento da execução` na própria demanda, inclusive quando o template original não trouxer essa seção.
+	Origem: própria deste repositório.
+
 ## 1. Para adicionar como pasta de skills
 
 `git subtree add --prefix=_docs/ia-context/skills git@github.com:vagnernogueira/xskills.git main --squash`

@@ -56,3 +56,7 @@ Preencher antes de usar este template:
 ## Tipo de saída esperada
 
 [análise | implementação | revisão]
+
+## Sugestão de commit final
+
+- Mensagem sugerida: `[feat|fix|chore|refactor](escopo): descrição curta da alteração final`

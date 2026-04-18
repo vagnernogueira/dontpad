@@ -1,0 +1,63 @@
+{
+  "skill_name": "demand-execution-planning",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Revise o arquivo generate-demand/exemplos/demanda-20260418-0116-limpeza-filtro-explorer.md e acrescente a seção `## Planejamento da execução` na propria demanda. Como o documento segue o template simple, mantenha o plano curto, preserve o restante do texto e nao invente requisitos novos.",
+      "expected_output": "A demanda simple passa a conter a secao `## Planejamento da execucao` entre `## Demanda` e `## Sugestao de commit final`, com 3 etapas curtas e numeradas, separando localizacao do ponto de renderizacao, ajuste textual da label e validacao sem regressao visual/comportamental.",
+      "files": [],
+      "expectations": [
+        "A resposta atualiza a propria demanda, em vez de devolver um plano solto separado",
+        "A secao `## Planejamento da execução` foi inserida mesmo o template original nao a prevendo",
+        "O planejamento contem 3 etapas curtas e sequenciais",
+        "As 3 etapas separam descoberta, alteracao textual e validacao final de nao regressao",
+        "As etapas permanecem dentro do escopo de mudar apenas a label do botao no frontend",
+        "O restante da demanda e preservado sem expansao indevida de escopo"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Pegue o arquivo generate-demand/exemplos/demanda-20260318-2130-header-editor-para-componente.md, escreva na propria demanda uma nova secao `## Planejamento da execução` e mantenha o estilo do template ultra-compact. O plano deve ser objetivo e suficiente para orientar a implementacao sem alterar objetivo, escopo ou criterios de aceite.",
+      "expected_output": "A demanda ultra-compact recebe a secao `## Planejamento da execucao` como nova secao top-level depois do bloco completo de `## Entrada mínima` e antes de `## Sugestão de commit final`, mantendo `Critérios de aceite` e `Tipo de saída` dentro de `Entrada mínima`. O plano tem 3 etapas objetivas e numeradas, ancoradas em `Editor.vue`, `EditorHeader.vue` e no padrao de `EditorToolbar.vue` ou no evento `edit-profile`.",
+      "files": [],
+      "expectations": [
+        "A secao `## Planejamento da execução` e adicionada ao template ultra-compact",
+        "O plano e escrito dentro da propria demanda",
+        "A secao `## Planejamento da execução` entra depois do bloco completo de `## Entrada mínima`, sem quebrar `Critérios de aceite` ou `Tipo de saída`",
+        "O planejamento usa 3 etapas objetivas, sem inflar o template ultra-compact",
+        "As etapas citam a extracao do header, a substituicao no Editor e a validacao de comportamento/visual",
+        "O planejamento reaproveita nomes concretos da demanda, como `Editor.vue`, `EditorHeader.vue` e `EditorToolbar.vue` ou `edit-profile`",
+        "Nao ha introducao de alteracoes fora do escopo, como mexer em Explorer ou estilos nao solicitados",
+        "O restante da estrutura ultra-compact permanece intacto"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Revise apenas a secao `## Planejamento da execução` de generate-demand/exemplos/demanda-20260415-1825-explorer-selecao-unica-checkbox.md para deixá-la mais acionavel e claramente alinhada ao estado da selecao unica no Explorer. Preserve todas as outras secoes da demanda.",
+      "expected_output": "A demanda compact continua com a mesma estrutura, mas o planejamento fica mais claro, sequencial e verificavel, cobrindo identificacao do estado canônico, ajuste de binding/handler e validacao de regressao. O plano se ancora explicitamente em `useDocumentList.ts`, `Explorer.vue` e, quando natural, na fonte de verdade da selecao mencionada na propria demanda.",
+      "files": [],
+      "expectations": [
+        "A skill detecta modo de review e reescreve apenas a secao de planejamento ou o minimo adjacente necessario",
+        "O plano revisado continua com 3 ou 4 etapas, sem inflar a demanda desnecessariamente",
+        "As etapas ficam alinhadas aos arquivos e modulos ja citados na demanda",
+        "O planejamento se ancora explicitamente em `useDocumentList.ts`, `Explorer.vue` e na fonte de verdade da selecao quando ela estiver nomeada na demanda",
+        "Existe uma etapa final de validacao conectada aos criterios de aceite",
+        "Nenhuma nova exigencia funcional e adicionada fora do problema de selecao unica"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Revise a secao `## Planejamento da execução` de generate-demand/exemplos/demanda-20260416-0321-backup-geral-explorer.md para um caso full e multi-modulo. O planejamento deve continuar dentro do escopo do backup geral, mas ficar mais nitido em termos de dependencia entre backend, frontend e validacao final.",
+      "expected_output": "A demanda full mantem sua estrutura e recebe um planejamento mais robusto, com 4 a 6 etapas ordenadas, cobrindo mapeamento do fluxo atual, implementacao no backend, integracao no frontend e validacao do zip/paths/autenticacao. O plano se ancora em artefatos nomeados na demanda, citando pelo menos um arquivo ou modulo de frontend e um de backend.",
+      "files": [],
+      "expectations": [
+        "A secao de planejamento e revisada sem reescrever o restante da demanda",
+        "O plano usa 4 a 6 etapas proporcionais a complexidade do caso full",
+        "As etapas diferenciam claramente trabalho de backend, frontend e validacao",
+        "O planejamento reaproveita pelo menos um artefato nomeado de frontend e um de backend citados na demanda",
+        "O plano permanece aderente aos criterios de aceite e as restricoes ja existentes",
+        "Nao surgem entregas extras como redesign do Explorer ou novos formatos de exportacao"
+      ]
+    }
+  ]
+}

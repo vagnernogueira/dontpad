@@ -20,3 +20,7 @@ Preencher antes de usar este template:
 - Arquivos-alvo: [path1, path2]
 - Critérios de aceite: [critério 1, critério 2]
 - Tipo de saída: [análise | implementação | revisão]
+
+## Sugestão de commit final
+
+- Mensagem sugerida: `[feat|fix|chore|refactor](escopo): descrição curta da alteração final`
