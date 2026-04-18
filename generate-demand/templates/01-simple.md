@@ -21,3 +21,7 @@ Preencher antes de usar este template:
 ## Demanda
 
 [cole aqui]
+
+## Sugestão de commit final
+
+- Mensagem sugerida: `[feat|fix|chore|refactor](escopo): descrição curta da alteração final`
