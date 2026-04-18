@@ -18,6 +18,7 @@
       @transform-case="transformCaseClick"
       @open-link="openLinkDialog"
       @open-image="openImageDialog"
+      @open-emoji="openEmojiDialog"
       @open-lock="openLockDialog"
       @toggle-spellcheck="toggleSpellcheck"
       @set-editor-zoom="setEditorZoom"
@@ -60,6 +61,12 @@
       @close="closeDialogs"
     />
 
+    <EmojiPickerDialog
+      v-if="showEmojiDialog"
+      @select="onEmojiInsert"
+      @close="closeDialogs"
+    />
+
     <LockDialog
       v-if="access.showLockDialog.value"
       :is-locked="access.isDocumentLocked.value"
@@ -87,6 +94,7 @@ import ProfileDialog from './ProfileDialog.vue'
 import EditorToolbar from './EditorToolbar.vue'
 import LinkDialog from './LinkDialog.vue'
 import ImageDialog from './ImageDialog.vue'
+import EmojiPickerDialog from './EmojiPickerDialog.vue'
 import LockDialog from './LockDialog.vue'
 import AccessDialog from './AccessDialog.vue'
 
@@ -98,7 +106,7 @@ import { useEditorZoom } from '../composables/useEditorZoom'
 import { captureEditorSelection, focusEditorSelection } from '../cm-utils/initial-editor-focus'
 
 // Commands
-import { applyFormat as applyFormatCommand, insertLink as insertLinkCommand, insertImage as insertImageCommand, transformCase } from '../cm-commands'
+import { applyFormat as applyFormatCommand, insertEmoji as insertEmojiCommand, insertLink as insertLinkCommand, insertImage as insertImageCommand, transformCase } from '../cm-commands'
 import { spellcheckPlugin } from '../cm-plugins/spellcheck'
 
 import * as persistence from '../services/persistence'
@@ -134,6 +142,7 @@ const requestedTemplateId = computed(() => {
 // Dialog state
 const showLinkDialog = ref(false)
 const showImageDialog = ref(false)
+const showEmojiDialog = ref(false)
 const showProfileDialog = ref(false)
 const dialogInitialText = ref('')
 const savedEditorSelection = ref<EditorSelectionSnapshot | null>(null)
@@ -285,6 +294,18 @@ const onImageInsert = (alt: string, url: string) => {
   void closeDialogs(true)
 }
 
+const openEmojiDialog = () => {
+  if (!getView()) return
+  rememberEditorSelection()
+  showEmojiDialog.value = true
+}
+
+const onEmojiInsert = (emoji: string) => {
+  const v = getView()
+  if (v) insertEmojiCommand(v, emoji)
+  void closeDialogs(true)
+}
+
 const openProfileDialog = () => {
   rememberEditorSelection()
   showProfileDialog.value = true
@@ -333,6 +354,7 @@ const closeAccessDialog = () => access.closeAccessDialog()
 const closeDialogs = async (preserveCurrentSelection: boolean = false) => {
   showLinkDialog.value = false
   showImageDialog.value = false
+  showEmojiDialog.value = false
   access.closeLockDialog()
 
   if (preserveCurrentSelection) {

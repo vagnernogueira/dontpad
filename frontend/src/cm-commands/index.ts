@@ -7,7 +7,7 @@
 
 // Re-export all commands
 export { applyFormat, formatInline, formatLinePrefix, transformCase } from './formatting'
-export { insertLink, insertImage } from './insertions'
+export { insertLink, insertImage, insertEmoji } from './insertions'
 export { createUndoCommand, createRedoCommand } from './history'
 export { normalizeMarkdownTable } from './table'
 

@@ -29,6 +29,8 @@
         "clsx": "^2.1.1",
         "codemirror": "^6.0.2",
         "dompurify": "^3.4.0",
+        "emoji-picker-element": "^1.29.1",
+        "emoji-picker-element-data": "^1.8.0",
         "html2pdf.js": "^0.14.0",
         "lucide-vue-next": "^0.575.0",
         "markdown-it": "^14.1.1",

@@ -26,6 +26,14 @@ export const ANIMAL_EMOJIS = [
   '🐟', '🐬', '🐳', '🐋', '🦈', '🐊', '🐘', '🦏'
 ] as const
 
+/**
+ * Curated funny-face emojis for the toolbar shortcut.
+ */
+export const FUNNY_FACE_EMOJIS = [
+  '😀', '😄', '😆', '😎', '😛', '😜', '🤪', '😹',
+  '🥳', '🤠', '🥸', '😵‍💫', '🤓', '😇', '🙃', '😏'
+] as const
+
 /** Profile data stored in localStorage and shared via awareness */
 export interface CollaboratorProfile {
   id: string
@@ -60,6 +68,13 @@ export function getRandomCursorColor(): string {
  */
 export function getRandomAnimalEmoji(): string {
   return ANIMAL_EMOJIS[Math.floor(Math.random() * ANIMAL_EMOJIS.length)]
+}
+
+/**
+ * Get a random funny face emoji.
+ */
+export function getRandomFunnyFaceEmoji(): string {
+  return FUNNY_FACE_EMOJIS[Math.floor(Math.random() * FUNNY_FACE_EMOJIS.length)]
 }
 
 /**
@@ -174,8 +189,10 @@ export function getProfileAwarenessState(profile: CollaboratorProfile) {
 export default {
   CURSOR_COLORS,
   ANIMAL_EMOJIS,
+  FUNNY_FACE_EMOJIS,
   getRandomCursorColor,
   getRandomAnimalEmoji,
+  getRandomFunnyFaceEmoji,
   getRandomCursorName,
   getOrCreateProfile,
   updateProfile,

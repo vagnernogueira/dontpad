@@ -71,3 +71,32 @@ export function insertImage(view: EditorView, alt: string, url: string): boolean
   view.focus()
   return true
 }
+
+/**
+ * Insert an emoji at the current cursor position or over the active selection.
+ *
+ * @param view - CodeMirror EditorView instance
+ * @param emoji - Emoji unicode to insert
+ * @returns true if successful
+ */
+export function insertEmoji(view: EditorView, emoji: string): boolean {
+  if (!view || !emoji) return false
+
+  const { state } = view
+  const selection = state.selection.main
+
+  view.dispatch({
+    changes: {
+      from: selection.from,
+      to: selection.to,
+      insert: emoji,
+    },
+    selection: {
+      anchor: selection.from + emoji.length,
+      head: selection.from + emoji.length,
+    },
+  })
+
+  view.focus()
+  return true
+}

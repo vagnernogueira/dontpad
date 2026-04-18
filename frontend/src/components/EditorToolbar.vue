@@ -43,6 +43,9 @@
 
     <ToolbarButton title="Link" @click="emit('open-link')">Link</ToolbarButton>
     <ToolbarButton title="Imagem" @click="emit('open-image')">Img</ToolbarButton>
+    <ToolbarButton title="Inserir emoji" class="text-base leading-none" @click="emit('open-emoji')">
+      {{ emojiToolbarFace }}
+    </ToolbarButton>
     <ToolbarButton title="Travar com senha" @click="emit('open-lock')">
       <Lock :size="14" />
     </ToolbarButton>
@@ -95,6 +98,7 @@
 import type { AcceptableValue } from 'reka-ui'
 import { ChevronDown, Download, Lock, Redo2, Table2, Undo2, ZoomIn } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
+import { getRandomFunnyFaceEmoji } from '../cm-utils/cursor'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -120,12 +124,15 @@ const emit = defineEmits<{
   (e: 'transform-case'): void
   (e: 'open-link'): void
   (e: 'open-image'): void
+  (e: 'open-emoji'): void
   (e: 'open-lock'): void
   (e: 'toggle-spellcheck'): void
   (e: 'set-editor-zoom', value: number): void
   (e: 'download-md'): void
   (e: 'download-pdf'): void
 }>()
+
+const emojiToolbarFace = getRandomFunnyFaceEmoji()
 
 const onEditorZoomChange = (value: AcceptableValue) => {
   if (value === null) {
