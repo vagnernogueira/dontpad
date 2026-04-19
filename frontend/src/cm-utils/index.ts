@@ -20,7 +20,7 @@ export {
   type CollaboratorProfile,
 } from './cursor'
 
-export { trimTrailingSlashes } from './document-name'
+export { buildDocumentTitle, trimTrailingSlashes } from './document-name'
 
 export {
   findMarkdownLinks,

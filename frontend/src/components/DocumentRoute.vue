@@ -55,12 +55,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed, defineAsyncComponent, nextTick, ref, watch } from 'vue'
+import { computed, defineAsyncComponent, nextTick, onBeforeUnmount, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { buildDocumentTitle } from '../cm-utils/document-name'
 import * as exportService from '../services/export'
 import { markdownStyles } from '../services/pdf-styles'
 import { createDocumentAPI } from '../services/document-api'
@@ -85,6 +86,12 @@ const documentId = computed(() => {
   const value = route.params.documentId
   return typeof value === 'string' && value.trim() ? value : 'default'
 })
+
+const previousTitle = document.title || 'Dontpad'
+
+const syncDocumentTitle = () => {
+  document.title = buildDocumentTitle(documentId.value, previousTitle)
+}
 
 const activeMode = computed<SpecialMode | null>(() => {
   if (Object.prototype.hasOwnProperty.call(route.query, 'pdf')) return 'pdf'
@@ -155,6 +162,18 @@ const retryWithPassword = async () => {
   if (!accessPassword.value.trim()) return
   await loadSpecialMode()
 }
+
+watch(
+  documentId,
+  () => {
+    syncDocumentTitle()
+  },
+  { immediate: true }
+)
+
+onBeforeUnmount(() => {
+  document.title = previousTitle
+})
 
 watch(
   () => route.fullPath,
