@@ -8,6 +8,13 @@
 import type { EditorView } from '@codemirror/view'
 import { getWordBoundaries, isWordCharAt } from '../cm-utils/word-boundaries'
 
+const LIST_LINE_PREFIXES = new Set(['- ', '1. ', '- [ ] '])
+
+type ListLineChange = {
+  from: number
+  insert: string
+}
+
 /**
  * Apply inline formatting (wraps selection with prefix/suffix)
  * Examples: bold (**text**), italic (*text*), code (`text`)
@@ -107,6 +114,69 @@ export function formatLinePrefix(view: EditorView, prefix: string): boolean {
   return true
 }
 
+function formatListPrefix(view: EditorView, prefix: string): boolean {
+  if (!view) return false
+
+  const { state } = view
+  const selection = state.selection.main
+
+  if (selection.empty) {
+    return formatLinePrefix(view, prefix)
+  }
+
+  const startLine = state.doc.lineAt(selection.from)
+  const endLine = state.doc.lineAt(Math.max(selection.to - 1, selection.from))
+
+  if (startLine.number === endLine.number) {
+    return formatLinePrefix(view, prefix)
+  }
+
+  const changes: ListLineChange[] = []
+  const insertedLines: Array<{ from: number; length: number }> = []
+  let numberedLine = 1
+
+  for (let lineNumber = startLine.number; lineNumber <= endLine.number; lineNumber++) {
+    const line = state.doc.line(lineNumber)
+
+    if (line.text.trim().length === 0) {
+      continue
+    }
+
+    const linePrefix = prefix === '1. ' ? `${numberedLine++}. ` : prefix
+
+    changes.push({ from: line.from, insert: linePrefix })
+    insertedLines.push({ from: line.from, length: linePrefix.length })
+  }
+
+  if (changes.length === 0) {
+    view.focus()
+    return true
+  }
+
+  const shiftPosition = (position: number): number => {
+    let shift = 0
+
+    for (const insertedLine of insertedLines) {
+      if (insertedLine.from <= position) {
+        shift += insertedLine.length
+      }
+    }
+
+    return position + shift
+  }
+
+  view.dispatch({
+    changes,
+    selection: {
+      anchor: shiftPosition(selection.from),
+      head: shiftPosition(selection.to),
+    },
+  })
+
+  view.focus()
+  return true
+}
+
 /**
  * Apply general formatting (detects inline vs line-level automatically)
  * 
@@ -120,6 +190,10 @@ export function applyFormat(view: EditorView, prefix: string, suffix: string = '
   const isLineFormat = !suffix && prefix.endsWith(' ')
 
   if (isLineFormat) {
+    if (LIST_LINE_PREFIXES.has(prefix)) {
+      return formatListPrefix(view, prefix)
+    }
+
     return formatLinePrefix(view, prefix)
   } else {
     return formatInline(view, prefix, suffix)

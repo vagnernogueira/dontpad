@@ -13,7 +13,7 @@ export { normalizeMarkdownTable } from './table'
 export { deleteCurrentLine } from './editor'
 
 // Import commands for registry
-import { formatInline, formatLinePrefix, transformCase } from './formatting'
+import { applyFormat, formatInline, formatLinePrefix, transformCase } from './formatting'
 import { normalizeMarkdownTable } from './table'
 import { deleteCurrentLine } from './editor'
 
@@ -42,9 +42,9 @@ export const commands = {
   heading1: (view: EditorView) => formatLinePrefix(view, '# '),
   heading2: (view: EditorView) => formatLinePrefix(view, '## '),
   heading3: (view: EditorView) => formatLinePrefix(view, '### '),
-  bulletList: (view: EditorView) => formatLinePrefix(view, '- '),
-  numberedList: (view: EditorView) => formatLinePrefix(view, '1. '),
-  checklist: (view: EditorView) => formatLinePrefix(view, '- [ ] '),
+  bulletList: (view: EditorView) => applyFormat(view, '- '),
+  numberedList: (view: EditorView) => applyFormat(view, '1. '),
+  checklist: (view: EditorView) => applyFormat(view, '- [ ] '),
   quote: (view: EditorView) => formatLinePrefix(view, '> '),
 
   // Text case transformation
