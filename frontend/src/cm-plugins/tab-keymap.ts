@@ -18,6 +18,7 @@
  * - Detecção de palavras: insere antes da palavra se cursor está adjacente
  */
 
+import { indentLess } from '@codemirror/commands'
 import { keymap } from "@codemirror/view"
 import { EditorView } from "@codemirror/view"
 import { getWordBeforeCursor, hasSnippetForPrefix } from '../cm-utils/snippet-registry'
@@ -95,5 +96,9 @@ export const tabIndentKeymap = keymap.of([
 
             return true
         }
+    },
+    {
+        key: 'Shift-Tab',
+        run: indentLess
     }
 ])

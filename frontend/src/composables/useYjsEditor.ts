@@ -10,6 +10,7 @@ import { ref, watch } from 'vue'
 import * as Y from 'yjs'
 import { WebsocketProvider } from 'y-websocket'
 import { Compartment, EditorState } from '@codemirror/state'
+import { indentUnit } from '@codemirror/language'
 import { EditorView, basicSetup } from 'codemirror'
 import { drawSelection } from '@codemirror/view'
 import { markdown } from '@codemirror/lang-markdown'
@@ -116,6 +117,7 @@ export function useYjsEditor() {
       doc: ytext.toString(),
       extensions: [
         basicSetup,
+        indentUnit.of('    '),
         drawSelection(),
         spellcheckCompartment.of(spellcheckPlugin(options.spellcheckEnabled)),
         EditorView.lineWrapping,
