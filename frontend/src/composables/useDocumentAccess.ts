@@ -18,6 +18,7 @@ export function useDocumentAccess(documentAPI: DocumentAccessAPI) {
   const hasDocumentAccess = ref(false)
   const documentAccessPassword = ref('')
   const isDocumentLocked = ref(false)
+  const isAccessLoading = ref(false)
 
   // Lock dialog state
   const showLockDialog = ref(false)
@@ -34,6 +35,7 @@ export function useDocumentAccess(documentAPI: DocumentAccessAPI) {
     onGranted: () => Promise<void>,
     accessPasswordInput: Ref<HTMLInputElement | null>
   ) {
+    isAccessLoading.value = true
     hasDocumentAccess.value = false
 
     try {
@@ -42,16 +44,19 @@ export function useDocumentAccess(documentAPI: DocumentAccessAPI) {
 
       if (!lockStatus.locked) {
         documentAccessPassword.value = ''
+        isAccessLoading.value = false
         await onGranted()
         return
       }
 
       showAccessDialog.value = true
+      isAccessLoading.value = false
       await nextTick()
       accessPasswordInput.value?.focus()
     } catch {
       documentAccessPassword.value = ''
       isDocumentLocked.value = false
+      isAccessLoading.value = false
       await onGranted()
     }
   }
@@ -60,15 +65,21 @@ export function useDocumentAccess(documentAPI: DocumentAccessAPI) {
     const password = accessPassword.value.trim()
     if (!password) return
 
-    const canAccess = await documentAPI.verifyAccess(documentId, password)
-    if (!canAccess) {
-      accessError.value = 'Senha inválida.'
-      return
-    }
+    isAccessLoading.value = true
+    try {
+      const canAccess = await documentAPI.verifyAccess(documentId, password)
+      if (!canAccess) {
+        accessError.value = 'Senha inválida.'
+        return
+      }
 
-    documentAccessPassword.value = password
-    closeAccessDialog()
-    await onGranted()
+      documentAccessPassword.value = password
+      closeAccessDialog()
+      isAccessLoading.value = false
+      await onGranted()
+    } finally {
+      isAccessLoading.value = false
+    }
   }
 
   function closeAccessDialog() {
@@ -124,6 +135,7 @@ export function useDocumentAccess(documentAPI: DocumentAccessAPI) {
   }
 
   function handleAccessDenied(accessPasswordInput: Ref<HTMLInputElement | null>) {
+    isAccessLoading.value = false
     hasDocumentAccess.value = false
     accessError.value = 'Senha necessária para abrir este documento.'
     showAccessDialog.value = true
@@ -137,6 +149,7 @@ export function useDocumentAccess(documentAPI: DocumentAccessAPI) {
     hasDocumentAccess,
     documentAccessPassword,
     isDocumentLocked,
+    isAccessLoading,
     showLockDialog,
     lockPassword,
     lockError,
