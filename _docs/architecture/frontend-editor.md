@@ -16,7 +16,7 @@ Este módulo documenta a arquitetura do frontend focada no editor colaborativo: 
 - `frontend/src/composables/*.ts` — 5 composables Vue 3
 - `frontend/src/cm-commands/*` — 5 arquivos (formatting, history, insertions, table, index)
 - `frontend/src/cm-extensions/*` — 2 arquivos (editor-theme, index)
-- `frontend/src/cm-plugins/*` — 17 plugins + barrel index
+- `frontend/src/cm-plugins/*` — plugins do editor (widgets, keymaps estaticos, keymaps contextuais e barrel index)
 - `frontend/src/cm-utils/*` — 7 módulos utilitários (inclui helper local de foco/seleção do editor)
 - `frontend/src/services/*` — 5 serviços + barrel index
 - `frontend/src/styles/*.css` — 5 arquivos CSS modulares (inclui camada de componentes)
@@ -33,7 +33,7 @@ src/
 ├── services/         # 5 serviços + barrel index
 ├── cm-commands/      # 5 arquivos (formatting, history, insertions, table, index)
 ├── cm-extensions/    # 2 arquivos (editor-theme, index)
-├── cm-plugins/       # 17 plugins + barrel index
+├── cm-plugins/       # plugins do editor (widgets, keymaps estaticos, keymaps contextuais e barrel index)
 ├── cm-utils/         # 7 módulos utilitários
 └── styles/           # 5 arquivos CSS modulares
 ```
@@ -154,6 +154,11 @@ Os composables retornam objetos com refs. No template Vue, refs dentro de objeto
 ## Plugins e keymaps
 
 Detalhamento completo no módulo [plugins-codemirror.md](./plugins-codemirror.md).
+
+Resumo arquitetural:
+- `frontend/src/cm-plugins/keymaps.ts` agrega apenas keymaps estaticos reutilizaveis do editor, com precedencia explicita.
+- Keymaps contextuais dependentes de callbacks do `Editor.vue` sao compostos em `frontend/src/composables/useYjsEditor.ts`.
+- Exemplos atuais de atalhos contextuais: paleta de comandos, lint de Markdown e abertura do modo raw em nova aba.
 
 ## Utils (`cm-utils`)
 
@@ -317,7 +322,7 @@ Todos os diretórios de módulos possuem barrel `index.ts` para centralizar expo
 
 - `cm-commands/index.ts` — registry central de comandos;
 - `cm-extensions/index.ts` — tema e highlight;
-- `cm-plugins/index.ts` — todos os plugins e keymaps;
+- `cm-plugins/index.ts` — plugins reutilizaveis e keymaps estaticos; alguns keymaps contextuais podem permanecer fora do barrel quando sao consumidos diretamente por `useYjsEditor.ts`;
 - `cm-utils/index.ts` — utilitários, snippet registry, math evaluator;
 - `services/index.ts` — API, config, export, persistence, pdf-styles.
 

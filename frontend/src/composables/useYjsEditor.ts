@@ -9,7 +9,7 @@
 import { ref, watch } from 'vue'
 import * as Y from 'yjs'
 import { WebsocketProvider } from 'y-websocket'
-import { Compartment, EditorState } from '@codemirror/state'
+import { Compartment, EditorState, Prec } from '@codemirror/state'
 import { indentUnit } from '@codemirror/language'
 import { EditorView, basicSetup } from 'codemirror'
 import { drawSelection } from '@codemirror/view'
@@ -27,6 +27,7 @@ import { spellcheckPlugin } from '../cm-plugins/spellcheck'
 import { editorKeymaps } from '../cm-plugins/keymaps'
 import { createCommandPaletteKeymap } from '../cm-plugins/command-palette-keymap'
 import { createMarkdownLintKeymap } from '../cm-plugins/markdown-lint-keymap'
+import { createOpenRawDocumentKeymap } from '../cm-plugins/open-raw-document-keymap'
 import { getEditorTheme } from '../cm-extensions'
 import { useColorMode } from './useColorMode'
 import type { CollaboratorProfile } from '../cm-utils/cursor'
@@ -42,6 +43,7 @@ export interface YjsEditorOptions {
   spellcheckEnabled: boolean
   onOpenCommandPalette?: () => void
   onOpenMarkdownLint?: () => void
+  onOpenRawDocument?: () => void
 }
 
 export interface YjsEditorInstance {
@@ -117,6 +119,7 @@ export function useYjsEditor() {
       doc: ytext.toString(),
       extensions: [
         basicSetup,
+        ...(options.onOpenRawDocument ? [Prec.high(createOpenRawDocumentKeymap(options.onOpenRawDocument))] : []),
         indentUnit.of('    '),
         drawSelection(),
         spellcheckCompartment.of(spellcheckPlugin(options.spellcheckEnabled)),

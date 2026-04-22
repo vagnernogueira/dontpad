@@ -10,7 +10,7 @@ Detalha arquitetura dos plugins do editor: taxonomia, composição, precedência
 
 ## Arquivos-fonte principais
 
-- `frontend/src/cm-plugins/*.ts` — 17 plugins + barrel `index.ts`
+- `frontend/src/cm-plugins/*.ts` — plugins visuais, keymaps estaticos, keymaps contextuais e barrel `index.ts`
 - `frontend/src/cm-utils/snippet-registry.ts` — registry compartilhado de snippets
 - `frontend/src/cm-utils/math-evaluator.ts` — parser matemático extraído
 
@@ -35,6 +35,9 @@ Detalha arquitetura dos plugins do editor: taxonomia, composição, precedência
 - `enter-keymap.ts`
 - `delete-line-keymap.ts`
 - `table-normalize-keymap.ts`
+- `command-palette-keymap.ts`
+- `markdown-lint-keymap.ts`
+- `open-raw-document-keymap.ts`
 - `snippet.ts`
 - `math.ts`
 - `keymaps.ts`
@@ -47,14 +50,16 @@ Detalha arquitetura dos plugins do editor: taxonomia, composição, precedência
 
 ## Composição no Editor
 
-Todos os plugins são re-exportados pelo barrel `cm-plugins/index.ts`.
+Os plugins e keymaps estaticos reutilizaveis sao preferencialmente re-exportados pelo barrel `cm-plugins/index.ts`.
+Keymaps contextuais que dependem de callbacks do `Editor.vue` podem ser importados diretamente por `useYjsEditor.ts`.
 
 Empilhamento recomendado no `Editor.vue` (via composable `useYjsEditor`):
 
 1. plugins visuais base;
 2. plugins de interação;
-3. keymaps agregados em `keymaps.ts`;
-4. preview composto via `markdown-preview.ts`.
+3. keymaps contextuais compostos em `useYjsEditor.ts` quando dependem de callbacks do editor;
+4. keymaps estaticos agregados em `keymaps.ts`;
+5. preview composto via `markdown-preview.ts`.
 
 ## Estrutura padrão de implementação
 
@@ -75,17 +80,24 @@ Padrões esperados:
 
 Ordem arquitetural:
 
-1. prioridade alta para Tab (indentação);
-2. prioridade alta para deleção de linha;
-3. prioridade normal para Enter contextual;
-4. prioridade normal para cálculo matemático;
-5. prioridade normal para normalização de tabela (`Alt+Shift+T`);
-6. prioridade baixa para snippets.
+1. prioridade alta para keymaps contextuais que precisam bloquear atalhos nativos do navegador/editor;
+2. prioridade alta para Tab (indentação);
+3. prioridade alta para deleção de linha;
+4. prioridade normal para Enter contextual;
+5. prioridade normal para cálculo matemático;
+6. prioridade normal para normalização de tabela (`Alt+Shift+T`);
+7. prioridade baixa para snippets.
 
 ## Atalhos customizados relevantes
 
+- `Mod+U`: abre o modo raw do documento em nova aba (`open-raw-document-keymap.ts`);
+- `Ctrl+Alt+Space`: abre a paleta de comandos (`command-palette-keymap.ts`);
+- `Ctrl+Alt+L`: abre o lint de Markdown (`markdown-lint-keymap.ts`);
 - `Ctrl+L`: remove linha atual (`delete-line-keymap.ts`);
 - `Alt+Shift+T`: normaliza tabela Markdown selecionada ou sob cursor (`table-normalize-keymap.ts`).
+
+Observacao:
+Atalhos como `Tab`, `Shift-Tab`, `Enter` contextual e o trigger de math por espaco continuam documentados nas secoes de precedencia e taxonomia, mesmo quando nao aparecem nesta lista resumida de atalhos mais visiveis.
 
 ## Snippets padrão
 
@@ -121,7 +133,7 @@ Expressões fora do conjunto são rejeitadas.
 Atualizar este módulo ao alterar:
 
 - ordem de precedência dos keymaps;
-- atalhos customizados e seus comandos;
+- atalhos customizados, seus comandos ou o ponto de composicao entre keymaps estaticos e contextuais;
 - contrato de snippets/variáveis;
 - lista de plugins disponíveis;
 - regras do parser matemático.

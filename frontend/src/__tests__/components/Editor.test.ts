@@ -126,6 +126,33 @@ describe('Editor', () => {
     vi.clearAllMocks()
   })
 
+  it('binds Ctrl+U to open the raw document in a new tab', async () => {
+    documentAccessMocks.getLockStatus.mockResolvedValueOnce({ locked: false })
+    const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null)
+    window.history.replaceState({}, '', '/default?template=demo')
+
+    const { default: Editor } = await import('../../components/Editor.vue')
+
+    render(Editor, {
+      global: {
+        stubs,
+      },
+    })
+
+    await waitFor(() => {
+      expect(editorMocks.init).toHaveBeenCalled()
+    })
+
+    const initOptions = editorMocks.init.mock.calls[0]?.[1]
+
+    expect(initOptions?.onOpenRawDocument).toBeTypeOf('function')
+
+    initOptions.onOpenRawDocument()
+
+    expect(openSpy).toHaveBeenCalledWith('http://localhost:3000/default?raw', '_blank', 'noopener')
+    openSpy.mockRestore()
+  }, 10000)
+
   it('shows loading while the access status is unresolved and only then reveals the password state', async () => {
     const deferredLockStatus = createDeferred<{ locked: boolean }>()
     documentAccessMocks.getLockStatus.mockReturnValueOnce(deferredLockStatus.promise)

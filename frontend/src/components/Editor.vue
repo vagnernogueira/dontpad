@@ -191,6 +191,17 @@ const applyEditorZoom = () => {
   editorContainer.value.style.setProperty('--editor-content-zoom', `${editorZoom.value / 100}`)
 }
 
+const openRawDocumentInNewTab = () => {
+  if (typeof window === 'undefined') {
+    return
+  }
+
+  const rawUrl = new URL(route.path, window.location.origin)
+  rawUrl.hash = ''
+  rawUrl.search = '?raw'
+  window.open(rawUrl.toString(), '_blank', 'noopener')
+}
+
 const initEditor = () => {
   if (!editorContainer.value) return
 
@@ -203,6 +214,7 @@ const initEditor = () => {
     spellcheckEnabled: isSpellcheckEnabled.value,
     onOpenCommandPalette: openCommandPalette,
     onOpenMarkdownLint: openMarkdownLintDialog,
+    onOpenRawDocument: openRawDocumentInNewTab,
   }, {
     onAccessDenied: () => access.handleAccessDenied(ref(null)),
   })

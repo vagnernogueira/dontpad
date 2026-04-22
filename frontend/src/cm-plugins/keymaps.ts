@@ -1,8 +1,11 @@
 /**
  * Keymaps Agrupados com Precedencia Explicita
  * 
- * Este modulo centraliza todos os keymaps customizados do editor,
+ * Este modulo agrega os keymaps estaticos do editor,
  * aplicando precedencia explicita para garantir comportamento previsivel.
+ *
+ * Atalhos contextuais dependentes de callbacks do editor (ex.: abrir dialogs,
+ * abrir o modo raw em nova aba) sao compostos em `useYjsEditor.ts`.
  * 
  * Ordem de precedencia (maior para menor):
  * 1. HIGH: Tab/Shift-Tab de indentacao (prioridade sobre snippets)
@@ -16,6 +19,7 @@
  * - Shift-Tab usa o comando nativo de desidentacao do CodeMirror
  * - Enter cobre task lists e sai da lista quando item vazio
  * - Precedencia explicita evita conflitos com basicSetup
+ * - Keymaps contextuais ficam fora deste agregador estatico para receber callbacks
  */
 
 import { Prec } from '@codemirror/state'
@@ -27,7 +31,7 @@ import { tableNormalizeKeymap } from './table-normalize-keymap'
 import { snippetKeymap } from './snippet'
 
 /**
- * Keymaps agrupados com precedencia explicita
+ * Keymaps estaticos agrupados com precedencia explicita
  * 
  * Uso no Editor:
  * ```typescript
