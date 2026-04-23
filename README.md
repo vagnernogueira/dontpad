@@ -175,3 +175,7 @@ Histórico e evolução do projeto:
 - **CodeMirror 6:** documentação oficial e changelog devem ser consultados diretamente quando necessário.
 
 ---
+
+## Licença
+
+Este projeto adota a licença BSD-3-Clause. Consulte o arquivo [LICENSE](./LICENSE) para o texto completo.

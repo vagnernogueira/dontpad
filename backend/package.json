@@ -1,6 +1,7 @@
 {
   "name": "dontpad-backend",
   "version": "1.0.0",
+  "license": "BSD-3-Clause",
   "description": "Backend for Dontpad local clone",
   "main": "dist/server.js",
   "scripts": {
