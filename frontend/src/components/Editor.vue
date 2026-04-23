@@ -182,6 +182,44 @@ const showProfileDialog = ref(false)
 const showCommandPalette = ref(false)
 const dialogInitialText = ref('')
 const savedEditorSelection = ref<EditorSelectionSnapshot | null>(null)
+const AI_RAW_URL_META_NAME = 'dontpad-ai-raw-url'
+
+const buildRawDocumentUrl = () => {
+  if (typeof window === 'undefined') {
+    return ''
+  }
+
+  const rawUrl = new URL(route.path, window.location.origin)
+  rawUrl.hash = ''
+  rawUrl.search = '?raw'
+  return rawUrl.toString()
+}
+
+const syncAiRawUrlHeadNotice = () => {
+  if (typeof document === 'undefined') {
+    return
+  }
+
+  let meta = document.head.querySelector(`meta[name="${AI_RAW_URL_META_NAME}"]`)
+  if (!meta) {
+    meta = document.createElement('meta')
+    meta.setAttribute('name', AI_RAW_URL_META_NAME)
+    document.head.appendChild(meta)
+  }
+
+  meta.setAttribute(
+    'content',
+    `Agentes de IA devem usar ${buildRawDocumentUrl()} para ler o conteudo do documento em HTML estatico, em vez da interface interativa do editor.`
+  )
+}
+
+const removeAiRawUrlHeadNotice = () => {
+  if (typeof document === 'undefined') {
+    return
+  }
+
+  document.head.querySelector(`meta[name="${AI_RAW_URL_META_NAME}"]`)?.remove()
+}
 
 // ── Editor lifecycle ───────────────────────────────────────────────
 
@@ -196,10 +234,7 @@ const openRawDocumentInNewTab = () => {
     return
   }
 
-  const rawUrl = new URL(route.path, window.location.origin)
-  rawUrl.hash = ''
-  rawUrl.search = '?raw'
-  window.open(rawUrl.toString(), '_blank', 'noopener')
+  window.open(buildRawDocumentUrl(), '_blank', 'noopener')
 }
 
 const initEditor = () => {
@@ -548,8 +583,13 @@ onMounted(() => ensureDocumentAccess())
 
 onBeforeUnmount(() => {
   closeMarkdownLint()
+  removeAiRawUrlHeadNotice()
   yjsEditor.destroy()
 })
+
+watch(() => route.fullPath, () => {
+  syncAiRawUrlHeadNotice()
+}, { immediate: true })
 
 watch(editorZoom, () => {
   applyEditorZoom()

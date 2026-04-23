@@ -153,6 +153,27 @@ describe('Editor', () => {
     openSpy.mockRestore()
   }, 10000)
 
+  it('publishes an AI raw URL notice in the document head', async () => {
+    documentAccessMocks.getLockStatus.mockResolvedValueOnce({ locked: false })
+
+    const { default: Editor } = await import('../../components/Editor.vue')
+
+    render(Editor, {
+      global: {
+        stubs,
+      },
+    })
+
+    await waitFor(() => {
+      expect(editorMocks.init).toHaveBeenCalled()
+    })
+
+    const meta = document.head.querySelector('meta[name="dontpad-ai-raw-url"]')
+
+    expect(meta).not.toBeNull()
+    expect(meta?.getAttribute('content')).toContain('http://localhost:3000/default?raw')
+  })
+
   it('shows loading while the access status is unresolved and only then reveals the password state', async () => {
     const deferredLockStatus = createDeferred<{ locked: boolean }>()
     documentAccessMocks.getLockStatus.mockReturnValueOnce(deferredLockStatus.promise)

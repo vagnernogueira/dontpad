@@ -68,4 +68,28 @@ describe('DocumentRoute', () => {
       expect(document.title).toBe('Dontpad')
     })
   })
+
+  it('renders raw content after loading the public document in SPA mode', async () => {
+    const { default: DocumentRoute } = await import('../../components/DocumentRoute.vue')
+
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [
+        { path: '/:documentId(.*)', name: 'document', component: DocumentRoute },
+      ],
+    })
+
+    await router.push('/teste?raw')
+    await router.isReady()
+
+    const screen = render({ template: '<router-view />' }, {
+      global: {
+        plugins: [router],
+      },
+    })
+
+    await waitFor(() => {
+      expect(screen.getByText('# Documento')).toBeInTheDocument()
+    })
+  })
 })

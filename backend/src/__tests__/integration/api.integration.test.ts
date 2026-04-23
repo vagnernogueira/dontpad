@@ -49,6 +49,37 @@ describe('api integration', () => {
         expect(response.body).toEqual({ status: 'ok' });
     });
 
+    it('renders raw document html with content already present in the response', async () => {
+        const initialDocs = new Map<string, string>();
+        initialDocs.set('teste', '# Documento\nLinha 2');
+        __setTestPersistence(createMockPersistence(initialDocs));
+
+        const response = await request(app).get('/teste?raw');
+
+        expect(response.status).toBe(200);
+        expect(response.headers['content-type']).toContain('text/html');
+        expect(response.text).toContain('<!doctype html><meta charset=utf-8>');
+        expect(response.text).toContain('<pre># Documento\nLinha 2</pre>');
+        expect(response.text).not.toContain('<h1>');
+        expect(response.text).not.toContain('<style>');
+    });
+
+    it('renders a raw password message instead of exposing locked content without credentials', async () => {
+        const initialDocs = new Map<string, string>();
+        initialDocs.set('segredo', 'conteudo sensivel');
+        __setTestPersistence(createMockPersistence(initialDocs));
+        setDocumentPassword('segredo', '1234');
+
+        const response = await request(app).get('/segredo?raw');
+
+        expect(response.status).toBe(403);
+        expect(response.headers['content-type']).toContain('text/html');
+        expect(response.text).toContain('Este documento esta protegido por senha');
+        expect(response.text).not.toContain('conteudo sensivel');
+
+        removeDocumentPassword('segredo');
+    });
+
     it('rejects lock status request without document id', async () => {
         const response = await request(app).get('/api/document-lock');
 

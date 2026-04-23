@@ -5,6 +5,7 @@ import setupWSConnection from './sync';
 import { listDocumentNames, listDocumentSummaries, listTemplateNames, getDocumentContent, renameDocument, deleteDocument } from './sync';
 import { isDocumentLocked, setDocumentPassword, verifyDocumentAccess, verifyDocumentsMasterPassword } from './sync';
 import { removeDocumentPassword } from './sync';
+import { normalizeDocName } from './sync';
 import cors from 'cors';
 import { buildDocumentsBackupArchive } from './document-backup';
 
@@ -12,6 +13,34 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 const server = http.createServer(app);
+
+const trimTrailingSlashes = (value: string) => value.replace(/\/+$/g, '');
+
+const normalizeRequestedDocumentId = (value: string) => {
+        const normalized = trimTrailingSlashes(normalizeDocName(value).trim());
+        return normalized || 'default';
+};
+
+const escapeHtml = (value: string) => value
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+
+const renderRawDocumentHtml = (body: string) => `<!doctype html><meta charset=utf-8>${body}`;
+
+const renderRawContentPage = (_documentId: string, content: string) => renderRawDocumentHtml(
+        `<pre>${escapeHtml(content)}</pre>`
+);
+
+const renderRawPasswordPage = () => renderRawDocumentHtml(
+        '<p>Este documento esta protegido por senha. Recarregue a URL raw com o parametro password para acessar o conteudo.</p>'
+);
+
+const renderRawErrorPage = () => renderRawDocumentHtml(
+        '<p>Nao foi possivel carregar o documento.</p>'
+);
 
 // Simple health check or API route
 app.get('/api/health', (req, res) => {
@@ -237,6 +266,33 @@ app.get('/api/client-info', (req, res) => {
         ? forwarded.split(',')[0].trim()
         : req.socket.remoteAddress || '';
     res.json({ ip });
+});
+
+app.get('/:documentId(*)', async (req, res, next) => {
+    if (!Object.prototype.hasOwnProperty.call(req.query, 'raw')) {
+        next();
+        return;
+    }
+
+    try {
+        const documentId = normalizeRequestedDocumentId(typeof req.params.documentId === 'string' ? req.params.documentId : '');
+        const password = typeof req.query.password === 'string' ? req.query.password : '';
+
+        if (isDocumentLocked(documentId) && !verifyDocumentAccess(documentId, password)) {
+            res.status(403).type('html').send(renderRawPasswordPage());
+            return;
+        }
+
+        const content = await getDocumentContent(documentId);
+        res
+            .status(200)
+            .type('html')
+            .setHeader('X-Robots-Tag', 'index, follow')
+            .send(renderRawContentPage(documentId, content));
+    } catch (error) {
+        console.error('Failed to render raw document html', error);
+        res.status(500).type('html').send(renderRawErrorPage());
+    }
 });
 
 // Setup WebSocket Server
