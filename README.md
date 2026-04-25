@@ -159,6 +159,23 @@ cd backend && npm run lint
 cd frontend && npm run lint
 ```
 
+## CLI
+
+O repositório agora inclui um CLI funcional em `cli/`, mantido como pacote isolado e sem conversão da raiz para workspace npm.
+
+Bootstrap rápido:
+
+```bash
+cd cli
+npm install
+npm run build
+npm start -- --help
+```
+
+O fluxo inicial disponível é a persistência da configuração do CLI, documentada em `cli/README.md`.
+
+Além da configuração persistida, o pacote agora expõe comandos de leitura, exportação, atualização e criação de documentos, reutilizando apenas os contratos HTTP e Yjs/WebSocket já existentes no projeto.
+
 ## Ondas de Desenvolvimento
 
 Histórico e evolução do projeto:
