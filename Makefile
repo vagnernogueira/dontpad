@@ -9,7 +9,7 @@ update-skills:
 		echo "Erro: o repositório atual não contém a subtree $(SKILLS_PREFIX)."; \
 		exit 1; \
 	fi
-	GIT_MERGE_AUTOEDIT=no git subtree pull --prefix=$(SKILLS_PREFIX) $(SKILLS_REPO) $(SKILLS_BRANCH) --squash
+	ALLOW_SKILLS_CHANGES=1 GIT_MERGE_AUTOEDIT=no git subtree pull --prefix=$(SKILLS_PREFIX) $(SKILLS_REPO) $(SKILLS_BRANCH) --squash
 
 sync-skills: update-skills
-	git push
+	ALLOW_SKILLS_CHANGES=1 git push
