@@ -13,6 +13,7 @@ participantes.
 - **Linguagem:** TypeScript
 - **Frontend:** Vue.js 3, Vite, Tailwind CSS v4, shadcn-vue, CodeMirror 6
 - **Backend:** Node.js, Express, WebSocket (`ws`)
+- **CLI:** Node.js, TypeScript, commander.js, Yjs (`y-websocket`)
 - **Colaboração em tempo real:** Yjs (`y-websocket`, `y-codemirror.next`)
 - **Banco de dados:** LevelDB via `y-leveldb`
 - **Infraestrutura:** Podman, Compose e `Makefile`
@@ -23,6 +24,7 @@ participantes.
 - Criação instantânea de documentos via URL amigável.
 - Organização por subdocumentos com rotas hierárquicas.
 - Suporte a texto simples e Markdown.
+- CLI isolado para configurar acesso, ler, exportar, atualizar e criar documentos sem endpoint novo no backend.
 - Normalização de tabelas Markdown com atalho `Alt+Shift+T`.
 - Salvamento automático e persistência local.
 - Bloqueio de documento por senha com bypass administrativo por senha mestre.
@@ -68,11 +70,18 @@ Defina no `.env` ao menos:
 ### Como Compilar
 
 ```bash
-# instala as dependências dos dois pacotes
+# instala as dependências usadas pelos fluxos web atuais
 make install
 
 # executa os testes existentes e gera as imagens do backend e frontend
 make build
+```
+
+O pacote `cli/` permanece autocontido e deve ser instalado separadamente:
+
+```bash
+cd cli
+npm install
 ```
 
 Para verificações específicas do frontend que não possuem alvo dedicado no `Makefile`, continue usando os scripts do pacote:
@@ -172,9 +181,30 @@ npm run build
 npm start -- --help
 ```
 
-O fluxo inicial disponível é a persistência da configuração do CLI, documentada em `cli/README.md`.
+Fluxos disponíveis:
 
-Além da configuração persistida, o pacote agora expõe comandos de leitura, exportação, atualização e criação de documentos, reutilizando apenas os contratos HTTP e Yjs/WebSocket já existentes no projeto.
+- `dontpad config` para persistir `baseUrl`, `wsBaseUrl` opcional e `masterPassword` opcional;
+- `dontpad get` para ler Markdown por path ou URL completa e opcionalmente exportar para `.md`;
+- `dontpad update` para substituir o conteúdo de um documento a partir de argumento, arquivo ou stdin;
+- `dontpad create` para criar documento em branco ou com conteúdo inicial.
+
+Contratos reutilizados pelo CLI:
+
+- `GET /api/document-content` e `GET /api/public-document-content` para leitura;
+- sincronização Yjs via WebSocket para atualização e criação, alinhada ao editor web;
+- sem criação de endpoint específico para a interface de linha de comando.
+
+Exemplos rápidos:
+
+```bash
+cd cli
+npm run dev -- config set --base-url http://localhost:3001 --master-password minha-senha
+npm run dev -- get me/todo --output ./tmp/todo.md --no-print
+printf '# Atualizado pelo CLI\n' | npm run dev -- update me/todo --stdin
+npm run dev -- create drafts/nova-nota --content '# Rascunho\n'
+```
+
+Documentação detalhada, opções e estratégia de validação com `XDG_CONFIG_HOME` temporário estão em `cli/README.md`.
 
 ## Ondas de Desenvolvimento
 

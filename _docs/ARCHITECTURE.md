@@ -46,12 +46,14 @@
 O DontPad é uma aplicação full-stack para edição colaborativa de documentos Markdown em tempo real.
 
 - Frontend SPA: Vue 3 + CodeMirror 6;
+- CLI opcional: Node.js + commander.js para automação operacional e integração por terminal;
 - Backend: Node.js + Express + WebSocket;
 - Sincronização: Yjs (CRDT), com persistência incremental em LevelDB.
 
 Características principais:
 
 - edição colaborativa em tempo real;
+- CLI isolado para configurar acesso e operar leitura, exportação, atualização e criação de documentos;
 - criação de documentos a partir de templates em `/_tmpl/` pela Home;
 - proteção por senha de documentos;
 - Explorer administrativo em `/explorer` com senha mestra;
@@ -66,6 +68,7 @@ Características principais:
 | Camada            | Tecnologias principais                                    |
 | ----------------- | --------------------------------------------------------- |
 | Frontend          | Vue 3, TypeScript, Vite, Vue Router                       |
+| CLI               | Node.js, TypeScript, commander.js                         |
 | Editor            | CodeMirror 6, @lezer/markdown                             |
 | Colaboração       | Yjs, y-websocket, y-codemirror.next                       |
 | Backend           | Node.js, Express, ws, TypeScript                          |
@@ -98,13 +101,20 @@ Detalhes extensos de implementação por camada estão nos módulos listados na 
 │  │  └───────────────────┬───────────────────────────┘   │   │
 │  └──────────────────────┼───────────────────────────────┘   │
 └─────────────────────────┼───────────────────────────────────┘
-                          │ WebSocket + HTTP API
-        ┌─────────────────▼──────────────┐
-        │      Backend Server (Node.js)  │
-        │ - Express REST                 │
-        │ - WebSocket Provider (Yjs)     │
-        │ - LevelDB Persistence          │
-        └────────────────────────────────┘
+        │ HTTP API + WebSocket Sync
+┌─────────────────────────▼───────────────────────────────────┐
+│                    Backend Server (Node.js)                 │
+│ - Express REST                                              │
+│ - WebSocket Provider (Yjs)                                  │
+│ - LevelDB Persistence                                       │
+└─────────────────────────┬───────────────────────────────────┘
+        │
+      ┌─────────────▼─────────────┐
+      │      CLI Package          │
+      │ - commander.js bootstrap  │
+      │ - HTTP document reads     │
+      │ - Yjs WebSocket writes    │
+      └───────────────────────────┘
 ```
 
 ---
@@ -134,6 +144,7 @@ _docs/
 ## 5. Mapa de Módulos Arquiteturais
 
 - [Frontend Editor](./architecture/frontend-editor.md) — camada de UI/editor e fluxos no browser.
+- [CLI](../cli/README.md) — pacote isolado para automação e operações de documentos por terminal.
 - [Backend Runtime](./architecture/backend-runtime.md) — execução backend, contratos HTTP/WS e persistência.
 - [Plugins CodeMirror](./architecture/plugins-codemirror.md) — plugins, keymaps, snippets e limites do parser.
 - [Explorer de Documentos](./architecture/explorer.md) — regras funcionais e endpoints administrativos.
@@ -148,6 +159,7 @@ _docs/
 
 - colaboração em tempo real usa Yjs (CRDT) como fonte de consistência;
 - acesso administrativo exige `x-docs-password` válido;
+- o CLI reutiliza apenas contratos já existentes: leitura por `GET /api/document-content` ou `GET /api/public-document-content`, e escrita/criação pela mesma sincronização Yjs/WebSocket do editor;
 - templates de documentos são listados por endpoint público dedicado e só podem ser aplicados automaticamente em documento novo ou vazio;
 - acesso por URL parametrizada (`pdf/view/raw`) usa endpoint dedicado de conteúdo e respeita lock por documento;
 - documentos lockados exigem senha para acesso e handshake WS.
@@ -155,6 +167,7 @@ _docs/
 ### 6.2 Decisões arquiteturais centrais
 
 - **Commands Pattern** no frontend para reduzir acoplamento da UI;
+- **CLI autocontido** em `cli/`, sem workspace npm na raiz e sem alterar os contratos públicos do backend;
 - **Factory Pattern** em services para configuração e testabilidade;
 - **Composables Pattern** para extrair lógica reativa de componentes Vue complexos (`useYjsEditor`, `useDocumentAccess`, `useCollaborators`, `useExplorerSession`, `useDocumentList`);
 - **Component Composition** com sub-componentes focados: `EditorHeader`, `EditorToolbar`, `BaseDialog` (thin wrapper shadcn), `LinkDialog`, `ImageDialog`, `LockDialog`, `AccessDialog`, `ProfileDialog`;
@@ -212,6 +225,10 @@ _docs/
 | `frontend/src/cm-utils/snippet-registry.ts` | Registry compartilhado de snippets e prefixes para tab-keymap e snippet plugins.                 |
 | `frontend/src/__tests__/unit/initial-editor-focus.test.ts` | Testes unitários do fluxo de foco inicial e restauração de seleção do editor.                    |
 | `frontend/src/services/document-api.ts`     | Cliente HTTP para lock/access e ações administrativas.                                           |
+| `cli/src/cli.ts`                            | Bootstrap do CLI com `commander`, help estruturado e registro dos comandos `config`, `get`, `update` e `create`. |
+| `cli/src/config.ts`                         | Persistência de `baseUrl`, `wsBaseUrl` opcional e `masterPassword` opcional para o CLI.         |
+| `cli/src/document-api.ts`                   | Cliente HTTP do CLI para leitura de conteúdo, reutilizando os contratos existentes.              |
+| `cli/src/document-sync.ts`                  | Escrita e criação via sincronização Yjs/WebSocket reutilizada do produto.                        |
 | `backend/src/server.ts`                     | Bootstrap backend (Express + WS + rotas API).                                                    |
 | `backend/src/sync.ts`                       | Persistência CRDT, lock e autenticação WS.                                                       |
 | `_docs/ARCHITECTURE.md`                     | Hub arquitetural (fonte de verdade central).                                                     |
@@ -226,6 +243,7 @@ _docs/
 | Yjs + y-websocket     | Colaboração (CRDT)                                  | Alta        |
 | CodeMirror 6          | Editor extensível                                   | Alta        |
 | LevelDB via y-leveldb | Persistência colaborativa                           | Alta        |
+| commander.js          | Parsing, help e composição do CLI                   | Média       |
 | reka-ui               | Primitivos headless UI (focus trap, aria, keyboard) | Alta        |
 | shadcn-vue            | Componentes UI copiados para `components/ui/` e versionados no repositório | Média       |
 | html2pdf.js           | Export PDF frontend                                 | Média       |
@@ -249,6 +267,11 @@ Referências externas:
   - Principais alterações arquiteturais: base SPA + API/WS, adoção de Yjs/CodeMirror e persistência em LevelDB.
 
 ### 9.2 Changelog do Documento
+
+- **Versão 3.9**
+  - **Data:** 2026-04-25
+  - **Autor:** GitHub Copilot
+  - **Mudanças:** Hub atualizado para incluir o pacote `cli/` como terceiro módulo do sistema, com referência aos comandos `config/get/update/create`, aos contratos HTTP reutilizados para leitura e ao fluxo Yjs/WebSocket reutilizado para escrita e criação.
 
 - **Versão 3.8**
   - **Data:** 2026-04-16
