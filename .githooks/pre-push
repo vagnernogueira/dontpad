@@ -1,0 +1,53 @@
+#!/bin/sh
+
+set -eu
+
+skills_prefix="_docs/ia-context/skills"
+subtree_marker="git-subtree-dir: $skills_prefix"
+zero_oid="0000000000000000000000000000000000000000"
+
+if [ "${ALLOW_SKILLS_CHANGES:-0}" = "1" ]; then
+	exit 0
+fi
+
+commit_is_allowed() {
+	commit="$1"
+
+	if git show -s --format=%B "$commit" | grep -Fq "$subtree_marker"; then
+		return 0
+	fi
+
+	for parent in $(git show -s --format=%P "$commit"); do
+		if git show -s --format=%B "$parent" | grep -Fq "$subtree_marker"; then
+			return 0
+		fi
+	done
+
+	return 1
+}
+
+while read -r local_ref local_sha remote_ref remote_sha; do
+	if [ -z "${local_sha:-}" ] || [ "$local_sha" = "$zero_oid" ]; then
+		continue
+	fi
+
+	if [ "$remote_sha" = "$zero_oid" ]; then
+		range="$local_sha"
+	else
+		range="$remote_sha..$local_sha"
+	fi
+
+	for commit in $(git rev-list "$range"); do
+		if ! git diff-tree --no-commit-id --name-only -r "$commit" -- "$skills_prefix" | grep -q .; then
+			continue
+		fi
+
+		if commit_is_allowed "$commit"; then
+			continue
+		fi
+
+		echo >&2 "Push bloqueado: o commit $commit altera $skills_prefix fora do fluxo de subtree."
+		echo >&2 "Sincronize com 'make -f _docs/ia-context/skills/Makefile sync-skills' ou use ALLOW_SKILLS_CHANGES=1 de forma consciente."
+		exit 1
+	done
+done
