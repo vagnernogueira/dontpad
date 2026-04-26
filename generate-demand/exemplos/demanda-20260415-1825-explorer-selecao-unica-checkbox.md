@@ -37,10 +37,6 @@ Restaurar a coerência entre seleção lógica e seleção visual da tabela do E
 - frontend/src/composables/useDocumentList.ts
 - frontend/src/components/Explorer.vue
 
-## Planejamento da execução
-
-> Planejamento pendente. Use a skill demand-execution-planning para preencher ou revisar esta seção.
-
 ## Critérios de aceite
 
 - Ao selecionar um segundo item, apenas o novo item permanece marcado.
@@ -64,10 +60,16 @@ Restaurar a coerência entre seleção lógica e seleção visual da tabela do E
 
 implementação
 
+## Planejamento da execução
+
+1. Ler `useDocumentList.ts` e `Explorer.vue` para entender como `selectedDocumentName` é mantido e como o estado dos checkboxes está vinculado a ele na tabela.
+2. Corrigir o binding do checkbox em `Explorer.vue` para que o valor derivado de `selectedDocumentName` controle exclusivamente qual item aparece marcado, garantindo que a troca de seleção desmarque visualmente o item anterior de forma imediata.
+3. Validar que selecionar um segundo item desmarca o anterior e que nenhuma outra funcionalidade do Explorer — busca, ordenação, renomeação ou exclusão — é afetada pela alteração.
+
 ## Memorial de execução
 
-> Memorial pendente. Ao final da execução ou atendimento da demanda, adicione o resumo da execução, a lista de arquivos alterados, os impactos identificados ou esperados, as validações executadas e as validações recomendadas.
+> Ao concluir a execução: informe o usuário em uma única frase que a demanda foi atendida; depois edite este arquivo, substituindo este bloco pelo memorial real com: resumo da execução, lista de arquivos alterados, validações recomendadas e observações (se houver).
 
-## Sugestão de commit final
+### Sugestão de commit final
 
 > Mensagem de commit pendente. Use a skill conventional-commits para sugerir a mensagem final.

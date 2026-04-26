@@ -21,12 +21,14 @@ Ajustar o texto do botão de limpeza do filtro no Explorer para usar a label `Li
 
 ## Planejamento da execução
 
-> Planejamento pendente. Use a skill demand-execution-planning para preencher ou revisar esta seção.
+1. Localizar o ponto de renderização da label do botão de limpeza do filtro em `Explorer.vue` (ou no componente filho responsável).
+2. Substituir o texto atual pela string `Limpar filtro`, preservando o handler de clique e todos os demais atributos do elemento.
+3. Validar visualmente que a nova label é exibida corretamente e que o comportamento de clique permanece idêntico ao estado anterior.
 
 ## Memorial de execução
 
-> Memorial pendente. Ao final da execução ou atendimento da demanda, adicione o resumo da execução, a lista de arquivos alterados e as validações recomendadas.
+> Ao concluir a execução: informe o usuário em uma única frase que a demanda foi atendida; depois edite este arquivo, substituindo este bloco pelo memorial real com: resumo da execução, lista de arquivos alterados, validações recomendadas e observações (se houver).
 
-## Sugestão de commit final
+### Sugestão de commit final
 
 > Mensagem de commit pendente. Use a skill conventional-commits para sugerir a mensagem final.

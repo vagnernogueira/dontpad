@@ -59,10 +59,6 @@ Permitir que o usuário exporte, a partir do Explorer, um backup completo dos do
 - backend/src/__tests__/unit/document-content.unit.test.ts
 - frontend/src/__tests__/unit/document-api.test.ts
 
-## Planejamento da execução
-
-> Planejamento pendente. Use a skill demand-execution-planning para preencher ou revisar esta seção.
-
 ## Critérios de aceite
 
 - Existe um novo botão no Explorer para acionar o backup geral.
@@ -97,10 +93,18 @@ Permitir que o usuário exporte, a partir do Explorer, um backup completo dos do
 
 implementação
 
+## Planejamento da execução
+
+1. Ler `Explorer.vue`, `document-api.ts`, `export.ts`, `server.ts` e `sync.ts` para mapear o padrão de ações existentes: download por documento, autenticação por senha mestra e listagem de documentos reutilizável.
+2. Criar a rota/serviço no backend (em `server.ts` ou arquivo dedicado) para gerar o `.zip` com todos os documentos não vazios, preservando a hierarquia de paths como estrutura interna do arquivo e reaproveitando a leitura de conteúdo já disponível em `sync.ts`.
+3. Adicionar o botão de backup na toolbar de `Explorer.vue` e conectá-lo ao novo endpoint via `document-api.ts`, seguindo o padrão das demais ações do módulo e mantendo a proteção por senha mestra.
+4. Escrever testes de integração em `api.integration.test.ts` cobrindo composição do zip, exclusão de documentos vazios e preservação da hierarquia de paths; e testes unitários em `document-api.test.ts` cobrindo a nova ação do frontend.
+5. Validar end-to-end que o clique no botão gera e baixa o `.zip` correto, que documentos vazios estão ausentes, que documentos aninhados como `me/todo` aparecem com o caminho interno preservado e que a autenticação por senha mestra está ativa na nova rota.
+
 ## Memorial de execução
 
-> Memorial pendente. Ao final da execução ou atendimento da demanda, adicione a descrição da execução, a lista de arquivos alterados, os impactos identificados ou esperados, as validações executadas e as validações recomendadas.
+> Ao concluir a execução: informe o usuário em uma única frase que a demanda foi atendida; depois edite este arquivo, substituindo este bloco pelo memorial real com: resumo da execução, lista de arquivos alterados, validações recomendadas e observações (se houver).
 
-## Sugestão de commit final
+### Sugestão de commit final
 
 > Mensagem de commit pendente. Use a skill conventional-commits para sugerir a mensagem final.

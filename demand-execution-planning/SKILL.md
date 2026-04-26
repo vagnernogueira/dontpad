@@ -1,17 +1,19 @@
 ---
 name: demand-execution-planning
 description: >-
-  Use esta skill sempre que o usuário tiver uma demanda Markdown já pronta e
-  quiser adicionar, escrever, revisar, reescrever ou fortalecer o plano de
-  execução dentro da própria demanda. Acione mesmo se ele falar apenas em
-  plano, planejamento, etapas ou seção, ou disser que a demanda precisa ficar
-  pronta para outra IA executar. Serve para inserir ou corrigir a seção
-  `Planejamento da execução`, trocar etapas vagas por etapas acionáveis e
-  alinhar o plano aos arquivos, módulos e critérios já citados no `.md`,
-  inclusive em demandas simple, ultra-compact, compact e full. Não use para
-  criar a demanda do zero, implementar código, revisar arquitetura, montar
-  cronograma da squad ou executar a demanda.
+  [DEPRECADA] Esta skill foi incorporada à skill `generate-demand`, que agora
+  executa o planejamento automaticamente via subagente (quando disponível) ou
+  inline. Não acione esta skill para novas demandas. Use apenas se precisar
+  revisar manualmente o planejamento de uma demanda já existente cujo arquivo
+  não pode ser regenerado.
+deprecated: true
 ---
+
+> **DEPRECADA** — A lógica de planejamento desta skill foi integrada à
+> `generate-demand`. O planejamento agora é executado automaticamente como
+> parte da geração da demanda, via subagente quando o harness suportar.
+> Esta skill permanece disponível apenas para revisão manual de demandas
+> antigas já salvas. Para novas demandas, use `generate-demand`.
 
 # Demand Execution Planning
 

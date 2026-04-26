@@ -40,12 +40,15 @@
 
 ## Planejamento da execução
 
-> Planejamento pendente. Use a skill demand-execution-planning para preencher ou revisar esta seção.
+1. Ler `Editor.vue` e mapear o bloco `<header>` inline: props consumidas, emits disparados, composables referenciados e classes CSS utilizadas.
+2. Criar `frontend/src/components/EditorHeader.vue` com as props `documentId`, `collaborators` e `status`, o emit `edit-profile` e o template extraído do bloco mapeado, sem acesso direto a composables.
+3. Substituir o bloco `<header>` inline em `Editor.vue` pelo uso de `<EditorHeader />`, adicionando o import e o registro do componente.
+4. Validar que o visual e o comportamento responsivo do header permanecem idênticos e que `Editor.vue` não contém mais o bloco `<header>` inline.
 
 ## Memorial de execução
 
-> Memorial pendente. Ao final da execução ou atendimento da demanda, adicione o resumo da execução, a lista de arquivos alterados e as validações recomendadas.
+> Ao concluir a execução: informe o usuário em uma única frase que a demanda foi atendida; depois edite este arquivo, substituindo este bloco pelo memorial real com: resumo da execução, lista de arquivos alterados, validações recomendadas e observações (se houver).
 
-## Sugestão de commit final
+### Sugestão de commit final
 
 > Mensagem de commit pendente. Use a skill conventional-commits para sugerir a mensagem final.
