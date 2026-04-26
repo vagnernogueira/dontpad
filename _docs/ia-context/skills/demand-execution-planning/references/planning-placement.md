@@ -9,8 +9,8 @@ Use este guia quando houver dúvida sobre onde inserir ou revisar a seção
 | --- | --- | --- | --- | --- |
 | `simple` | `## Instruções`, `## Demanda`, sem `## Objetivo` | `generate-demand/exemplos/demanda-20260418-0116-limpeza-filtro-explorer.md` | Inserir depois de `## Demanda` e antes de `## Sugestão de commit final` | 3 etapas curtas |
 | `ultra-compact` | `## Entrada mínima` com lista curta de campos | `generate-demand/exemplos/demanda-20260318-2130-header-editor-para-componente.md` | Não quebrar `## Entrada mínima`; concluir todos os campos (`Demanda`, `Objetivo`, `Escopo`, `Arquivos-alvo`, `Critérios de aceite`, `Tipo de saída`) e inserir o planejamento depois desse bloco, antes de `## Sugestão de commit final` | 3 etapas curtas |
-| `compact` | `## Objetivo`, `## Escopo`, `## Arquivos ou módulos-alvo`, `## Critérios de aceite` | `generate-demand/exemplos/demanda-20260415-1825-explorer-selecao-unica-checkbox.md` | Se a seção existir, manter a posição e revisar o conteúdo. Se não existir, inserir antes de `## Critérios de aceite` | 3 ou 4 etapas |
-| `full` | `## Restrições`, `## Contexto técnico adicional`, `## Riscos conhecidos` | `generate-demand/exemplos/demanda-20260416-0321-backup-geral-explorer.md` | Se a seção existir, manter a posição e revisar o conteúdo. Se não existir, inserir depois de `## Arquivos ou módulos suspeitos` e antes de `## Critérios de aceite` | 4 a 6 etapas |
+| `compact` | `## Objetivo`, `## Escopo`, `## Arquivos ou módulos-alvo`, `## Critérios de aceite` | `generate-demand/exemplos/demanda-20260415-1825-explorer-selecao-unica-checkbox.md` | Se a seção existir, manter a posição e revisar o conteúdo. Se não existir, inserir depois de `[análise \| implementação \| revisão]` e antes de `## Memorial de execução` | 3 ou 4 etapas |
+| `full` | `## Restrições`, `## Contexto técnico adicional`, `## Riscos conhecidos` | `generate-demand/exemplos/demanda-20260416-0321-backup-geral-explorer.md` | Se a seção existir, manter a posição e revisar o conteúdo. Se não existir, inserir depois de `[análise \| implementação \| revisão]` e antes de `## Memorial de execução` | 4 a 6 etapas |
 
 ## Regra de integridade do bloco atual
 
@@ -27,9 +27,9 @@ bloco top-level como contêiner único de campos.
 
 Se o documento não corresponder claramente a nenhum template:
 
-1. Se existir `## Critérios de aceite`, inserir imediatamente antes dessa seção.
-2. Senão, se existir `## Tipo de saída` ou equivalente, inserir imediatamente antes dela.
-3. Senão, se existir `## Sugestão de commit final`, inserir imediatamente antes dela.
+1. Se existir `## Memorial de execução`, inserir imediatamente antes dessa seção.
+2. Senão, se existir `### Sugestão de commit final`, inserir imediatamente antes dela.
+3. Senão, se existir `## Tipo de saída` ou equivalente, inserir imediatamente antes dela.
 4. Senão, inserir após a descrição principal da demanda, antes do fechamento do documento.
 
 ## Heurística por tipo de saída
