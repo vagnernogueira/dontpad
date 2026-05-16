@@ -16,6 +16,7 @@ export default defineConfig(({ command }) => ({
             manifest: {
                 name: 'Dontpad',
                 short_name: 'Dontpad',
+                lang: 'pt-BR',
                 description: 'Editor colaborativo de Markdown em tempo real.',
                 theme_color: '#1E1E1E',
                 background_color: '#09090B',
