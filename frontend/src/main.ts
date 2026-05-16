@@ -1,5 +1,6 @@
 import { createApp } from 'vue'
 import { createRouter, createWebHistory } from 'vue-router'
+import { registerSW } from 'virtual:pwa-register'
 import './index.css'
 import App from './App.vue'
 import { trimTrailingSlashes } from './cm-utils/document-name'
@@ -37,3 +38,12 @@ router.beforeEach((to) => {
 const app = createApp(App)
 app.use(router)
 app.mount('#app')
+
+if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+    registerSW({
+        immediate: true,
+        onRegisterError(error) {
+            console.error('Service worker registration failed.', error)
+        },
+    })
+}
