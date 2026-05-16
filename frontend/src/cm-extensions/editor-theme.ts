@@ -71,14 +71,14 @@ function createMarkdownHighlightStyle(palette: ThemePalette) {
     { tag: tags.link, color: palette.link },
     {
       tag: tags.monospace,
-      fontFamily: '"Fira Code", "Consolas", monospace',
+      fontFamily: '"Fira Code Variable", "Consolas", monospace',
       backgroundColor: palette.inlineCodeBackground,
       fontSize: '0.88em',
     },
     { tag: tags.quote, fontStyle: 'italic', color: palette.quote },
     {
       tag: tags.processingInstruction,
-      fontFamily: '"Fira Code", "JetBrains Mono", "Consolas", monospace',
+      fontFamily: '"Fira Code Variable", "JetBrains Mono Variable", "Consolas", monospace',
       color: palette.codeFence,
       fontSize: '0.88em',
     },

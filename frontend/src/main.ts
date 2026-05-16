@@ -1,6 +1,8 @@
 import { createApp } from 'vue'
 import { createRouter, createWebHistory } from 'vue-router'
 import { registerSW } from 'virtual:pwa-register'
+import '@fontsource-variable/fira-code/wght.css'
+import '@fontsource-variable/jetbrains-mono/wght.css'
 import './index.css'
 import App from './App.vue'
 import { trimTrailingSlashes } from './cm-utils/document-name'

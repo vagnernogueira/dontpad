@@ -22,6 +22,8 @@
         "@codemirror/language": "^6.11.3",
         "@codemirror/state": "^6.5.2",
         "@codemirror/view": "^6.26.0",
+        "@fontsource-variable/fira-code": "^5.2.7",
+        "@fontsource-variable/jetbrains-mono": "^5.2.8",
         "@lezer/highlight": "^1.2.3",
         "@types/node": "^25.5.0",
         "@vue/devtools-api": "^6.6.4",
