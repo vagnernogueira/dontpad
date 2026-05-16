@@ -22,6 +22,8 @@
         "@codemirror/language": "^6.11.3",
         "@codemirror/state": "^6.5.2",
         "@codemirror/view": "^6.26.0",
+        "@fontsource-variable/fira-code": "^5.2.7",
+        "@fontsource-variable/jetbrains-mono": "^5.2.8",
         "@lezer/highlight": "^1.2.3",
         "@types/node": "^25.5.0",
         "@vue/devtools-api": "^6.6.4",
@@ -73,6 +75,7 @@
         "typescript": "^5.2.2",
         "typescript-eslint": "^8.0.0",
         "vite": "^6.4.2",
+        "vite-plugin-pwa": "^1.2.0",
         "vitest": "^3.2.4",
         "vue-tsc": "^2.0.6"
     }

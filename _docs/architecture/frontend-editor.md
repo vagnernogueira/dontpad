@@ -2,7 +2,7 @@
 
 ## Escopo
 
-Este módulo documenta a arquitetura do frontend focada no editor colaborativo: componentes, comandos, extensões, plugins, serviços e fluxos de dados no browser.
+Este módulo documenta a arquitetura do frontend focada no editor colaborativo e no shell executado no browser: bootstrap da SPA/PWA, componentes, comandos, extensões, plugins, serviços e fluxos de dados.
 
 ## Donos
 
@@ -10,6 +10,9 @@ Este módulo documenta a arquitetura do frontend focada no editor colaborativo: 
 
 ## Arquivos-fonte principais
 
+- `frontend/index.html` — shell HTML mínimo da SPA/PWA
+- `frontend/src/main.ts` — bootstrap Vue Router + registro do service worker + import de tipografia local
+- `frontend/vite.config.ts` — configuração de build, manifest e service worker via `vite-plugin-pwa`
 - `frontend/src/components/*.vue` — 14 componentes Vue
 - `frontend/src/components/ui/` — 13 diretórios de componentes shadcn-vue (`alert`, `alert-dialog`, `avatar`, `badge`, `button`, `card`, `checkbox`, `dialog`, `input`, `label`, `separator`, `switch`, `table`)
 - `frontend/src/lib/utils.ts` — utilitário `cn()` (clsx + tailwind-merge)
@@ -39,6 +42,9 @@ src/
 ```
 
 - `DocumentRoute.vue` resolve modos de acesso por query params e delega fallback para edição padrão;
+- `main.ts` inicializa o app Vue, importa a tipografia local versionada e registra o service worker apenas em produção;
+- `vite.config.ts` gera `manifest.webmanifest` e `sw.js` com fallback de navegação restrito a `/` e `/explorer`;
+- `index.html` permanece como shell HTML mínimo e não referencia mais Google Fonts externamente;
 - `Editor.vue` orquestra composables e integrações (CodeMirror + Yjs + APIs) no modo de edição;
 - `composables` encapsulam lógica reativa extraída de componentes complexos;
 - `cm-commands` concentra ações stateless sobre o editor;
@@ -48,6 +54,14 @@ src/
 - `services` isola infraestrutura (API, export, config, persistence);
 - a base visual usa Tailwind CSS v4 em `src/styles/base.css`, mantendo `tailwind.config.js` referenciado via `@config` para tokens e plugins;
 - `styles` organiza CSS global em módulos por responsabilidade.
+
+## Bootstrap e shell PWA
+
+- `frontend/index.html` carrega apenas o `#app`, os metadados básicos da aplicação e o entrypoint `src/main.ts`.
+- `frontend/src/main.ts` importa `@fontsource-variable/fira-code/wght.css` e `@fontsource-variable/jetbrains-mono/wght.css`, garantindo que o Vite emita os `.woff2` como assets versionados do bundle.
+- O registro do service worker usa `registerSW` de `virtual:pwa-register` apenas quando `import.meta.env.PROD` e `navigator.serviceWorker` estão disponíveis.
+- `frontend/vite.config.ts` usa `VitePWA({ strategies: 'generateSW' })` para gerar `manifest.webmanifest` e `sw.js`, incluindo `favicon.svg`, `pwa-icon.svg` e `pwa-maskable.svg` no conjunto de assets estáticos.
+- A estratégia do service worker é deliberadamente conservadora: o fallback de navegação atende apenas `/` e `/explorer`, enquanto APIs, documentos dinâmicos, respostas `?raw` e sincronização WebSocket permanecem fora da política automática de fallback/cache.
 
 ## Componentes e responsabilidades
 
@@ -192,7 +206,7 @@ CSS global organizado em módulos importados sequencialmente por `index.css`:
 
 | Arquivo | Conteúdo |
 |---|---|
-| `base.css` | Entrada do Tailwind CSS v4 com `@import "tailwindcss"`, `@config "../../tailwind.config.js"`, `@custom-variant dark`, variáveis CSS do projeto/shadcn-vue e estilos de `html`/`body` |
+| `base.css` | Entrada do Tailwind CSS v4 com `@import "tailwindcss"`, `@config "../../tailwind.config.js"`, `@custom-variant dark`, variáveis CSS do projeto/shadcn-vue, mapeamento de `--font-ui`/`--font-code` para fontes locais variáveis e estilos de `html`/`body` |
 | `components.css` | Abstrações CSS com `@layer components` e `@apply` (layout, botões, inputs); classes de diálogo (`.dialog-*`) mantidas apenas como fallback |
 | `codemirror.css` | Estilos do CodeMirror (editor chrome, cursor, gutter) |
 | `plugins.css` | Widgets de plugins CM (code blocks, links, images, checkboxes, etc.) |
@@ -237,7 +251,18 @@ Tokens customizados registrados em `tailwind.config.js`:
 | Colors (shadcn) | `background`, `foreground`, `primary`, `secondary`, `muted`, `accent`, `destructive`, `border`, `input`, `ring`, `card`, `popover` | `hsl(var(--*))` | `bg-background`, `text-foreground`, etc. |
 | Border radius (shadcn) | `lg`, `md`, `sm` | `var(--radius)` derivados | `rounded-lg`, `rounded-md`, `rounded-sm` |
 
+Observação:
+Os tokens declarados em `tailwind.config.js` mantêm os nomes históricos para compatibilidade com utilitários existentes, mas o runtime do app shell remapeia `--font-ui` e `--font-code` em `base.css` para `Fira Code Variable` e `JetBrains Mono Variable`, carregadas localmente no bootstrap.
+
 ## Fluxos críticos
+
+### Bootstrap PWA e tipografia local
+
+1. `index.html` entrega um shell HTML mínimo sem referências remotas a tipografia.
+2. `main.ts` importa os CSS de `@fontsource-variable/*`, permitindo ao Vite emitir os arquivos `.woff2` no bundle final.
+3. O bootstrap monta Vue Router e registra o service worker somente em produção.
+4. `vite-plugin-pwa` gera `manifest.webmanifest` e `sw.js`, com precache dos assets versionados do frontend, ícones públicos e tipografia local empacotada.
+5. O service worker não passa a servir APIs, conteúdo colaborativo dinâmico ou tráfego WebSocket; a PWA melhora revisitas do shell, não adiciona edição colaborativa offline completa.
 
 ### Acesso ao documento
 
@@ -330,6 +355,9 @@ Todos os diretórios de módulos possuem barrel `index.ts` para centralizar expo
 
 Atualizar este módulo ao alterar:
 
+- bootstrap de `frontend/index.html`, `frontend/src/main.ts` ou `frontend/vite.config.ts`;
+- estratégia de manifest/service worker, fallback de navegação ou política de cache do shell estático;
+- forma de carregamento e empacotamento da tipografia local do frontend;
 - contratos entre `Editor.vue` e `cm-*`;
 - props/eventos de `EditorHeader.vue` ou `EditorToolbar.vue`;
 - comportamento de foco/seleção entre `Editor.vue`, `useYjsEditor.ts` e diálogos associados;

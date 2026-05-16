@@ -18,6 +18,14 @@ participantes.
 - **Banco de dados:** LevelDB via `y-leveldb`
 - **Infraestrutura:** Podman, Compose e `Makefile`
 
+## PWA no Frontend
+
+- O build de `frontend/` gera um `manifest.webmanifest` e um service worker via `vite-plugin-pwa`.
+- O cache automático fica restrito ao shell estático, assets versionados do build e fontes locais emitidas junto com o bundle do frontend.
+- O fallback de navegação do service worker é conservador: atende apenas `/` e `/explorer`, sem mascarar rotas dinâmicas de documento, respostas `?raw`, APIs HTTP ou sincronização WebSocket.
+- A aplicação continua sem suporte oficial a edição colaborativa offline completa; documentos, autenticação e estado em tempo real seguem dependentes da rede.
+- Os ícones do manifest usam assets SVG versionados no `frontend/public/`; isso cobre a base de instalabilidade desta entrega, embora alguns agentes ainda possam exigir PNG dedicados para uma integração mais ampla.
+
 ## Principais Funcionalidades
 
 - Edição colaborativa em tempo real com cursores múltiplos.

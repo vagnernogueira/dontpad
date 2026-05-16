@@ -4,8 +4,8 @@
 
 :root {
   /* Project tokens preserved outside the shadcn theme surface. */
-  --font-ui: 'Fira Code', -apple-system, system-ui, sans-serif;
-  --font-code: 'Fira Code', 'Consolas', monospace;
+  --font-ui: 'Fira Code Variable', -apple-system, system-ui, sans-serif;
+  --font-code: 'Fira Code Variable', 'JetBrains Mono Variable', 'Consolas', monospace;
   --code-bg: #e8eef2;
   --background: oklch(0.9911 0 0);
   --foreground: oklch(0.2046 0 0);
