@@ -45,7 +45,7 @@
 
 O DontPad é uma aplicação full-stack para edição colaborativa de documentos Markdown em tempo real.
 
-- Frontend SPA: Vue 3 + CodeMirror 6;
+- Frontend SPA/PWA: Vue 3 + CodeMirror 6 + service worker para shell estático;
 - CLI opcional: Node.js + commander.js para automação operacional e integração por terminal;
 - Backend: Node.js + Express + WebSocket;
 - Sincronização: Yjs (CRDT), com persistência incremental em LevelDB.
@@ -58,6 +58,8 @@ Características principais:
 - proteção por senha de documentos;
 - Explorer administrativo em `/explorer` com senha mestra;
 - exportação para Markdown e PDF;
+- PWA básica com `manifest.webmanifest`, `sw.js` e cache conservador do shell estático;
+- tipografia local versionada no bundle do frontend, sem dependência de Google Fonts;
 - acesso por URL parametrizada para formatos `pdf`, `view` e `raw`;
 - arquitetura modular com separação clara de responsabilidades.
 
@@ -67,13 +69,13 @@ Características principais:
 
 | Camada            | Tecnologias principais                                    |
 | ----------------- | --------------------------------------------------------- |
-| Frontend          | Vue 3, TypeScript, Vite, Vue Router                       |
+| Frontend          | Vue 3, TypeScript, Vite, Vue Router, vite-plugin-pwa      |
 | CLI               | Node.js, TypeScript, commander.js                         |
 | Editor            | CodeMirror 6, @lezer/markdown                             |
 | Colaboração       | Yjs, y-websocket, y-codemirror.next                       |
 | Backend           | Node.js, Express, ws, TypeScript                          |
 | Persistência      | y-leveldb, LevelDB, metadados JSON                        |
-| UI/UX             | Tailwind CSS v4 (modelo híbrido com `base.css` + `@config`), shadcn-vue, reka-ui, Lucide Vue Next |
+| UI/UX             | Tailwind CSS v4 (modelo híbrido com `base.css` + `@config`), shadcn-vue, reka-ui, Lucide Vue Next, @fontsource-variable |
 | Export            | marked, html2pdf.js                                       |
 | Qualidade de código | ESLint v9 (flat config), typescript-eslint v8, eslint-plugin-vue v9, Prettier v3 |
 
@@ -162,6 +164,7 @@ _docs/
 - o CLI reutiliza apenas contratos já existentes: leitura por `GET /api/document-content` ou `GET /api/public-document-content`, e escrita/criação pela mesma sincronização Yjs/WebSocket do editor;
 - templates de documentos são listados por endpoint público dedicado e só podem ser aplicados automaticamente em documento novo ou vazio;
 - acesso por URL parametrizada (`pdf/view/raw`) usa endpoint dedicado de conteúdo e respeita lock por documento;
+- service worker do frontend cobre apenas shell estático, assets versionados, ícones e tipografia local; APIs HTTP, documentos dinâmicos, respostas `?raw` e sincronização WebSocket continuam dependentes de rede;
 - documentos lockados exigem senha para acesso e handshake WS.
 
 ### 6.2 Decisões arquiteturais centrais
@@ -176,6 +179,8 @@ _docs/
 - **CSS Component Layer** via `@layer components` com `@apply` para abstrações reutilizáveis de layout, botões e inputs; camada de diálogos migrada para primitivos **shadcn-vue** (`Dialog`, `DialogContent`, `DialogHeader`, `DialogFooter` via `reka-ui`);
 - **Contexto operacional shadcn-vue**: a configuração vive em `frontend/components.json`; comandos de inspeção/instalação devem rodar em `frontend/` com `npx shadcn-vue@latest ...` (ou scripts equivalentes do pacote), não na raiz com `npx shadcn@latest`;
 - **Orquestração explícita de foco do editor**: o fluxo de montagem do CodeMirror e a restauração de seleção após diálogos usam helpers dedicados em `frontend/src/cm-utils/initial-editor-focus.ts`, evitando depender do retorno automático de foco do browser ou do `Dialog`;
+- **PWA mínima com `vite-plugin-pwa`**: o frontend gera `manifest.webmanifest` e `sw.js` com `generateSW`, faz fallback de navegação apenas para `/` e `/explorer` e limita o cache automático ao shell estático e assets versionados do build;
+- **Tipografia local versionada**: `@fontsource-variable/fira-code` e `@fontsource-variable/jetbrains-mono` são importados no bootstrap para que o Vite emita `.woff2` locais, remova a dependência de `fonts.googleapis.com`/`fonts.gstatic.com` e mantenha as fontes sob a mesma política de cache do app shell;
 - **CRDT (Yjs)** em vez de OT para merge automático e melhor suporte offline;
 - **Lazy loading** para bibliotecas pesadas de export (`marked`, `html2pdf.js`);
 - **LevelDB local** para persistência incremental simples em ambiente self-hosted;
@@ -205,6 +210,9 @@ _docs/
 
 | Arquivo                                     | Descrição                                                                                        |
 | ------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `frontend/index.html`                       | Shell HTML mínimo da SPA/PWA; carrega apenas o `#app`, metadados base e `src/main.ts`, sem referências remotas a Google Fonts. |
+| `frontend/src/main.ts`                      | Bootstrap do frontend; monta Vue Router, importa tipografia local via `@fontsource-variable/*` e registra o service worker apenas em produção. |
+| `frontend/vite.config.ts`                   | Configuração central do Vite e do `vite-plugin-pwa`; gera manifest, `sw.js`, ícones precacheados e fallback de navegação conservador. |
 | `frontend/src/components/Home.vue`          | Landing page com criação de documentos e seleção de templates vindos de `/_tmpl/`.              |
 | `frontend/src/components/DocumentRoute.vue` | Resolução de modos por query params e fallback para edição.                                      |
 | `frontend/src/components/Editor.vue`        | Componente principal do editor colaborativo; orquestra composables, diálogos e a restauração de seleção/foco do CodeMirror. |
@@ -217,8 +225,10 @@ _docs/
 | `frontend/src/components/Explorer.vue`      | Gestão administrativa de documentos em `/explorer` (orquestra composables).                      |
 | `frontend/src/components/ToolbarButton.vue` | Componente reutilizável para botões de toolbar com estilo padronizado.                           |
 | `frontend/components.json`                  | Configuração da CLI shadcn-vue, aliases e arquivo CSS principal (`src/styles/base.css`).         |
-| `frontend/src/styles/base.css`              | Entrada CSS do Tailwind v4; importa `tailwindcss`, registra `@custom-variant dark` e referencia `tailwind.config.js` via `@config`. |
+| `frontend/src/styles/base.css`              | Entrada CSS do Tailwind v4; registra `@custom-variant dark`, referencia `tailwind.config.js` via `@config` e mapeia os tokens tipográficos de runtime para fontes locais variáveis. |
 | `frontend/src/styles/components.css`        | Abstrações CSS com `@apply` (`btn-*`, `dialog-*`, `input-*`, `page-header`, `toolbar`).          |
+| `frontend/public/pwa-icon.svg`              | Ícone PWA principal referenciado pelo manifest e incluído no bundle estático do frontend.        |
+| `frontend/public/pwa-maskable.svg`          | Ícone PWA `maskable` para agentes compatíveis com instalação mais integrada.                      |
 | `frontend/src/composables/*`                | Composables Vue 3 para lógica reativa extraída dos componentes.                                  |
 | `frontend/src/cm-utils/initial-editor-focus.ts` | Helper local do editor para foco inicial em linha 1/coluna 1 e captura/restauração explícita da seleção ao abrir e fechar diálogos. |
 | `frontend/src/cm-utils/math-evaluator.ts`   | Parser matemático recursivo descendente (tokenizer + avaliador).                                 |
@@ -246,6 +256,8 @@ _docs/
 | commander.js          | Parsing, help e composição do CLI                   | Média       |
 | reka-ui               | Primitivos headless UI (focus trap, aria, keyboard) | Alta        |
 | shadcn-vue            | Componentes UI copiados para `components/ui/` e versionados no repositório | Média       |
+| vite-plugin-pwa       | Geração de manifest e service worker do frontend    | Média       |
+| @fontsource-variable  | Empacotamento local das famílias tipográficas do frontend | Média       |
 | html2pdf.js           | Export PDF frontend                                 | Média       |
 
 Referências externas:
@@ -265,8 +277,15 @@ Referências externas:
 
 - **Onda 1 — MVP colaborativo**
   - Principais alterações arquiteturais: base SPA + API/WS, adoção de Yjs/CodeMirror e persistência em LevelDB.
+- **Onda 2 — PWA mínima + tipografia local**
+  - Principais alterações arquiteturais: introdução de `manifest.webmanifest` e `sw.js` com cache conservador do shell estático, registro controlado do service worker no bootstrap e remoção da dependência de Google Fonts via fontes locais versionadas no build.
 
 ### 9.2 Changelog do Documento
+
+- **Versão 4.0**
+  - **Data:** 2026-05-16
+  - **Autor:** GitHub Copilot
+  - **Mudanças:** Hub atualizado para refletir a base de PWA no frontend (`vite-plugin-pwa`, `manifest.webmanifest`, `sw.js`, fallback restrito a `/` e `/explorer`) e a internalização das fontes com assets `.woff2` locais empacotados no bundle.
 
 - **Versão 3.9**
   - **Data:** 2026-04-25
