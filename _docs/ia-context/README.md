@@ -17,7 +17,7 @@ O diretório `_docs/ia-context` define a estrutura oficial de contexto operacion
 4. `_docs/ia-context/core/workflow.md`
 5. `_docs/ia-context/project-overlay/workflow-overrides.md` (se existir)
 6. `_docs/ia-context/core/output-contracts.md`
-7. `_docs/ia-context/skills/*/SKILL.md` (quando aplicável)
+7. `/home/vagner/xskills/*/SKILL.md` (skills externas, quando aplicável)
 
 
 ## Convenção de precedência (em caso de conflito)
@@ -35,7 +35,7 @@ O diretório `_docs/ia-context` define a estrutura oficial de contexto operacion
 
 ## Regra prática
 
-- Para elaborar demandas do Dontpad, use a skill canônica `_docs/ia-context/skills/generate-demand/SKILL.md` como ponto de partida.
+- Para elaborar demandas do Dontpad, use a skill canônica `/home/vagner/xskills/deprecated/generate-demand/SKILL.md` como ponto de partida.
 
 ## Arquivos de entrada por ferramenta de IA
 

@@ -12,14 +12,14 @@ Este diretório contém o núcleo **genérico e reutilizável** para uso em qual
 
 ## Referência importante
 
-As `skills/` ou **playbooks operacionais reutilizáveis** encontram-se em diretório um nível acima deste (`ia-context/skills`).
+As `skills/` ou **playbooks operacionais reutilizáveis** são mantidas externamente no catálogo `/home/vagner/xskills` (fonte: repositório `xskills`, não fazem parte deste repositório).
 
 ## Ordem de leitura recomendada
 
 1. `rules.md`
 2. `workflow.md`
 3. `output-contracts.md`
-4. `skills/*` (quando aplicável)
+4. `/home/vagner/xskills/*` (skills externas, quando aplicável)
 
 ## Regras de uso
 

@@ -47,7 +47,7 @@ Não testar via navegador web. Para demandas multi-fase, trabalhar em etapas.
 
 Preservar comportamento atual salvo instrução explícita. Operar no escopo mínimo sem melhorias paralelas. Não inferir fatos sem evidência no código. Declarar suposições quando faltar contexto. Não alterar contrato de API pública sem justificativa. Priorizar mecanismos nativos do CodeMirror. Preferir solução simples sobre abstração prematura.
 
-IMPORTANTE! Para produzir ou elaborar demandas use a skill `_docs/ia-context/skills/generate-demand/SKILL.md`
+IMPORTANTE! Para produzir ou elaborar demandas use a skill `/home/vagner/xskills/deprecated/generate-demand/SKILL.md`
 
 Conflito de fontes: código-fonte > `_docs/ARCHITECTURE.md` > `README.md` > overlay de projeto > docs auxiliares.
 
@@ -70,6 +70,8 @@ Após toda implementação entregar: resumo das mudanças · arquivos alterados 
 | `_docs/ia-context/core/rules.md` | Regras universais e guardrails operacionais |
 | `_docs/ia-context/core/workflow.md` | Fluxo de execução padrão |
 | `_docs/ia-context/core/output-contracts.md` | Contratos de saída e checklist anti-alucinação |
-| `_docs/ia-context/skills/` | Skills: generate-demand · documentation-blueprint · shadcn-vue |
-| `_docs/ia-context/skills/generate-demand/templates/` | Templates de demanda da skill generate-demand: 01-simple → 04-full |
+| `/home/vagner/xskills/deprecated/generate-demand/` | Skill generate-demand (descontinuada no xskills, mantida por referência) |
+| `/home/vagner/xskills/documentation-blueprint/` | Skill documentation-blueprint |
+| `/home/vagner/xskills/shadcn/` | Skill shadcn (uso local: shadcn-vue) |
+| `/home/vagner/xskills/deprecated/generate-demand/templates/` | Templates de demanda da skill generate-demand: 01-simple → 04-full |
 | `_docs/ia-context/project-overlay/context.md` | Baseline factual do produto |

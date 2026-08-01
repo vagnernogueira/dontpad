@@ -85,7 +85,9 @@ Após toda implementação entregar:
 | Documento | Conteúdo |
 |-----------|----------|
 | `_docs/ia-context/core/workflow.md` | Fluxo de execução padrão |
-| `_docs/ia-context/skills/` | Skills: generate-demand · documentation-blueprint · shadcn-vue |
-| `_docs/ia-context/skills/generate-demand/templates/` | Templates de demanda da skill generate-demand: 01-simple → 04-full |
+| `/home/vagner/xskills/deprecated/generate-demand/` | Skill generate-demand (descontinuada no xskills, mantida por referência) |
+| `/home/vagner/xskills/documentation-blueprint/` | Skill documentation-blueprint |
+| `/home/vagner/xskills/shadcn/` | Skill shadcn (uso local: shadcn-vue) |
+| `/home/vagner/xskills/deprecated/generate-demand/templates/` | Templates de demanda da skill generate-demand: 01-simple → 04-full |
 | `_docs/ia-context/project-overlay/context.md` | Baseline factual do produto |
 | `_docs/ARCHITECTURE.md` | Arquitetura do sistema |
