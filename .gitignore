@@ -35,8 +35,5 @@ node-compile-cache
 *.tsbuildinfo
 backend/db/yjs-data/
 
-# IA
-agent-workspace/
-
 # Claude Code — configurações locais (tokens, permissões pessoais)
 .claude/settings.local.json
