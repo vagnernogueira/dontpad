@@ -1,9 +1,14 @@
-#!/usr/bin/env node
-
-import { buildCli } from './cli'
+import { runCli } from './runtime'
+import { BACKGROUND_UPDATE_ENV } from './utils/background-update-process'
+import { runBackgroundUpdateCheck } from './utils/auto-update'
 
 async function main(): Promise<void> {
-  await buildCli().parseAsync(process.argv)
+  if (process.env[BACKGROUND_UPDATE_ENV] === '1') {
+    await runBackgroundUpdateCheck()
+    return
+  }
+
+  await runCli()
 }
 
 main().catch((error: unknown) => {

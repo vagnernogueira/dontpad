@@ -1,0 +1,144 @@
+name: CLI Build and Release
+
+# Distribui o pacote `cli/` (binários standalone + skill empacotada) via GitHub
+# Releases em tags dedicadas `cli-v*`, sem colidir com um eventual versionamento
+# do app inteiro (`v*`). Alinhado aos contratos criados em S1/S2:
+#   - tag: cli-v<semver>  (ex.: cli-v0.2.0)
+#   - binários: dontpad-linux-x64, dontpad-darwin-arm64, dontpad-win-x64.exe
+#   - skill: skills.tar.gz (+ skills.tar.gz.sha256)
+#   - repo: vagnernogueira/dontpad
+#
+# Espelha o padrão dos workflows release.yml do aave-cli e llama-cli, com os
+# ajustes de monorepo: working-directory em `cli/`, prefixo de tag `cli-v*` e
+# badge atualizado apenas em `cli/README.md`.
+
+on:
+  push:
+    tags: ['cli-v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag de release cli-v* para publicar os artefatos (ex.: cli-v0.2.0)'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+# Tag de release efetiva: input manual (workflow_dispatch) ou o nome da tag
+# que disparou o push. Usado em todos os uploads para anexar ao release certo.
+env:
+  RELEASE_TAG: ${{ github.event.inputs.tag || github.ref_name }}
+
+jobs:
+  update-readme-badge:
+    name: Bump README badge
+    runs-on: ubuntu-latest
+    # O badge só faz sentido quando há uma tag cli-v*; em workflow_dispatch o
+    # input `tag` já carrega a versão, então também bumpamos.
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: main
+
+      - name: Update version badge in cli/README.md
+        shell: bash
+        run: |
+          # RELEASE_TAG vem como `cli-v0.2.0`; o badge usa `release-v0.2.0`,
+          # então stripamos o prefixo `cli-` antes de substituir.
+          TAG="${RELEASE_TAG}"
+          VERSION="${TAG#cli-v}"
+          echo "Bumping badge to release-v${VERSION} (from ${TAG})"
+          sed -i -E "s#(img\.shields\.io/badge/release-)v[0-9]+\.[0-9]+\.[0-9]+(-blue)#\1v${VERSION}\2#" cli/README.md
+
+      - name: Commit and push if changed
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if ! git diff --quiet cli/README.md; then
+            git add cli/README.md
+            git commit -m "docs(cli): bump README badge to ${RELEASE_TAG}"
+            git push origin HEAD:main
+          else
+            echo "No badge changes; nothing to commit."
+          fi
+
+  package-skill:
+    name: Package skill tarball
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Package cli/skills into skills.tar.gz
+        # Empacota o diretório `cli/skills/` preservando o top-level `skills/`
+        # dentro do tarball — layout aceito pelo skill-installer (resolveSkillRoot
+        # procura SKILL.md na raiz ou sob `skills/`).
+        run: tar czf skills.tar.gz -C cli skills
+
+      - name: Generate skill checksum
+        run: sha256sum skills.tar.gz > skills.tar.gz.sha256
+
+      - name: Upload skill release assets
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: ${{ env.RELEASE_TAG }}
+          files: |
+            skills.tar.gz
+            skills.tar.gz.sha256
+          generate_release_notes: true
+
+  build:
+    name: Build binary (${{ matrix.target }})
+    needs: package-skill
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: linux-x64
+            ext: ''
+          - os: macos-latest
+            target: darwin-arm64
+            ext: ''
+          - os: windows-latest
+            target: win-x64
+            ext: '.exe'
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: cli/package-lock.json
+
+      - uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        working-directory: cli
+        run: npm ci
+
+      - name: Build bundle
+        working-directory: cli
+        run: npm run build
+
+      - name: Build standalone binary
+        # Compila para o host de cada runner (ubuntu=x64, macos=arm64, windows=x64),
+        # mesma estratégia dos workflows do aave-cli/llama-cli. O nome de saída
+        # espelha scripts/build-binary.mjs (dontpad-<target>[.exe]).
+        shell: bash
+        working-directory: cli
+        run: bun build ./dist/index.js --compile --outfile "dontpad-${{ matrix.target }}${{ matrix.ext }}"
+
+      - name: Generate checksum
+        shell: bash
+        working-directory: cli
+        run: sha256sum "dontpad-${{ matrix.target }}${{ matrix.ext }}" > "dontpad-${{ matrix.target }}${{ matrix.ext }}.sha256"
+
+      - name: Upload binary release assets
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: ${{ env.RELEASE_TAG }}
+          files: cli/dontpad-${{ matrix.target }}*

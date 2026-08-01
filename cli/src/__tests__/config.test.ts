@@ -1,4 +1,4 @@
-import { mkdtemp, rm } from 'node:fs/promises'
+import { mkdtemp, rm, writeFile } from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
 
@@ -44,12 +44,16 @@ describe('config persistence', () => {
     expect(persisted.config.baseUrl).toBe('https://dontpad.example.local')
     expect(persisted.config.wsBaseUrl).toBe('wss://sync.example.local/api')
     expect(persisted.config.masterPassword).toBe('top-secret')
+    expect(persisted.config.autoUpdateEnabled).toBe(true)
+    expect(persisted.config.autoUpdateInterval).toBe(24)
 
     await expect(readConfig({ configFilePath })).resolves.toEqual({
       version: 1,
       baseUrl: 'https://dontpad.example.local',
       wsBaseUrl: 'wss://sync.example.local/api',
       masterPassword: 'top-secret',
+      autoUpdateEnabled: true,
+      autoUpdateInterval: 24,
     })
   })
 
@@ -70,7 +74,45 @@ describe('config persistence', () => {
     expect(updated.config).toEqual({
       version: 1,
       baseUrl: 'https://dontpad.example.local/app',
+      autoUpdateEnabled: true,
+      autoUpdateInterval: 24,
     })
+  })
+
+  it('uses safe defaults when reading a configuration written before update preferences existed', async () => {
+    const tempDirectory = await createTempDirectory()
+    const configFilePath = path.join(tempDirectory, 'cli.json')
+    await writeFile(
+      configFilePath,
+      JSON.stringify({ version: 1, baseUrl: 'https://dontpad.example.local' }),
+      'utf8',
+    )
+
+    await expect(readConfig({ configFilePath })).resolves.toMatchObject({
+      autoUpdateEnabled: true,
+      autoUpdateInterval: 24,
+    })
+  })
+
+  it('persists validated background update preferences', async () => {
+    const tempDirectory = await createTempDirectory()
+    const configFilePath = path.join(tempDirectory, 'cli.json')
+
+    const updated = await upsertConfig(
+      {
+        baseUrl: 'https://dontpad.example.local',
+        autoUpdateEnabled: false,
+        autoUpdateInterval: 72,
+      },
+      { configFilePath },
+    )
+
+    expect(updated.config.autoUpdateEnabled).toBe(false)
+    expect(updated.config.autoUpdateInterval).toBe(72)
+
+    await expect(
+      upsertConfig({ autoUpdateInterval: 0 }, { configFilePath }),
+    ).rejects.toThrow('Auto-update interval must be a whole number of hours between 1 and 8760.')
   })
 
   it('derives the WebSocket base URL from the HTTP base URL when not configured', () => {
