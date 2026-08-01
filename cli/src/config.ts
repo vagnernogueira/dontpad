@@ -7,6 +7,9 @@ export interface DontpadCliConfig {
   baseUrl: string
   wsBaseUrl?: string
   masterPassword?: string
+  autoUpdateEnabled: boolean
+  /** Hours between best-effort GitHub release checks. */
+  autoUpdateInterval: number
 }
 
 export interface ConfigAccessOptions {
@@ -20,16 +23,24 @@ export interface ConfigUpdateInput {
   masterPassword?: string
   clearWsBaseUrl?: boolean
   clearMasterPassword?: boolean
+  autoUpdateEnabled?: boolean
+  autoUpdateInterval?: number
 }
 
 const CONFIG_FILE_NAME = 'cli.json'
 const CONFIG_DIRECTORY_NAME = 'dontpad'
+export const DEFAULT_AUTO_UPDATE_ENABLED = true
+export const DEFAULT_AUTO_UPDATE_INTERVAL = 24
 
-export function getConfigFilePath(env: NodeJS.ProcessEnv = process.env): string {
+export function getConfigDirectoryPath(env: NodeJS.ProcessEnv = process.env): string {
   const explicitConfigHome = env.XDG_CONFIG_HOME?.trim()
   const configHome = explicitConfigHome || path.join(os.homedir(), '.config')
 
-  return path.join(configHome, CONFIG_DIRECTORY_NAME, CONFIG_FILE_NAME)
+  return path.join(configHome, CONFIG_DIRECTORY_NAME)
+}
+
+export function getConfigFilePath(env: NodeJS.ProcessEnv = process.env): string {
+  return path.join(getConfigDirectoryPath(env), CONFIG_FILE_NAME)
 }
 
 export function normalizeBaseUrl(rawBaseUrl: string): string {
@@ -101,6 +112,14 @@ function resolveConfigFilePath(options: ConfigAccessOptions = {}): string {
   return options.configFilePath ?? getConfigFilePath(options.env)
 }
 
+function validateAutoUpdateInterval(interval: unknown): number {
+  if (!Number.isInteger(interval) || typeof interval !== 'number' || interval < 1 || interval > 24 * 365) {
+    throw new Error('Auto-update interval must be a whole number of hours between 1 and 8760.')
+  }
+
+  return interval
+}
+
 function validateStoredPassword(masterPassword: unknown): string | undefined {
   if (masterPassword === undefined) {
     return undefined
@@ -135,6 +154,8 @@ function parseConfig(rawConfig: string, configFilePath: string): DontpadCliConfi
     baseUrl?: unknown
     wsBaseUrl?: unknown
     masterPassword?: unknown
+    autoUpdateEnabled?: unknown
+    autoUpdateInterval?: unknown
   }
 
   if (candidateConfig.version !== 1) {
@@ -146,6 +167,18 @@ function parseConfig(rawConfig: string, configFilePath: string): DontpadCliConfi
   }
 
   const masterPassword = validateStoredPassword(candidateConfig.masterPassword)
+  const autoUpdateEnabled =
+    candidateConfig.autoUpdateEnabled === undefined
+      ? DEFAULT_AUTO_UPDATE_ENABLED
+      : typeof candidateConfig.autoUpdateEnabled === 'boolean'
+        ? candidateConfig.autoUpdateEnabled
+        : (() => {
+            throw new Error(`Config file at ${configFilePath} has an invalid autoUpdateEnabled value.`)
+          })()
+  const autoUpdateInterval =
+    candidateConfig.autoUpdateInterval === undefined
+      ? DEFAULT_AUTO_UPDATE_INTERVAL
+      : validateAutoUpdateInterval(candidateConfig.autoUpdateInterval)
   const wsBaseUrl =
     candidateConfig.wsBaseUrl === undefined
       ? undefined
@@ -160,6 +193,8 @@ function parseConfig(rawConfig: string, configFilePath: string): DontpadCliConfi
     baseUrl: normalizeBaseUrl(candidateConfig.baseUrl),
     ...(wsBaseUrl ? { wsBaseUrl } : {}),
     ...(masterPassword ? { masterPassword } : {}),
+    autoUpdateEnabled,
+    autoUpdateInterval,
   }
 }
 
@@ -195,6 +230,8 @@ export async function writeConfig(
     baseUrl: normalizeBaseUrl(config.baseUrl),
     ...(config.wsBaseUrl ? { wsBaseUrl: normalizeWsBaseUrl(config.wsBaseUrl) } : {}),
     ...(config.masterPassword ? { masterPassword: config.masterPassword } : {}),
+    autoUpdateEnabled: config.autoUpdateEnabled,
+    autoUpdateInterval: validateAutoUpdateInterval(config.autoUpdateInterval),
   }
 
   await mkdir(path.dirname(configFilePath), { recursive: true })
@@ -224,6 +261,10 @@ export async function upsertConfig(
     throw new Error('WebSocket base URL cannot be empty when provided.')
   }
 
+  if (update.autoUpdateInterval !== undefined) {
+    validateAutoUpdateInterval(update.autoUpdateInterval)
+  }
+
   const existingConfig = await readConfig(options)
   const baseUrl = update.baseUrl ?? existingConfig?.baseUrl
 
@@ -243,6 +284,8 @@ export async function upsertConfig(
     baseUrl: normalizeBaseUrl(baseUrl),
     ...(wsBaseUrl ? { wsBaseUrl: normalizeWsBaseUrl(wsBaseUrl) } : {}),
     ...(masterPassword ? { masterPassword } : {}),
+    autoUpdateEnabled: update.autoUpdateEnabled ?? existingConfig?.autoUpdateEnabled ?? DEFAULT_AUTO_UPDATE_ENABLED,
+    autoUpdateInterval: update.autoUpdateInterval ?? existingConfig?.autoUpdateInterval ?? DEFAULT_AUTO_UPDATE_INTERVAL,
   }
   const configFilePath = await writeConfig(config, options)
 
@@ -265,6 +308,8 @@ export function formatConfigForDisplay(
         : config.masterPassword
           ? '<configured>'
           : null,
+      autoUpdateEnabled: config.autoUpdateEnabled,
+      autoUpdateInterval: config.autoUpdateInterval,
     },
     null,
     2,

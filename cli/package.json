@@ -4,14 +4,28 @@
   "private": true,
   "license": "BSD-3-Clause",
   "description": "Command-line interface scaffold for Dontpad",
-  "main": "dist/index.js",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vagnernogueira/dontpad.git"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "bin": {
-    "dontpad": "./dist/index.js"
+    "dontpad": "./dist/index.cjs"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
   },
   "scripts": {
-    "build": "tsc",
-    "start": "node dist/index.js",
-    "dev": "ts-node src/index.ts",
+    "build": "tsup",
+    "build:binary": "node scripts/build-binary.mjs",
+    "start": "node dist/index.cjs",
+    "dev": "tsup --watch",
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "eslint src --ext .ts"
@@ -32,7 +46,8 @@
     "eslint": "^9.0.0",
     "eslint-config-prettier": "^9.0.0",
     "globals": "^15.0.0",
-    "ts-node": "^10.9.2",
+    "nexe": "^5.0.0-beta.4",
+    "tsup": "^8.4.0",
     "typescript": "^5.3.3",
     "typescript-eslint": "^8.0.0",
     "vitest": "^3.2.4"

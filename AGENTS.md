@@ -73,12 +73,25 @@ cd cli && npm run test
 ### CLI (uso manual)
 
 ```bash
+# 1) Build do CLI a partir do código-fonte (runtime via Node.js)
 cd cli
-npm run build && npm start -- --help
+npm run build
+npm start -- --help
+
+# 2) Build local de binário standalone (sem dependência de Node.js no runtime)
+npm run build:binary
+
+# 3) Configurar base-url e (opcionalmente) senha mestra
+# (store persiste em ~/.config/dontpad/cli.json)
 npm run dev -- config set --base-url http://localhost:3001 --master-password minha-senha
-npm run dev -- get me/todo --output ./tmp/todo.md --no-print
-printf '# Atualizado\n' | npm run dev -- update me/todo --stdin
-npm run dev -- create drafts/nova-nota --content '# Rascunho\n'
+
+# 4) Auto-update do binário standalone (usando dontpad standalone)
+# (disponível apenas no binário compilado)
+dontpad cli update --check-only
+dontpad cli update --yes
+
+# 5) Instalar a skill no Claude Code (para agentes)
+dontpad skill install
 ```
 
 ## Arquitetura

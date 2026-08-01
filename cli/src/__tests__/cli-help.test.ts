@@ -8,8 +8,11 @@ describe('CLI help', () => {
 
     expect(help).toContain('get')
     expect(help).toContain('update')
+    expect(help).toContain('cli')
     expect(help).toContain('create')
+    expect(help).toContain('skill')
     expect(help).toContain('dontpad get me/todo')
+    expect(help).toContain('dontpad cli update --check-only')
     expect(help).toContain('Yjs WebSocket')
   })
 })

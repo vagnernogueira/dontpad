@@ -14,6 +14,29 @@ interface ConfigWriteOptions {
   masterPassword?: string
   clearWsBaseUrl?: boolean
   clearMasterPassword?: boolean
+  autoUpdateEnabled?: boolean
+  autoUpdateInterval?: number
+}
+
+function parseAutoUpdateEnabled(value: string): boolean {
+  if (value === 'true') {
+    return true
+  }
+  if (value === 'false') {
+    return false
+  }
+
+  throw new Error('auto-update-enabled must be true or false.')
+}
+
+function parseAutoUpdateInterval(value: string): number {
+  const interval = Number(value)
+
+  if (!Number.isInteger(interval)) {
+    throw new Error('auto-update-interval must be a whole number of hours.')
+  }
+
+  return interval
 }
 
 interface ConfigShowOptions {
@@ -27,6 +50,8 @@ async function handleConfigWrite(options: ConfigWriteOptions): Promise<void> {
     masterPassword: options.masterPassword,
     clearWsBaseUrl: options.clearWsBaseUrl,
     clearMasterPassword: options.clearMasterPassword,
+    autoUpdateEnabled: options.autoUpdateEnabled,
+    autoUpdateInterval: options.autoUpdateInterval,
   })
 
   process.stdout.write(`Config saved to ${configFilePath}\n`)
@@ -54,12 +79,24 @@ export function buildConfigCommand(): Command {
       )
       .option('--clear-ws-base-url', 'Remove the persisted explicit WebSocket base URL override.')
       .option('--clear-master-password', 'Remove the stored master password.')
+      .option(
+        '--auto-update-enabled <true|false>',
+        'Enable or disable the best-effort background CLI update check.',
+        parseAutoUpdateEnabled,
+      )
+      .option(
+        '--auto-update-interval <hours>',
+        'Hours between background update checks (1 to 8760).',
+        parseAutoUpdateInterval,
+      )
       .action(handleConfigWrite),
       `
 Examples:
   dontpad config set --base-url http://localhost:1234
   dontpad config set --base-url https://docs.example.com --master-password master
   dontpad config set --ws-base-url wss://ws.example.com/app
+  dontpad config set --auto-update-enabled false
+  dontpad config set --auto-update-interval 72
 `,
     )
   }
@@ -102,6 +139,7 @@ Examples:
 Notes:
   baseUrl is required the first time.
   wsBaseUrl is optional. When omitted, the CLI derives ws:// or wss:// from baseUrl.
+  Background update checks are enabled every 24 hours by default; set auto-update-enabled false to disable them.
 `,
   )
 }
