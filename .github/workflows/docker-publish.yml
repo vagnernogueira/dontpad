@@ -1,0 +1,139 @@
+name: Docker Images
+
+# Build e publicação das imagens Docker (backend + frontend) no GHCR
+# (ghcr.io). Dispara em push para `main` (tags `latest` + `sha-<short>`),
+# em tags `v*` (tag semver) e manualmente via workflow_dispatch.
+#
+# Alinhado ao spike S1 e ao Makefile parametrizado em S2:
+#   - backend/Dockerfile: imagem única node:20-alpine, sem build-args.
+#   - frontend/Dockerfile: multi-stage node:20-alpine -> nginx:alpine,
+#     consome ARG VITE_BACKEND_HTTP_URL e ARG VITE_BACKEND_WS_URL
+#     (bake-time, Opção A) — injetados via secrets do repo (veja o job
+#     build-frontend abaixo).
+#   - Sem multi-arch e sem invocação de make/podman: usamos as actions
+#     docker/* diretamente para aproveitar o cache nativo do Actions.
+#     As imagens são específicas para dontpad.vagnernogueira.com.
+#
+# Convenções espelhadas do cli-release.yml: actions/checkout@v7,
+# permissões explícitas por job.
+
+on:
+  push:
+    branches: ['main']
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  packages: write
+  contents: read
+
+jobs:
+  test:
+    name: Tests (backend + frontend)
+    runs-on: ubuntu-latest
+    # Portão: os builds só rodam se os testes de backend e frontend
+    # passarem. Os jobs de build declaram `needs: [test]`.
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Backend tests
+        working-directory: backend
+        run: |
+          npm ci
+          npm test
+
+      - name: Frontend tests
+        working-directory: frontend
+        run: |
+          npm ci
+          npm test
+
+  build-backend:
+    name: Build and Push backend
+    needs: [test]
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Image metadata (backend)
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository_owner }}/dontpad-backend
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=sha,prefix=sha-,format=short
+            type=semver,pattern=v{{version}}
+            type=semver,pattern=v{{major}}
+            type=semver,pattern=v{{major}}.{{minor}}
+
+      - name: Build and push backend
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+  build-frontend:
+    name: Build and Push frontend
+    needs: [test]
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+    # ATENÇÃO: este job injeta as ARGs VITE_BACKEND_HTTP_URL e
+    # VITE_BACKEND_WS_URL no build do frontend (bake-time, Opção A).
+    # Os secrets do repo abaixo DEVEM estar configurados em
+    # Settings > Secrets and variables > Actions:
+    #   - FRONTEND_HTTP_URL  (ex.: https://dontpad.vagnernogueira.com/api)
+    #   - FRONTEND_WS_URL    (ex.: wss://dontpad.vagnernogueira.com)
+    # Sem eles, a imagem do frontend é buildada com URLs vazias e o app
+    # não consegue falar com o backend em produção.
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Image metadata (frontend)
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository_owner }}/dontpad-frontend
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=sha,prefix=sha-,format=short
+            type=semver,pattern=v{{version}}
+            type=semver,pattern=v{{major}}
+            type=semver,pattern=v{{major}}.{{minor}}
+
+      - name: Build and push frontend
+        uses: docker/build-push-action@v6
+        with:
+          context: ./frontend
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            VITE_BACKEND_HTTP_URL=${{ secrets.FRONTEND_HTTP_URL }}
+            VITE_BACKEND_WS_URL=${{ secrets.FRONTEND_WS_URL }}
