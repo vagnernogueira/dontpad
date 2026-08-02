@@ -1,8 +1,10 @@
 name: Docker Images
 
 # Build e publicação das imagens Docker (backend + frontend) no GHCR
-# (ghcr.io). Dispara em push para `main` (tags `latest` + `sha-<short>`),
-# em tags `v*` (tag semver) e manualmente via workflow_dispatch.
+# (ghcr.io). Dispara SOMENTE em push de tag `v*` (release) ou manualmente
+# via workflow_dispatch — nunca em commit comum, nem merge, em `main`.
+# Disciplina esperada (sem checagem automática): sempre tagear a partir de
+# `main`, nunca de uma branch de feature.
 #
 # Alinhado ao spike S1 e ao Makefile parametrizado em S2:
 #   - backend/Dockerfile: imagem única node:20-alpine, sem build-args.
@@ -19,7 +21,6 @@ name: Docker Images
 
 on:
   push:
-    branches: ['main']
     tags: ['v*']
   workflow_dispatch:
 
@@ -79,8 +80,7 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository_owner }}/dontpad-backend
           tags: |
-            type=raw,value=latest,enable={{is_default_branch}}
-            type=sha,prefix=sha-,format=short
+            type=raw,value=latest,enable=${{ !contains(github.ref_name, '-') }}
             type=semver,pattern=v{{version}}
             type=semver,pattern=v{{major}}
             type=semver,pattern=v{{major}}.{{minor}}
@@ -124,8 +124,7 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository_owner }}/dontpad-frontend
           tags: |
-            type=raw,value=latest,enable={{is_default_branch}}
-            type=sha,prefix=sha-,format=short
+            type=raw,value=latest,enable=${{ !contains(github.ref_name, '-') }}
             type=semver,pattern=v{{version}}
             type=semver,pattern=v{{major}}
             type=semver,pattern=v{{major}}.{{minor}}
