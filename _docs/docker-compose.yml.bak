@@ -1,3 +1,8 @@
+# Backup do docker-compose.yml de ANTES da migração para as imagens
+# publicadas no GHCR (ticket #4) — versão em que backend e frontend eram
+# sempre buildados localmente (build: context: ...), sem pull de registry.
+# Mantido só como referência histórica; não é usado por make/podman-compose.
+
 version: '3.8'
 
 services:
