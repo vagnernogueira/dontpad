@@ -2,8 +2,12 @@ version: '3.8'
 
 services:
   backend:
-    build: 
-      context: ./backend
+    # Puxa a imagem publicada no GHCR (ver .github/workflows/docker-publish.yml).
+    # Para testar um build local em vez do registry, comente a linha `image:`
+    # abaixo e descomente o bloco `build:`.
+    image: ghcr.io/vagnernogueira/dontpad-backend:latest
+    # build:
+    #   context: ./backend
     container_name: dontpad_backend
     ports:
       - "127.0.0.1:1234:1234"
@@ -17,11 +21,17 @@ services:
       - dontpad_net
 
   frontend:
-    build:
-      context: ./frontend
-      args:
-        VITE_BACKEND_HTTP_URL: ${VITE_BACKEND_HTTP_URL:-}
-        VITE_BACKEND_WS_URL: ${VITE_BACKEND_WS_URL:-}
+    # Puxa a imagem publicada no GHCR (ver .github/workflows/docker-publish.yml).
+    # As URLs do backend (VITE_BACKEND_HTTP_URL/WS_URL) já vêm compiladas nessa
+    # imagem em build-time (Opção A do ticket #4) — não são configuráveis aqui.
+    # Para testar um build local com URLs diferentes, comente `image:` abaixo e
+    # descomente o bloco `build:` (os args voltam a valer nesse caso).
+    image: ghcr.io/vagnernogueira/dontpad-frontend:latest
+    # build:
+    #   context: ./frontend
+    #   args:
+    #     VITE_BACKEND_HTTP_URL: ${VITE_BACKEND_HTTP_URL:-}
+    #     VITE_BACKEND_WS_URL: ${VITE_BACKEND_WS_URL:-}
     container_name: dontpad_frontend
     ports:
       - "127.0.0.1:8080:80"

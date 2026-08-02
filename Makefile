@@ -17,6 +17,7 @@ push: build
 	podman push $(IMAGE_REGISTRY)/dontpad-frontend:$(TAG)
 
 run:
+	@echo "Subindo as imagens publicadas no GHCR (ghcr.io/vagnernogueira/dontpad-*:latest), nao um build local. Para usar imagem local, veja os comentarios em docker-compose.yml."
 	podman-compose up -d
 
 stop:
