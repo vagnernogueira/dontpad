@@ -119,6 +119,83 @@ VITE_BACKEND_HTTP_URL=https://dontpad.vagnernogueira.com
 VITE_BACKEND_WS_URL=wss://dontpad.vagnernogueira.com/api
 ```
 
+## Container images / Imagens de container (GHCR)
+
+As imagens de produção do Dontpad ficam publicadas no **GHCR** (GitHub Container Registry).
+
+### De onde vêm e nomes das imagens
+
+- **Backend:** `ghcr.io/vagnernogueira/dontpad-backend`
+- **Frontend:** `ghcr.io/vagnernogueira/dontpad-frontend`
+
+### Tags disponíveis
+
+As imagens são publicadas com estas tags:
+
+- `latest`
+- `sha-<sha-curto>` (tag baseada no commit)
+- `v*` (tags semver, quando existem releases no repositório)
+
+### Como fazer `docker pull`
+
+```bash
+# Backend
+docker pull ghcr.io/vagnernogueira/dontpad-backend:latest
+# Frontend
+docker pull ghcr.io/vagnernogueira/dontpad-frontend:latest
+```
+
+Você também pode trocar a tag pelo `sha-<sha-curto>` ou por uma tag `v*`:
+
+```bash
+docker pull ghcr.io/vagnernogueira/dontpad-backend:sha-<sha-curto>
+docker pull ghcr.io/vagnernogueira/dontpad-frontend:v1.2.3
+```
+
+### Como rodar com Docker (exemplos básicos)
+
+#### Backend
+
+O container do backend espera que você forneça a senha mestra via variável de ambiente.
+
+```bash
+docker run --rm \
+  -p 3001:3001 \
+  -e DOCUMENTS_MASTER_PASSWORD="defina-uma-senha-forte" \
+  ghcr.io/vagnernogueira/dontpad-backend:latest
+```
+
+#### Frontend
+
+A imagem do frontend é construída já direcionando o frontend para o backend público do projeto.
+
+```bash
+docker run --rm \
+  -p 3000:3000 \
+  ghcr.io/vagnernogueira/dontpad-frontend:latest
+```
+
+### Como rodar com Podman
+
+Use os mesmos comandos do Docker, trocando apenas `docker` por `podman`.
+
+```bash
+podman pull ghcr.io/vagnernogueira/dontpad-backend:latest
+podman pull ghcr.io/vagnernogueira/dontpad-frontend:latest
+```
+
+### Decisão Opcao A (frontend com URLs do backend “baked-in”)
+
+**Opcao A:** as build-args `VITE_BACKEND_HTTP_URL` e `VITE_BACKEND_WS_URL` são *bake-time* (compiladas no bundle estático do frontend via secrets do repositório).
+
+Por isso:
+
+- a imagem publicada do **frontend** é específica para `dontpad.vagnernogueira.com`;
+- para apontar o frontend para outro backend (ou outro domínio), é necessário **rebuild** com secrets diferentes;
+- alternativamente, aguarde um ticket futuro que injete essas URLs em runtime (sem rebuild).
+
+Para uso “on-premises” com outro domínio, prefira a execução tradicional (Makefile / `.env`) ou ajuste o fluxo que replique o build com secrets apropriados.
+
 ## Explorer de Documentos
 
 - Rota: `/explorer`.
