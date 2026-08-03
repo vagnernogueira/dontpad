@@ -29,7 +29,7 @@ import {
   type SkillMetadataAccessOptions,
 } from './skill-metadata'
 
-export const DEFAULT_SKILL_TARGET = join(homedir(), '.claude', 'skills', 'dontpad-cli')
+export const DEFAULT_SKILL_TARGET = join(homedir(), '.agents', 'skills', 'dontpad-cli')
 export const SKILL_FILE_NAME = 'SKILL.md'
 export const MAX_SKILL_ARCHIVE_BYTES = 5 * 1024 * 1024
 export const MAX_SKILL_EXTRACTED_BYTES = 16 * 1024 * 1024

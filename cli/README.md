@@ -201,7 +201,12 @@ dontpad skill uninstall
 
 O artefato `skills.tar.gz` (SHA-256 em `skills.tar.gz.sha256`) é baixado do release,
 verificado, extraído e instalado atomicamente no diretório alvo. O diretório padrão é
-`~/.claude/skills/dontpad-cli`. Metadados são persistidos em `~/.config/dontpad/skill.json`.
+`~/.agents/skills/dontpad-cli`. Metadados são persistidos em `~/.config/dontpad/skill.json`.
+Para o Claude Code enxergar a skill, crie um symlink em `~/.claude/skills/dontpad-cli`:
+
+```bash
+ln -sf ../../.agents/skills/dontpad-cli ~/.claude/skills/dontpad-cli
+```
 
 ## Contratos reutilizados
 

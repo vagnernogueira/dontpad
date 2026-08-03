@@ -113,8 +113,9 @@ describe('skill installer', () => {
   it('installs a root-layout archive (SKILL.md at the archive root)', async () => {
     const { deps } = buildFixture('root')
     const target = path.join(createTempDirectory(), 'dontpad-cli')
+    const configDir = createTempDirectory()
 
-    const result = await installSkill(target, deps)
+    const result = await installSkill(target, deps, { metadataOptions: { configDirectoryPath: configDir } })
 
     expect(result.success).toBe(true)
     expect(existsSync(path.join(target, 'SKILL.md'))).toBe(true)
@@ -123,11 +124,13 @@ describe('skill installer', () => {
   it('refuses to install over an existing target without --force', async () => {
     const { deps } = buildFixture('nested')
     const target = path.join(createTempDirectory(), 'dontpad-cli')
+    const configDir = createTempDirectory()
+    const options = { metadataOptions: { configDirectoryPath: configDir } }
 
-    const first = await installSkill(target, deps)
+    const first = await installSkill(target, deps, options)
     expect(first.success).toBe(true)
 
-    const second = await installSkill(target, deps)
+    const second = await installSkill(target, deps, options)
 
     expect(second.success).toBe(false)
     expect(second.error).toMatch(/already installed/)
@@ -136,12 +139,14 @@ describe('skill installer', () => {
   it('force-installs over an existing target, replacing the content', async () => {
     const firstFixture = buildFixture('nested', '# old content\n')
     const target = path.join(createTempDirectory(), 'dontpad-cli')
+    const configDir = createTempDirectory()
+    const options = { metadataOptions: { configDirectoryPath: configDir } }
 
-    await installSkill(target, firstFixture.deps)
+    await installSkill(target, firstFixture.deps, options)
     expect(readFileSync(path.join(target, 'SKILL.md'), 'utf-8')).toContain('old content')
 
     const secondFixture = buildFixture('nested', '# new content\n')
-    const result = await forceInstallSkill(target, secondFixture.deps)
+    const result = await forceInstallSkill(target, secondFixture.deps, options)
 
     expect(result.success).toBe(true)
     expect(readFileSync(path.join(target, 'SKILL.md'), 'utf-8')).toContain('new content')
@@ -150,8 +155,9 @@ describe('skill installer', () => {
   it('refuses to update a skill that is not installed', async () => {
     const { deps } = buildFixture('nested')
     const target = path.join(createTempDirectory(), 'dontpad-cli')
+    const configDir = createTempDirectory()
 
-    const result = await updateSkill(target, deps)
+    const result = await updateSkill(target, deps, { metadataOptions: { configDirectoryPath: configDir } })
 
     expect(result.success).toBe(false)
     expect(result.error).toMatch(/not installed/)
@@ -160,11 +166,13 @@ describe('skill installer', () => {
   it('updates an installed skill, replacing its content', async () => {
     const firstFixture = buildFixture('nested', '# v1\n')
     const target = path.join(createTempDirectory(), 'dontpad-cli')
+    const configDir = createTempDirectory()
+    const options = { metadataOptions: { configDirectoryPath: configDir } }
 
-    await installSkill(target, firstFixture.deps)
+    await installSkill(target, firstFixture.deps, options)
 
     const secondFixture = buildFixture('nested', '# v2\n')
-    const result = await updateSkill(target, secondFixture.deps)
+    const result = await updateSkill(target, secondFixture.deps, options)
 
     expect(result.success).toBe(true)
     expect(readFileSync(path.join(target, 'SKILL.md'), 'utf-8')).toContain('v2')
@@ -173,8 +181,9 @@ describe('skill installer', () => {
   it('force-updates a skill even when the target is missing', async () => {
     const { deps } = buildFixture('nested')
     const target = path.join(createTempDirectory(), 'dontpad-cli')
+    const configDir = createTempDirectory()
 
-    const result = await forceUpdateSkill(target, deps)
+    const result = await forceUpdateSkill(target, deps, { metadataOptions: { configDirectoryPath: configDir } })
 
     expect(result.success).toBe(true)
     expect(existsSync(path.join(target, 'SKILL.md'))).toBe(true)
@@ -183,13 +192,14 @@ describe('skill installer', () => {
   it('fails the install when the checksum does not match', async () => {
     const { deps } = buildFixture('nested')
     const target = path.join(createTempDirectory(), 'dontpad-cli')
+    const configDir = createTempDirectory()
 
     const tamperedDeps: SkillInstallerDeps = {
       ...deps,
       fetchChecksum: async () => `${'deadbeef'.repeat(8)}  skills.tar.gz\n`,
     }
 
-    const result = await installSkill(target, tamperedDeps)
+    const result = await installSkill(target, tamperedDeps, { metadataOptions: { configDirectoryPath: configDir } })
 
     expect(result.success).toBe(false)
     expect(result.error).toMatch(/Checksum verification failed/)
@@ -202,13 +212,19 @@ describe('skill installer', () => {
   it('keeps an existing installation intact when forced replacement validation fails', async () => {
     const firstFixture = buildFixture('nested', '# old content\n')
     const target = path.join(createTempDirectory(), 'dontpad-cli')
-    await installSkill(target, firstFixture.deps)
+    const configDir = createTempDirectory()
+    const options = { metadataOptions: { configDirectoryPath: configDir } }
+    await installSkill(target, firstFixture.deps, options)
 
     const secondFixture = buildFixture('nested', '# untrusted content\n')
-    const result = await forceInstallSkill(target, {
-      ...secondFixture.deps,
-      fetchChecksum: async () => `${'deadbeef'.repeat(8)}  skills.tar.gz\n`,
-    })
+    const result = await forceInstallSkill(
+      target,
+      {
+        ...secondFixture.deps,
+        fetchChecksum: async () => `${'deadbeef'.repeat(8)}  skills.tar.gz\n`,
+      },
+      options,
+    )
 
     expect(result.success).toBe(false)
     expect(readFileSync(path.join(target, 'SKILL.md'), 'utf-8')).toContain('old content')
@@ -217,6 +233,7 @@ describe('skill installer', () => {
   it('rejects an oversized skill archive before extraction', async () => {
     const { deps } = buildFixture('nested')
     const target = path.join(createTempDirectory(), 'dontpad-cli')
+    const configDir = createTempDirectory()
     const oversizedDeps: SkillInstallerDeps = {
       ...deps,
       downloadFile: async (_url, destination) => {
@@ -224,7 +241,7 @@ describe('skill installer', () => {
       },
     }
 
-    const result = await installSkill(target, oversizedDeps)
+    const result = await installSkill(target, oversizedDeps, { metadataOptions: { configDirectoryPath: configDir } })
 
     expect(result.success).toBe(false)
     expect(result.error).toMatch(/between 1 and/)
@@ -247,8 +264,9 @@ describe('skill installer', () => {
       fetchChecksum: async () => `${sha256(archive)}  skills.tar.gz\n`,
     }
     const target = path.join(createTempDirectory(), 'dontpad-cli')
+    const configDir = createTempDirectory()
 
-    const result = await installSkill(target, maliciousDeps)
+    const result = await installSkill(target, maliciousDeps, { metadataOptions: { configDirectoryPath: configDir } })
 
     expect(result.success).toBe(false)
     expect(result.error).toMatch(/unsupported entry type/)
@@ -272,8 +290,9 @@ describe('skill installer', () => {
   it('reports not-installed status for an empty target', async () => {
     const { deps } = buildFixture('nested')
     const target = path.join(createTempDirectory(), 'dontpad-cli')
+    const configDir = createTempDirectory()
 
-    const status = await getSkillStatus(target, deps)
+    const status = await getSkillStatus(target, deps, { metadataOptions: { configDirectoryPath: configDir } })
 
     expect(status.installed).toBe(false)
     expect(status.target).toBe(target)
@@ -282,10 +301,12 @@ describe('skill installer', () => {
   it('reports up-to-date when the installed version matches the latest release', async () => {
     const { deps } = buildFixture('nested')
     const target = path.join(createTempDirectory(), 'dontpad-cli')
+    const configDir = createTempDirectory()
+    const options = { metadataOptions: { configDirectoryPath: configDir } }
 
-    await installSkill(target, deps)
+    await installSkill(target, deps, options)
 
-    const status = await getSkillStatus(target, deps)
+    const status = await getSkillStatus(target, deps, options)
 
     expect(status.installed).toBe(true)
     expect(status.upToDate).toBe(true)
@@ -296,8 +317,10 @@ describe('skill installer', () => {
   it('reports outdated when the latest release version differs', async () => {
     const first = buildFixture('nested')
     const target = path.join(createTempDirectory(), 'dontpad-cli')
+    const configDir = createTempDirectory()
+    const options = { metadataOptions: { configDirectoryPath: configDir } }
 
-    await installSkill(target, first.deps)
+    await installSkill(target, first.deps, options)
 
     const newerRelease: SkillReleaseCheck = {
       latestVersion: '0.3.0',
@@ -315,7 +338,7 @@ describe('skill installer', () => {
       fetchRelease: async () => newerRelease,
     }
 
-    const status = await getSkillStatus(target, offlineDeps)
+    const status = await getSkillStatus(target, offlineDeps, options)
 
     expect(status.installed).toBe(true)
     expect(status.upToDate).toBe(false)
@@ -325,8 +348,10 @@ describe('skill installer', () => {
   it('reports upToDate=null when the release check fails (offline)', async () => {
     const { deps } = buildFixture('nested')
     const target = path.join(createTempDirectory(), 'dontpad-cli')
+    const configDir = createTempDirectory()
+    const options = { metadataOptions: { configDirectoryPath: configDir } }
 
-    await installSkill(target, deps)
+    await installSkill(target, deps, options)
 
     const offlineDeps: SkillInstallerDeps = {
       ...deps,
@@ -335,7 +360,7 @@ describe('skill installer', () => {
       },
     }
 
-    const status = await getSkillStatus(target, offlineDeps)
+    const status = await getSkillStatus(target, offlineDeps, options)
 
     expect(status.installed).toBe(true)
     expect(status.upToDate).toBeNull()

@@ -228,4 +228,9 @@ dontpad skill uninstall [--target <path>] [--force] [--json]
 
 The skill artifact (`skills.tar.gz`) is downloaded from the latest release tagged `cli-v*`,
 SHA-256 verified, extracted, and atomically swapped into the target directory (default
-`~/.claude/skills/dontpad-cli`). Metadata is persisted at `~/.config/dontpad/skill.json`.
+`~/.agents/skills/dontpad-cli`). Metadata is persisted at `~/.config/dontpad/skill.json`. To make
+the skill visible to Claude Code, symlink it into `~/.claude/skills/dontpad-cli`, e.g.:
+
+```bash
+ln -sf ../../.agents/skills/dontpad-cli ~/.claude/skills/dontpad-cli
+```

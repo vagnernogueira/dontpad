@@ -38,7 +38,7 @@ export function buildSkillCommand(deps?: SkillInstallerDeps): Command {
   skill
     .command('install')
     .description('Download the skill artifact from the latest CLI release and install it.')
-    .option('--target <path>', 'Absolute target installation directory (defaults to ~/.claude/skills/dontpad-cli).')
+    .option('--target <path>', 'Absolute target installation directory (defaults to ~/.agents/skills/dontpad-cli).')
     .option('--force', 'Remove an existing installation before installing.')
     .option('--json', 'Emit machine-readable JSON instead of human text.')
     .action(async (options: SkillActionOptions) => {
@@ -167,7 +167,10 @@ Examples:
 Notes:
   The skill artifact (skills.tar.gz) is downloaded from the latest GitHub
   release tagged cli-v*, checksum-verified, extracted and atomically swapped
-  into the target directory. Metadata is persisted at ~/.config/dontpad/skill.json.
+  into the target directory (defaults to ~/.agents/skills/dontpad-cli).
+  Metadata is persisted at ~/.config/dontpad/skill.json. To make the skill
+  visible to Claude Code, symlink it into ~/.claude/skills/dontpad-cli
+  (e.g. ln -sf ../../.agents/skills/dontpad-cli ~/.claude/skills/dontpad-cli).
 `,
   )
 }
