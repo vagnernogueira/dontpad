@@ -1,4 +1,4 @@
-[![release](https://img.shields.io/badge/release-v0.1.1-blue)](https://github.com/vagnernogueira/dontpad/releases)
+[![release](https://img.shields.io/badge/release-v0.1.2-blue)](https://github.com/vagnernogueira/dontpad/releases)
 
 # Dontpad CLI
 
