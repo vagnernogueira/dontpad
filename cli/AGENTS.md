@@ -24,38 +24,32 @@ sobrescrever um bump de versão automático.
 
 ## Bump de versão / gerar release
 
-**Obrigatório:** este repo **não tem** um `scripts/bump-version.sh` dedicado (diferente de repos
-irmãos como `aave-cli` e `llama-cli`, que têm esse script). O padrão real aqui, confirmado pelo
-histórico de commits (`chore(release): bump cli version to X.Y.Z`) e por `.github/workflows/cli-release.yml`,
-é manual e deve seguir exatamente esta sequência — não invente uma variação:
+**Obrigatório:** este repo tem um script **compartilhado** de bump de versão na raiz do monorepo
+(`../scripts/bump-version.sh` a partir de `cli/`, ou `scripts/bump-version.sh` a partir da raiz) —
+**use sempre esse script**, nunca `npm version` manual nem uma sequência de git à mão. Ele cobre os
+dois modos de release do monorepo (`app` = backend+frontend, `cli` = este pacote); para o CLI:
 
-1. Working tree limpa e sincronizada com `origin/main` (ver seção acima).
-2. A partir de `cli/`, rode:
-   ```bash
-   npm version <patch|minor|major> --no-git-tag-version
-   ```
-   Isso atualiza `package.json` e `package-lock.json` sem criar tag automaticamente.
-3. Commit **apenas** desses dois arquivos, com a mensagem exata:
-   ```bash
-   git add cli/package.json cli/package-lock.json
-   git commit -m "chore(release): bump cli version to X.Y.Z"
-   ```
-4. Crie a tag com o prefixo `cli-v` — **não** `v` sozinho, que é reservado a um eventual
-   versionamento do app inteiro:
-   ```bash
-   git tag cli-vX.Y.Z
-   ```
-5. Push do commit e da tag:
-   ```bash
-   git push origin main
-   git push origin cli-vX.Y.Z
-   ```
-   O push da tag `cli-v*` dispara `.github/workflows/cli-release.yml`, que builda os binários,
-   empacota `skills.tar.gz` e publica a GitHub Release — não há necessidade (nem script) para
-   fazer isso manualmente.
-6. O próprio workflow cria um commit automático de bump do badge em `README.md` direto em `main`.
-   Depois que o workflow terminar, rode `git fetch origin` e sincronize o local (ver seção
-   "Antes de qualquer análise ou trabalho neste repo") antes de continuar trabalhando.
+```bash
+cd /home/vagner/dontpad   # rodar a partir da RAIZ do repo, não de cli/
+scripts/bump-version.sh cli X.Y.Z
+```
+
+O script (com `set -euo pipefail` e rollback automático em caso de falha):
+
+1. Valida a working tree limpa e o formato `X.Y.Z` do argumento.
+2. Atualiza `cli/package.json` e `cli/package-lock.json`.
+3. Cria o commit `chore(release): bump cli version to X.Y.Z`.
+4. Cria a tag **anotada** `cli-vX.Y.Z` (prefixo `cli-v`, não `v` sozinho — reservado ao modo `app`).
+5. Roda `git push --follow-tags`, que dispara `.github/workflows/cli-release.yml` (build dos
+   binários, empacotamento de `skills.tar.gz`, publicação da GitHub Release).
+
+Não edite `package.json`/`package-lock.json` manualmente para isso e não crie a tag à mão — o
+script já garante working tree limpa, mensagem de commit e push atômicos.
+
+O próprio workflow, depois de rodar, cria um commit automático de bump do badge em
+`cli/README.md` direto em `main`. Depois que ele terminar, rode `git fetch origin` e sincronize o
+local (ver seção "Antes de qualquer análise ou trabalho neste repo") antes de continuar
+trabalhando.
 
 ## Visão geral do pacote
 
