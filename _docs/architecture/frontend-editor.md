@@ -58,6 +58,8 @@ src/
 ## Bootstrap e shell PWA
 
 - `frontend/index.html` carrega apenas o `#app`, os metadados básicos da aplicação e o entrypoint `src/main.ts`.
+- Fora do `#app`, o shell inclui um link estático relativo `href="?raw"` (`#dontpad-raw-link`), visualmente oculto (técnica *visually-hidden* inline, `tabindex="-1"`, `aria-hidden="true"`), sem impacto no layout. Ele torna a versão raw de cada documento descobrível por crawlers sem execução de JavaScript — necessário para que ferramentas web de agentes (ex.: link safety da OpenAI, que só busca URLs já indexadas) consigam ler `?raw`. Coberto por `src/__tests__/unit/index-html-raw-link.test.ts`.
+- `frontend/public/robots.txt` é servido como arquivo estático (antes caía no fallback SPA): permite documentos e `?raw`, bloqueia `/api/`, `/explorer` e `/?raw`.
 - `frontend/src/main.ts` importa `@fontsource-variable/fira-code/wght.css` e `@fontsource-variable/jetbrains-mono/wght.css`, garantindo que o Vite emita os `.woff2` como assets versionados do bundle.
 - O registro do service worker usa `registerSW` de `virtual:pwa-register` apenas quando `import.meta.env.PROD` e `navigator.serviceWorker` estão disponíveis.
 - `frontend/vite.config.ts` usa `VitePWA({ strategies: 'generateSW' })` para gerar `manifest.webmanifest` e `sw.js`, incluindo `favicon.svg`, `pwa-icon.svg` e `pwa-maskable.svg` no conjunto de assets estáticos.

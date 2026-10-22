@@ -210,7 +210,7 @@ _docs/
 
 | Arquivo                                     | Descrição                                                                                        |
 | ------------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| `frontend/index.html`                       | Shell HTML mínimo da SPA/PWA; carrega apenas o `#app`, metadados base e `src/main.ts`, sem referências remotas a Google Fonts. |
+| `frontend/index.html`                       | Shell HTML mínimo da SPA/PWA; carrega apenas o `#app`, metadados base, `src/main.ts` e um link oculto `?raw` para descoberta por crawlers, sem referências remotas a Google Fonts. |
 | `frontend/src/main.ts`                      | Bootstrap do frontend; monta Vue Router, importa tipografia local via `@fontsource-variable/*` e registra o service worker apenas em produção. |
 | `frontend/vite.config.ts`                   | Configuração central do Vite e do `vite-plugin-pwa`; gera manifest, `sw.js`, ícones precacheados e fallback de navegação conservador. |
 | `frontend/src/components/Home.vue`          | Landing page com criação de documentos e seleção de templates vindos de `/_tmpl/`.              |
@@ -227,6 +227,7 @@ _docs/
 | `frontend/components.json`                  | Configuração da CLI shadcn-vue, aliases e arquivo CSS principal (`src/styles/base.css`).         |
 | `frontend/src/styles/base.css`              | Entrada CSS do Tailwind v4; registra `@custom-variant dark`, referencia `tailwind.config.js` via `@config` e mapeia os tokens tipográficos de runtime para fontes locais variáveis. |
 | `frontend/src/styles/components.css`        | Abstrações CSS com `@apply` (`btn-*`, `dialog-*`, `input-*`, `page-header`, `toolbar`).          |
+| `frontend/public/robots.txt`                | Regras para crawlers: permite documentos e `?raw`; bloqueia `/api/`, `/explorer` e `/?raw`.        |
 | `frontend/public/pwa-icon.svg`              | Ícone PWA principal referenciado pelo manifest e incluído no bundle estático do frontend.        |
 | `frontend/public/pwa-maskable.svg`          | Ícone PWA `maskable` para agentes compatíveis com instalação mais integrada.                      |
 | `frontend/src/composables/*`                | Composables Vue 3 para lógica reativa extraída dos componentes.                                  |

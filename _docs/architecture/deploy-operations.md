@@ -43,7 +43,7 @@ Notas:
 
 - Docker multi-stage com `node:20-alpine` no builder e `nginx:alpine` no runtime;
 - estágio builder recebe `VITE_BACKEND_HTTP_URL` e `VITE_BACKEND_WS_URL` como `build args` e executa `npm ci --legacy-peer-deps`;
-- `npm run build` gera o bundle Vite com `manifest.webmanifest`, `sw.js`, ícones públicos e assets tipográficos `.woff2` locais;
+- `npm run build` gera o bundle Vite com `manifest.webmanifest`, `sw.js`, `robots.txt`, ícones públicos e assets tipográficos `.woff2` locais;
 - estágio runtime copia `dist/` para o Nginx e aplica configuração de SPA com `try_files ... /index.html`, proxy de `/api` para o backend e bypass de `?raw` para o serviço Node.
 
 ## Proxy reverso
