@@ -37,3 +37,6 @@ backend/db/yjs-data/
 
 # Claude Code — configurações locais (tokens, permissões pessoais)
 .claude/settings.local.json
+
+# Cloudflare — cache local de conta (wrangler)
+.cloudflare/
