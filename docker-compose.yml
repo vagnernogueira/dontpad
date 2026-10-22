@@ -13,7 +13,7 @@ services:
       - "127.0.0.1:1234:1234"
     volumes:
       - yjs_data:/usr/src/app/db
-    restart: unless-stopped
+    restart: always
     environment:
       - PORT=1234
       - DOCUMENTS_MASTER_PASSWORD=${DOCUMENTS_MASTER_PASSWORD}
@@ -37,7 +37,7 @@ services:
       - "127.0.0.1:8080:80"
     depends_on:
       - backend
-    restart: unless-stopped
+    restart: always
     networks:
       - dontpad_net
 
