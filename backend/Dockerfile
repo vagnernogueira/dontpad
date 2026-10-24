@@ -1,4 +1,4 @@
-FROM docker.io/node:20-alpine AS builder
+FROM docker.io/node:24.22.1-alpine AS builder
 
 WORKDIR /usr/src/app
 
@@ -8,7 +8,7 @@ RUN npm install
 COPY . .
 RUN npm run build
 
-FROM docker.io/node:20-alpine
+FROM docker.io/node:24.22.1-alpine
 
 WORKDIR /usr/src/app
 

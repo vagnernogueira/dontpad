@@ -11,7 +11,7 @@ e sem impacto direto nos pacotes `frontend/` e `backend/`.
 
 ## Pré-requisitos
 
-- Node.js 20+ (apenas para build a partir do código-fonte)
+- Node.js 24+ (apenas para build a partir do código-fonte)
 - npm 10+ (apenas para build a partir do código-fonte)
 
 ## Instalação

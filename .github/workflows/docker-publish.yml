@@ -7,8 +7,8 @@ name: Docker Images
 # `main`, nunca de uma branch de feature.
 #
 # Alinhado ao spike S1 e ao Makefile parametrizado em S2:
-#   - backend/Dockerfile: imagem única node:20-alpine, sem build-args.
-#   - frontend/Dockerfile: multi-stage node:20-alpine -> nginx:alpine,
+#   - backend/Dockerfile: imagem única node:24.22.1-alpine, sem build-args.
+#   - frontend/Dockerfile: multi-stage node:24.22.1-alpine -> nginx:alpine,
 #     consome ARG VITE_BACKEND_HTTP_URL e ARG VITE_BACKEND_WS_URL
 #     (bake-time, Opção A) — injetados via secrets do repo (veja o job
 #     build-frontend abaixo).
@@ -39,7 +39,7 @@ jobs:
 
       - uses: actions/setup-node@v7
         with:
-          node-version: '20'
+          node-version: '24'
           cache: npm
           cache-dependency-path: |
             backend/package-lock.json
